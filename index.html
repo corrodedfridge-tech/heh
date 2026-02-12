@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>image</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            position: relative;
+            cursor: none;
+        }
+
+        /* Custom cursor */
+        .cursor {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(0, 0, 0, 0.3);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            transition: transform 0.15s ease, background 0.3s ease, width 0.3s ease, height 0.3s ease, border-color 0.3s ease;
+            transform: translate(-50%, -50%);
+            mix-blend-mode: difference;
+        }
+
+        .cursor.hovering {
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 0, 0, 0.05);
+            border-color: rgba(0, 0, 0, 0.6);
+        }
+
+        .cursor-dot {
+            width: 5px;
+            height: 5px;
+            background: #000;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 10001;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Floating particles */
+        .particle {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: radial-gradient(circle, rgba(0,0,0,0.15), transparent);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Shimmer lines */
+        .shimmer-line {
+            position: fixed;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0,0,0,0.06), transparent);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Loading screen */
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.8s cubic-bezier(0.77, 0, 0.175, 1), transform 0.8s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+
+        .loader.hidden {
+            opacity: 0;
+            transform: scale(1.05);
+            pointer-events: none;
+        }
+
+        .loader-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            color: #000;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            margin-bottom: 40px;
+            opacity: 0;
+            animation: fadeInUp 1s ease forwards 0.3s;
+        }
+
+        .loader-bar-container {
+            width: 200px;
+            height: 1px;
+            background: rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            animation: fadeInUp 1s ease forwards 0.5s;
+        }
+
+        .loader-bar {
+            height: 100%;
+            background: #000;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .loader-percentage {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.7rem;
+            color: rgba(0,0,0,0.4);
+            letter-spacing: 4px;
+            margin-top: 20px;
+            opacity: 0;
+            animation: fadeInUp 1s ease forwards 0.7s;
+        }
+
+        /* Main content */
+        .content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .content.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Top label */
+        .top-label {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.6rem;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            color: rgba(0,0,0,0.3);
+            margin-bottom: 50px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 1s ease 0.3s, transform 1s ease 0.3s;
+        }
+
+        .content.visible .top-label {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Image container */
+        .image-wrapper {
+            position: relative;
+            padding: 2px;
+            opacity: 0;
+            transform: scale(0.95) translateY(20px);
+            transition: opacity 1s ease 0.5s, transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.5s;
+        }
+
+        .content.visible .image-wrapper {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+
+        .image-border {
+            position: relative;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(0,0,0,0.1), rgba(0,0,0,0.02), rgba(0,0,0,0.1));
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .image-border::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, rgba(0,0,0,0.05), transparent, rgba(0,0,0,0.05), transparent);
+            animation: rotateBorder 8s linear infinite;
+            z-index: 0;
+        }
+
+        @keyframes rotateBorder {
+            to { transform: rotate(360deg); }
+        }
+
+        .image-inner {
+            position: relative;
+            background: #fff;
+            border-radius: 7px;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .main-image {
+            display: block;
+            max-width: min(80vw, 600px);
+            max-height: 70vh;
+            border-radius: 6px;
+            transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), filter 0.6s ease;
+            will-change: transform;
+            filter: saturate(1.05) contrast(1.02);
+        }
+
+        .image-wrapper:hover .main-image {
+            transform: scale(1.02);
+            filter: saturate(1.1) contrast(1.05);
+        }
+
+        /* Image glow effect */
+        .image-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 80%;
+            height: 80%;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(ellipse, rgba(0,0,0,0.03), transparent 70%);
+            pointer-events: none;
+            z-index: 2;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+        }
+
+        .image-wrapper:hover .image-glow {
+            opacity: 1;
+        }
+
+        /* Reflection */
+        .image-reflection {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                105deg,
+                transparent 40%,
+                rgba(255,255,255,0.15) 45%,
+                rgba(255,255,255,0.3) 50%,
+                rgba(255,255,255,0.15) 55%,
+                transparent 60%
+            );
+            z-index: 3;
+            pointer-events: none;
+            transform: translateX(-100%);
+            transition: none;
+        }
+
+        .image-wrapper:hover .image-reflection {
+            animation: shineAcross 1.5s ease forwards;
+        }
+
+        @keyframes shineAcross {
+            to { transform: translateX(100%); }
+        }
+
+        /* Shadow */
+        .image-shadow {
+            position: absolute;
+            bottom: -30px;
+            left: 10%;
+            width: 80%;
+            height: 30px;
+            background: radial-gradient(ellipse, rgba(0,0,0,0.08), transparent 70%);
+            filter: blur(10px);
+            z-index: -1;
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .image-wrapper:hover .image-shadow {
+            opacity: 0.6;
+            transform: translateY(5px) scaleX(0.95);
+        }
+
+        /* Corner accents */
+        .corner-accent {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            z-index: 4;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .image-wrapper:hover .corner-accent {
+            opacity: 1;
+        }
+
+        .corner-accent.tl { top: -8px; left: -8px; border-top: 1px solid rgba(0,0,0,0.2); border-left: 1px solid rgba(0,0,0,0.2); }
+        .corner-accent.tr { top: -8px; right: -8px; border-top: 1px solid rgba(0,0,0,0.2); border-right: 1px solid rgba(0,0,0,0.2); }
+        .corner-accent.bl { bottom: -8px; left: -8px; border-bottom: 1px solid rgba(0,0,0,0.2); border-left: 1px solid rgba(0,0,0,0.2); }
+        .corner-accent.br { bottom: -8px; right: -8px; border-bottom: 1px solid rgba(0,0,0,0.2); border-right: 1px solid rgba(0,0,0,0.2); }
+
+        /* Bottom label */
+        .bottom-label {
+            font-family: 'Playfair Display', serif;
+            font-size: 0.8rem;
+            letter-spacing: 3px;
+            color: rgba(0,0,0,0.2);
+            margin-top: 50px;
+            font-style: italic;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 1s ease 0.8s, transform 1s ease 0.8s;
+        }
+
+        .content.visible .bottom-label {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Decorative line */
+        .deco-line {
+            width: 40px;
+            height: 1px;
+            background: rgba(0,0,0,0.1);
+            margin-top: 20px;
+            opacity: 0;
+            transition: opacity 1s ease 1s, width 1s ease 1s;
+        }
+
+        .content.visible .deco-line {
+            opacity: 1;
+            width: 60px;
+        }
+
+        /* Magnetic tilt container */
+        .tilt-container {
+            perspective: 1000px;
+        }
+
+        /* Click ripple */
+        .ripple {
+            position: fixed;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,0,0,0.04), transparent 70%);
+            pointer-events: none;
+            z-index: 5;
+            animation: rippleExpand 1s ease forwards;
+        }
+
+        @keyframes rippleExpand {
+            from {
+                width: 0;
+                height: 0;
+                opacity: 1;
+            }
+            to {
+                width: 300px;
+                height: 300px;
+                opacity: 0;
+            }
+        }
+
+        /* Trail particles */
+        .trail {
+            position: fixed;
+            width: 3px;
+            height: 3px;
+            background: rgba(0,0,0,0.08);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            animation: trailFade 0.8s ease forwards;
+        }
+
+        @keyframes trailFade {
+            to {
+                opacity: 0;
+                transform: scale(0);
+            }
+        }
+
+        /* Ambient corner decorations */
+        .ambient-corner {
+            position: fixed;
+            width: 150px;
+            height: 150px;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.3;
+        }
+
+        .ambient-corner.top-left {
+            top: 30px;
+            left: 30px;
+            border-top: 1px solid rgba(0,0,0,0.04);
+            border-left: 1px solid rgba(0,0,0,0.04);
+        }
+
+        .ambient-corner.top-right {
+            top: 30px;
+            right: 30px;
+            border-top: 1px solid rgba(0,0,0,0.04);
+            border-right: 1px solid rgba(0,0,0,0.04);
+        }
+
+        .ambient-corner.bottom-left {
+            bottom: 30px;
+            left: 30px;
+            border-bottom: 1px solid rgba(0,0,0,0.04);
+            border-left: 1px solid rgba(0,0,0,0.04);
+        }
+
+        .ambient-corner.bottom-right {
+            bottom: 30px;
+            right: 30px;
+            border-bottom: 1px solid rgba(0,0,0,0.04);
+            border-right: 1px solid rgba(0,0,0,0.04);
+        }
+
+        /* Floating dots */
+        .floating-dot {
+            position: fixed;
+            width: 2px;
+            height: 2px;
+            background: rgba(0,0,0,0.06);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(10px, -15px); }
+            50% { transform: translate(-5px, -25px); }
+            75% { transform: translate(-15px, -10px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.06; }
+            50% { opacity: 0.12; }
+        }
+
+        /* Sound wave visual */
+        .sound-wave {
+            position: fixed;
+            bottom: 30px;
+            right: 40px;
+            display: flex;
+            gap: 3px;
+            align-items: flex-end;
+            height: 20px;
+            z-index: 5;
+            opacity: 0.15;
+        }
+
+        .sound-wave .bar {
+            width: 2px;
+            background: #000;
+            border-radius: 1px;
+            animation: soundBar 1.2s ease-in-out infinite;
+        }
+
+        @keyframes soundBar {
+            0%, 100% { height: 4px; }
+            50% { height: 16px; }
+        }
+
+        /* Scroll hint */
+        .scroll-hint {
+            position: fixed;
+            bottom: 35px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity 1s ease 2s;
+            z-index: 5;
+        }
+
+        .content.visible ~ .scroll-hint {
+            opacity: 0.2;
+        }
+
+        .scroll-hint span {
+            font-size: 0.5rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #000;
+        }
+
+        .scroll-hint .mouse {
+            width: 16px;
+            height: 24px;
+            border: 1px solid rgba(0,0,0,0.3);
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .scroll-hint .mouse::after {
+            content: '';
+            width: 2px;
+            height: 5px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 1px;
+            position: absolute;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: scrollDot 2s ease infinite;
+        }
+
+        @keyframes scrollDot {
+            0% { opacity: 1; top: 5px; }
+            100% { opacity: 0; top: 14px; }
+        }
+
+        /* Number counter in corner */
+        .frame-counter {
+            position: fixed;
+            top: 35px;
+            right: 40px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.6rem;
+            letter-spacing: 3px;
+            color: rgba(0,0,0,0.12);
+            z-index: 5;
+            opacity: 0;
+            transition: opacity 1s ease 1.5s;
+        }
+
+        .content.visible ~ .frame-counter {
+            opacity: 1;
+        }
+
+        /* Top left brand */
+        .brand {
+            position: fixed;
+            top: 35px;
+            left: 40px;
+            font-family: 'Playfair Display', serif;
+            font-size: 0.8rem;
+            letter-spacing: 4px;
+            color: rgba(0,0,0,0.12);
+            z-index: 5;
+            opacity: 0;
+            transition: opacity 1s ease 1.5s;
+        }
+
+        .content.visible ~ .brand {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .main-image {
+                max-width: 90vw;
+            }
+
+            .ambient-corner {
+                width: 60px;
+                height: 60px;
+            }
+
+            .brand, .frame-counter, .sound-wave {
+                display: none;
+            }
+
+            body {
+                cursor: auto;
+            }
+
+            .cursor, .cursor-dot {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Custom Cursor -->
+    <div class="cursor" id="cursor"></div>
+    <div class="cursor-dot" id="cursorDot"></div>
+
+    <!-- Loading Screen -->
+    <div class="loader" id="loader">
+        <div class="loader-text">Preparing</div>
+        <div class="loader-bar-container">
+            <div class="loader-bar" id="loaderBar"></div>
+        </div>
+        <div class="loader-percentage" id="loaderPercent">0%</div>
+    </div>
+
+    <!-- Ambient Corners -->
+    <div class="ambient-corner top-left"></div>
+    <div class="ambient-corner top-right"></div>
+    <div class="ambient-corner bottom-left"></div>
+    <div class="ambient-corner bottom-right"></div>
+
+    <!-- Main Content -->
+    <div class="content" id="content">
+        <div class="top-label">E X H I B I T&nbsp;&nbsp;&nbsp;N O. 1</div>
+
+        <div class="tilt-container" id="tiltContainer">
+            <div class="image-wrapper" id="imageWrapper">
+                <div class="corner-accent tl"></div>
+                <div class="corner-accent tr"></div>
+                <div class="corner-accent bl"></div>
+                <div class="corner-accent br"></div>
+
+                <div class="image-border">
+                    <div class="image-inner">
+                        <img
+                            src="https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/bullyingpeopletype.png"
+                            alt="The Image"
+                            class="main-image"
+                            id="mainImage"
+                            draggable="false"
+                        >
+                        <div class="image-reflection" id="imageReflection"></div>
+                    </div>
+                </div>
+
+                <div class="image-glow"></div>
+                <div class="image-shadow"></div>
+            </div>
+        </div>
+
+        <div class="bottom-label">— a moment, preserved —</div>
+        <div class="deco-line"></div>
+    </div>
+
+    <!-- Brand -->
+    <div class="brand">G A L L E R Y</div>
+
+    <!-- Frame Counter -->
+    <div class="frame-counter" id="frameCounter">001 / 001</div>
+
+    <!-- Sound Wave Visual -->
+    <div class="sound-wave">
+        <div class="bar" style="animation-delay: 0s;"></div>
+        <div class="bar" style="animation-delay: 0.15s;"></div>
+        <div class="bar" style="animation-delay: 0.3s;"></div>
+        <div class="bar" style="animation-delay: 0.45s;"></div>
+        <div class="bar" style="animation-delay: 0.6s;"></div>
+    </div>
+
+    <script>
+        // ===== CUSTOM CURSOR =====
+        const cursor = document.getElementById('cursor');
+        const cursorDot = document.getElementById('cursorDot');
+        let mouseX = 0, mouseY = 0;
+        let cursorX = 0, cursorY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            cursorDot.style.left = mouseX + 'px';
+            cursorDot.style.top = mouseY + 'px';
+
+            // Spawn trail particles
+            if (Math.random() > 0.7) {
+                createTrail(mouseX, mouseY);
+            }
+        });
+
+        function animateCursor() {
+            cursorX += (mouseX - cursorX) * 0.15;
+            cursorY += (mouseY - cursorY) * 0.15;
+            cursor.style.left = cursorX + 'px';
+            cursor.style.top = cursorY + 'px';
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        // Hover states
+        const imageWrapper = document.getElementById('imageWrapper');
+        imageWrapper.addEventListener('mouseenter', () => cursor.classList.add('hovering'));
+        imageWrapper.addEventListener('mouseleave', () => cursor.classList.remove('hovering'));
+
+        // ===== TRAIL PARTICLES =====
+        function createTrail(x, y) {
+            const trail = document.createElement('div');
+            trail.className = 'trail';
+            trail.style.left = (x + (Math.random() - 0.5) * 10) + 'px';
+            trail.style.top = (y + (Math.random() - 0.5) * 10) + 'px';
+            document.body.appendChild(trail);
+            setTimeout(() => trail.remove(), 800);
+        }
+
+        // ===== CLICK RIPPLE =====
+        document.addEventListener('click', (e) => {
+            const ripple = document.createElement('div');
+            ripple.className = 'ripple';
+            ripple.style.left = (e.clientX - 150) + 'px';
+            ripple.style.top = (e.clientY - 150) + 'px';
+            document.body.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 1000);
+        });
+
+        // ===== LOADING SCREEN =====
+        const loader = document.getElementById('loader');
+        const loaderBar = document.getElementById('loaderBar');
+        const loaderPercent = document.getElementById('loaderPercent');
+        const content = document.getElementById('content');
+        const mainImage = document.getElementById('mainImage');
+
+        let progress = 0;
+        let loaded = false;
+
+        mainImage.onload = () => { loaded = true; };
+        mainImage.onerror = () => { loaded = true; };
+
+        // If already cached
+        if (mainImage.complete) loaded = true;
+
+        function simulateLoading() {
+            const interval = setInterval(() => {
+                if (progress < 90 || loaded) {
+                    progress += loaded ? Math.random() * 15 + 5 : Math.random() * 3 + 1;
+                }
+
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+
+                    loaderBar.style.width = '100%';
+                    loaderPercent.textContent = '100%';
+
+                    setTimeout(() => {
+                        loader.classList.add('hidden');
+                        setTimeout(() => {
+                            content.classList.add('visible');
+                            spawnFloatingDots();
+                        }, 400);
+                    }, 500);
+                    return;
+                }
+
+                loaderBar.style.width = Math.floor(progress) + '%';
+                loaderPercent.textContent = Math.floor(progress) + '%';
+            }, 50);
+        }
+
+        setTimeout(simulateLoading, 800);
+
+        // ===== 3D TILT EFFECT =====
+        const tiltContainer = document.getElementById('tiltContainer');
+
+        imageWrapper.addEventListener('mousemove', (e) => {
+            const rect = imageWrapper.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+
+            const rotateX = ((y - centerY) / centerY) * -5;
+            const rotateY = ((x - centerX) / centerX) * 5;
+
+            imageWrapper.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+        });
+
+        imageWrapper.addEventListener('mouseleave', () => {
+            imageWrapper.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)';
+            imageWrapper.style.transition = 'transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        });
+
+        imageWrapper.addEventListener('mouseenter', () => {
+            imageWrapper.style.transition = 'transform 0.1s ease';
+        });
+
+        // ===== FLOATING DOTS =====
+        function spawnFloatingDots() {
+            for (let i = 0; i < 20; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'floating-dot';
+                dot.style.left = Math.random() * 100 + 'vw';
+                dot.style.top = Math.random() * 100 + 'vh';
+                dot.style.animation = `float ${8 + Math.random() * 12}s ease-in-out infinite, pulse ${3 + Math.random() * 4}s ease-in-out infinite`;
+                dot.style.animationDelay = `${Math.random() * 5}s`;
+                document.body.appendChild(dot);
+            }
+        }
+
+        // ===== SHIMMER LINES =====
+        for (let i = 0; i < 5; i++) {
+            const line = document.createElement('div');
+            line.className = 'shimmer-line';
+            line.style.top = (15 + Math.random() * 70) + 'vh';
+            line.style.left = '0';
+            line.style.width = '100vw';
+            line.style.opacity = 0.3 + Math.random() * 0.3;
+            line.style.animation = `pulse ${4 + Math.random() * 6}s ease-in-out infinite`;
+            line.style.animationDelay = `${Math.random() * 3}s`;
+            document.body.appendChild(line);
+        }
+
+        // ===== PARALLAX ON MOUSE MOVE =====
+        document.addEventListener('mousemove', (e) => {
+            const x = (e.clientX / window.innerWidth - 0.5) * 2;
+            const y = (e.clientY / window.innerHeight - 0.5) * 2;
+
+            const dots = document.querySelectorAll('.floating-dot');
+            dots.forEach((dot, i) => {
+                const speed = (i % 3 + 1) * 3;
+                dot.style.marginLeft = x * speed + 'px';
+                dot.style.marginTop = y * speed + 'px';
+            });
+        });
+
+        // ===== DOUBLE CLICK ZOOM =====
+        let zoomed = false;
+        mainImage.addEventListener('dblclick', () => {
+            if (!zoomed) {
+                mainImage.style.transition = 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                mainImage.style.transform = 'scale(1.8)';
+                zoomed = true;
+            } else {
+                mainImage.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                mainImage.style.transform = 'scale(1)';
+                zoomed = false;
+            }
+        });
+
+        // ===== KEYBOARD INTERACTION =====
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                // Trigger a fancy pulse
+                imageWrapper.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                imageWrapper.style.transform = 'perspective(1000px) scale(1.05)';
+                setTimeout(() => {
+                    imageWrapper.style.transform = 'perspective(1000px) scale(1)';
+                }, 300);
+
+                // Burst particles
+                for (let i = 0; i < 20; i++) {
+                    setTimeout(() => {
+                        const rect = imageWrapper.getBoundingClientRect();
+                        createTrail(
+                            rect.left + rect.width / 2 + (Math.random() - 0.5) * rect.width,
+                            rect.top + rect.height / 2 + (Math.random() - 0.5) * rect.height
+                        );
+                    }, i * 30);
+                }
+            }
+        });
+
+        // ===== FRAME COUNTER ANIMATION =====
+        const frameCounter = document.getElementById('frameCounter');
+        let frameNum = 0;
+        setInterval(() => {
+            frameNum = (frameNum + 1) % 60;
+            if (frameCounter) {
+                frameCounter.textContent = `001 / 001 — F${String(frameNum).padStart(2, '0')}`;
+            }
+        }, 1000 / 30);
+    </script>
+</body>
+</html>
