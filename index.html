@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,661 +8,450 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500&display=swap');
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+            --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
         }
+
+        html {
+            scroll-behavior: smooth;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(0,0,0,0.15) transparent;
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 3px; }
 
         body {
             background: #ffffff;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
             font-family: 'Inter', sans-serif;
-            overflow: hidden;
+            overflow-x: hidden;
             position: relative;
             cursor: none;
             user-select: none;
         }
 
+        /* ===== CUSTOM CURSOR ===== */
         .cursor {
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(0, 0, 0, 0.3);
+            width: 20px; height: 20px;
+            border: 2px solid rgba(0,0,0,0.3);
             border-radius: 50%;
             position: fixed;
             pointer-events: none;
             z-index: 10000;
-            transition: transform 0.15s ease, background 0.3s ease, width 0.3s ease, height 0.3s ease, border-color 0.3s ease;
+            transition: width 0.3s ease, height 0.3s ease, background 0.3s ease, border-color 0.3s ease;
             transform: translate(-50%, -50%);
             mix-blend-mode: difference;
         }
-
-        .cursor.hovering {
-            width: 50px;
-            height: 50px;
-            background: rgba(0, 0, 0, 0.05);
-            border-color: rgba(0, 0, 0, 0.6);
-        }
-
-        .cursor.grabbing {
-            width: 35px;
-            height: 35px;
-            background: rgba(0, 0, 0, 0.1);
-            border-color: rgba(0, 0, 0, 0.8);
-            border-style: dashed;
-        }
-
-        .cursor.zoomed-cursor {
-            width: 60px;
-            height: 60px;
-            border-color: rgba(0, 0, 0, 0.4);
-            background: rgba(0,0,0,0.02);
-        }
-
+        .cursor.hovering { width: 50px; height: 50px; background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.6); }
+        .cursor.grabbing { width: 35px; height: 35px; background: rgba(0,0,0,0.1); border-color: rgba(0,0,0,0.8); border-style: dashed; }
         .cursor-dot {
-            width: 5px;
-            height: 5px;
-            background: #000;
-            border-radius: 50%;
-            position: fixed;
-            pointer-events: none;
-            z-index: 10001;
-            transform: translate(-50%, -50%);
+            width: 5px; height: 5px; background: #000; border-radius: 50%;
+            position: fixed; pointer-events: none; z-index: 10001; transform: translate(-50%, -50%);
         }
 
-        .shimmer-line {
-            position: fixed;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(0,0,0,0.06), transparent);
-            pointer-events: none;
-            z-index: 0;
-        }
-
+        /* ===== LOADER ===== */
         .loader {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #ffffff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            transition: opacity 0.8s cubic-bezier(0.77, 0, 0.175, 1), transform 0.8s cubic-bezier(0.77, 0, 0.175, 1);
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #fff; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; z-index: 9999;
+            transition: opacity 1s var(--ease-out-expo), transform 1s var(--ease-out-expo);
         }
-
-        .loader.hidden {
-            opacity: 0;
-            transform: scale(1.05);
-            pointer-events: none;
-        }
-
+        .loader.hidden { opacity: 0; transform: scale(1.05); pointer-events: none; }
         .loader-text {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.2rem;
-            color: #000;
-            letter-spacing: 8px;
-            text-transform: uppercase;
-            margin-bottom: 40px;
-            opacity: 0;
-            animation: fadeInUp 1s ease forwards 0.3s;
+            font-family: 'Playfair Display', serif; font-size: 1.4rem;
+            color: #000; letter-spacing: 12px; text-transform: uppercase;
+            margin-bottom: 50px; opacity: 0; animation: fadeInUp 1s ease forwards 0.3s;
         }
-
+        .loader-sub {
+            font-family: 'Inter', sans-serif; font-size: 0.6rem;
+            color: rgba(0,0,0,0.3); letter-spacing: 6px; text-transform: uppercase;
+            margin-bottom: 40px; opacity: 0; animation: fadeInUp 1s ease forwards 0.5s;
+        }
         .loader-bar-container {
-            width: 200px;
-            height: 1px;
-            background: rgba(0,0,0,0.1);
-            position: relative;
-            overflow: hidden;
-            opacity: 0;
-            animation: fadeInUp 1s ease forwards 0.5s;
+            width: 200px; height: 1px; background: rgba(0,0,0,0.08);
+            overflow: hidden; opacity: 0; animation: fadeInUp 1s ease forwards 0.7s;
         }
-
-        .loader-bar {
-            height: 100%;
-            background: #000;
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-
+        .loader-bar { height: 100%; background: #000; width: 0%; transition: width 0.3s ease; }
         .loader-percentage {
-            font-family: 'Inter', sans-serif;
-            font-size: 0.7rem;
-            color: rgba(0,0,0,0.4);
-            letter-spacing: 4px;
-            margin-top: 20px;
-            opacity: 0;
-            animation: fadeInUp 1s ease forwards 0.7s;
+            font-size: 0.65rem; color: rgba(0,0,0,0.3); letter-spacing: 4px;
+            margin-top: 20px; opacity: 0; animation: fadeInUp 1s ease forwards 0.9s;
         }
 
-        .content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        /* ===== NAV ===== */
+        .nav {
+            position: fixed; top: 0; left: 0; width: 100%; z-index: 500;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 30px 50px;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0) 100%);
+            pointer-events: none;
+            opacity: 0; transform: translateY(-10px);
+            transition: opacity 0.8s ease 0.5s, transform 0.8s ease 0.5s;
+        }
+        .nav.visible { opacity: 1; transform: translateY(0); }
+        .nav-brand {
+            font-family: 'Playfair Display', serif; font-size: 0.85rem;
+            letter-spacing: 5px; color: rgba(0,0,0,0.15);
+        }
+        .nav-acts {
+            display: flex; gap: 30px; pointer-events: all;
+        }
+        .nav-acts a {
+            font-size: 0.55rem; letter-spacing: 4px; text-transform: uppercase;
+            color: rgba(0,0,0,0.25); text-decoration: none;
+            transition: color 0.3s ease; position: relative; padding-bottom: 4px;
+        }
+        .nav-acts a::after {
+            content: ''; position: absolute; bottom: 0; left: 0;
+            width: 0; height: 1px; background: rgba(0,0,0,0.3);
+            transition: width 0.4s var(--ease-out-expo);
+        }
+        .nav-acts a:hover { color: rgba(0,0,0,0.6); }
+        .nav-acts a:hover::after { width: 100%; }
+        .nav-acts a.active { color: rgba(0,0,0,0.5); }
+        .nav-acts a.active::after { width: 100%; }
+
+        /* ===== PROGRESS BAR ===== */
+        .progress-bar {
+            position: fixed; top: 0; left: 0; height: 2px;
+            background: linear-gradient(90deg, rgba(0,0,0,0.08), rgba(0,0,0,0.2));
+            z-index: 501; width: 0%; transition: width 0.1s linear;
         }
 
-        .content.visible {
-            opacity: 1;
-            transform: translateY(0);
+        /* ===== HERO ===== */
+        .hero {
+            height: 100vh; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            position: relative; overflow: hidden;
+        }
+        .hero-title {
+            font-family: 'Playfair Display', serif; font-size: clamp(2rem, 6vw, 5rem);
+            letter-spacing: 15px; color: rgba(0,0,0,0.08); text-transform: uppercase;
+            opacity: 0; transform: translateY(40px);
+            transition: opacity 1.2s ease, transform 1.2s var(--ease-out-expo);
+        }
+        .hero-title.visible { opacity: 1; transform: translateY(0); }
+        .hero-subtitle {
+            font-family: 'Inter', sans-serif; font-size: 0.6rem;
+            letter-spacing: 8px; color: rgba(0,0,0,0.2); text-transform: uppercase;
+            margin-top: 30px; opacity: 0; transform: translateY(20px);
+            transition: opacity 1s ease 0.3s, transform 1s var(--ease-out-expo) 0.3s;
+        }
+        .hero-subtitle.visible { opacity: 1; transform: translateY(0); }
+        .hero-line {
+            width: 1px; height: 80px; background: linear-gradient(to bottom, rgba(0,0,0,0.1), transparent);
+            margin-top: 60px; opacity: 0; transform: scaleY(0); transform-origin: top;
+            transition: opacity 1s ease 0.6s, transform 1s var(--ease-out-expo) 0.6s;
+        }
+        .hero-line.visible { opacity: 1; transform: scaleY(1); }
+        .hero-scroll {
+            position: absolute; bottom: 40px; font-size: 0.5rem;
+            letter-spacing: 5px; text-transform: uppercase; color: rgba(0,0,0,0.15);
+            animation: bob 2s ease-in-out infinite;
+        }
+        @keyframes bob {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(8px); }
         }
 
-        .top-label {
-            font-family: 'Inter', sans-serif;
-            font-size: 0.6rem;
-            letter-spacing: 6px;
-            text-transform: uppercase;
-            color: rgba(0,0,0,0.3);
-            margin-bottom: 50px;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: opacity 1s ease 0.3s, transform 1s ease 0.3s;
+        /* ===== ACT SECTIONS ===== */
+        .act {
+            min-height: 100vh; position: relative;
+            padding: 120px 0 80px; display: flex;
+            flex-direction: column; align-items: center;
         }
 
-        .content.visible .top-label {
-            opacity: 1;
-            transform: translateY(0);
+        .act-header {
+            text-align: center; margin-bottom: 80px;
+            opacity: 0; transform: translateY(40px);
+            transition: opacity 1s ease, transform 1s var(--ease-out-expo);
+        }
+        .act-header.visible { opacity: 1; transform: translateY(0); }
+
+        .act-number {
+            font-family: 'Playfair Display', serif; font-size: 0.6rem;
+            letter-spacing: 8px; color: rgba(0,0,0,0.15); text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+        .act-title {
+            font-family: 'Playfair Display', serif; font-size: clamp(1.5rem, 4vw, 3rem);
+            letter-spacing: 8px; color: rgba(0,0,0,0.12); text-transform: uppercase;
+            margin-bottom: 15px;
+        }
+        .act-description {
+            font-family: 'Playfair Display', serif; font-size: 0.8rem;
+            font-style: italic; color: rgba(0,0,0,0.2); letter-spacing: 2px;
+        }
+        .act-line {
+            width: 40px; height: 1px; background: rgba(0,0,0,0.08);
+            margin: 25px auto 0; transition: width 1s var(--ease-out-expo) 0.3s;
+        }
+        .act-header.visible .act-line { width: 80px; }
+
+        /* ===== IMAGE GALLERY GRID ===== */
+        .gallery {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 60px; width: 100%; max-width: 900px; padding: 0 30px;
         }
 
-        .content.visible.image-zoomed .top-label {
-            opacity: 0;
-            transform: translateY(-20px);
-            transition: opacity 0.3s ease, transform 0.3s ease;
+        .gallery-item {
+            position: relative; width: 100%;
+            opacity: 0; transform: translateY(60px);
+            transition: opacity 1s ease, transform 1s var(--ease-out-expo);
+        }
+        .gallery-item.visible { opacity: 1; transform: translateY(0); }
+
+        .gallery-item.layout-full { max-width: 700px; margin: 0 auto; }
+        .gallery-item.layout-offset-left { max-width: 550px; margin: 0 auto 0 5%; }
+        .gallery-item.layout-offset-right { max-width: 550px; margin: 0 5% 0 auto; }
+
+        .gallery-row {
+            display: flex; gap: 30px; width: 100%; max-width: 800px;
+            opacity: 0; transform: translateY(60px);
+            transition: opacity 1s ease, transform 1s var(--ease-out-expo);
+        }
+        .gallery-row.visible { opacity: 1; transform: translateY(0); }
+        .gallery-row .gallery-item { opacity: 1; transform: none; flex: 1; }
+
+        /* ===== IMAGE CARD ===== */
+        .image-card {
+            position: relative; border-radius: 6px; overflow: hidden;
+            background: #fafafa;
         }
 
-        /* Zoom viewport */
-        .zoom-viewport {
-            position: relative;
-            overflow: hidden;
-            border-radius: 8px;
-            max-width: min(85vw, 650px);
-            max-height: 75vh;
-            transition: max-width 0.5s ease, max-height 0.5s ease, border-radius 0.5s ease;
+        .image-card::before {
+            content: ''; position: absolute; inset: 0;
+            border: 1px solid rgba(0,0,0,0.04); border-radius: 6px;
+            z-index: 2; pointer-events: none;
         }
 
-        .image-zoomed .zoom-viewport {
-            max-width: 90vw;
-            max-height: 85vh;
-            border-radius: 4px;
-        }
-
-        .zoom-container {
-            transform-origin: 0 0;
-            transition: none;
+        .image-card img {
+            display: block; width: 100%; border-radius: 6px;
+            transition: transform 0.8s var(--ease-out-expo), filter 0.8s ease;
+            filter: saturate(1.02) contrast(1.01);
             will-change: transform;
-            cursor: grab;
         }
 
-        .zoom-container.is-dragging {
-            cursor: grabbing;
+        .image-card:hover img {
+            transform: scale(1.03);
+            filter: saturate(1.08) contrast(1.03);
         }
 
-        .zoom-container.is-animating {
-            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        .image-card .shine {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.12) 45%,
+                rgba(255,255,255,0.25) 50%, rgba(255,255,255,0.12) 55%, transparent 60%);
+            z-index: 3; pointer-events: none; transform: translateX(-110%);
         }
 
-        .image-wrapper {
-            position: relative;
-            padding: 2px;
-            opacity: 0;
-            transform: scale(0.95) translateY(20px);
-            transition: opacity 1s ease 0.5s, transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.5s;
+        .image-card:hover .shine {
+            animation: shineAcross 1.2s ease forwards;
         }
 
-        .content.visible .image-wrapper {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-        }
+        @keyframes shineAcross { to { transform: translateX(110%); } }
 
-        .image-border {
-            position: relative;
-            padding: 1px;
-            background: linear-gradient(135deg, rgba(0,0,0,0.1), rgba(0,0,0,0.02), rgba(0,0,0,0.1));
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .image-border::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: conic-gradient(from 0deg, transparent, rgba(0,0,0,0.05), transparent, rgba(0,0,0,0.05), transparent);
-            animation: rotateBorder 8s linear infinite;
-            z-index: 0;
-        }
-
-        @keyframes rotateBorder {
-            to { transform: rotate(360deg); }
-        }
-
-        .image-inner {
-            position: relative;
-            background: #fff;
-            border-radius: 7px;
-            overflow: hidden;
-            z-index: 1;
-        }
-
-        .main-image {
-            display: block;
-            width: min(80vw, 600px);
-            border-radius: 6px;
-            filter: saturate(1.05) contrast(1.02);
-            pointer-events: none;
-        }
-
-        .image-glow {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 80%;
-            height: 80%;
-            transform: translate(-50%, -50%);
-            background: radial-gradient(ellipse, rgba(0,0,0,0.03), transparent 70%);
-            pointer-events: none;
-            z-index: 2;
-            opacity: 0;
-            transition: opacity 0.6s ease;
-        }
-
-        .image-wrapper:hover .image-glow {
-            opacity: 1;
-        }
-
-        .image-reflection {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.15) 45%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0.15) 55%, transparent 60%);
-            z-index: 3;
-            pointer-events: none;
-            transform: translateX(-100%);
-        }
-
-        .image-wrapper:hover .image-reflection {
-            animation: shineAcross 1.5s ease forwards;
-        }
-
-        @keyframes shineAcross {
-            to { transform: translateX(100%); }
-        }
-
-        .image-shadow {
-            position: absolute;
-            bottom: -30px;
-            left: 10%;
-            width: 80%;
-            height: 30px;
-            background: radial-gradient(ellipse, rgba(0,0,0,0.08), transparent 70%);
-            filter: blur(10px);
-            z-index: -1;
+        .image-card .card-shadow {
+            position: absolute; bottom: -20px; left: 10%; width: 80%; height: 20px;
+            background: radial-gradient(ellipse, rgba(0,0,0,0.06), transparent 70%);
+            filter: blur(8px); z-index: -1;
             transition: opacity 0.6s ease, transform 0.6s ease;
         }
 
-        .corner-accent {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            z-index: 4;
+        .image-card:hover .card-shadow {
+            opacity: 0.5; transform: translateY(5px) scaleX(0.95);
+        }
+
+        .image-card-label {
+            position: absolute; bottom: 16px; left: 20px; z-index: 4;
+            font-size: 0.5rem; letter-spacing: 4px; text-transform: uppercase;
+            color: rgba(255,255,255,0.6); opacity: 0; transform: translateY(8px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+        }
+        .image-card:hover .image-card-label { opacity: 1; transform: translateY(0); }
+
+        .image-card-number {
+            position: absolute; top: 16px; right: 20px; z-index: 4;
+            font-size: 0.5rem; letter-spacing: 3px;
+            color: rgba(255,255,255,0.4); opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .image-card:hover .image-card-number { opacity: 1; }
+
+        /* ===== ZOOM OVERLAY ===== */
+        .zoom-overlay {
+            position: fixed; inset: 0; z-index: 8000;
+            background: rgba(255,255,255,0.97);
+            backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.5s var(--ease-out-expo);
+        }
+        .zoom-overlay.active { opacity: 1; pointer-events: all; }
+
+        .zoom-viewport {
+            position: relative; overflow: hidden;
+            width: 85vw; height: 85vh; border-radius: 8px;
+            cursor: grab;
+        }
+        .zoom-viewport:active { cursor: grabbing; }
+
+        .zoom-container {
+            transform-origin: 0 0; will-change: transform;
+            display: flex; align-items: center; justify-content: center;
+            min-width: 100%; min-height: 100%;
+        }
+        .zoom-container.is-animating {
+            transition: transform 0.4s var(--ease-out-expo);
+        }
+
+        .zoom-container img {
+            max-width: 80vw; max-height: 80vh; border-radius: 6px;
             pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.4s ease;
         }
 
-        .image-wrapper:hover .corner-accent {
-            opacity: 1;
+        .zoom-close {
+            position: fixed; top: 30px; right: 40px; z-index: 8001;
+            width: 40px; height: 40px; border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 50%; background: rgba(255,255,255,0.8);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; color: rgba(0,0,0,0.4); cursor: none;
+            transition: all 0.3s ease; opacity: 0; pointer-events: none;
         }
+        .zoom-overlay.active .zoom-close { opacity: 1; pointer-events: all; }
+        .zoom-close:hover { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.2); color: rgba(0,0,0,0.7); }
 
-        .corner-accent.tl { top: -8px; left: -8px; border-top: 1px solid rgba(0,0,0,0.2); border-left: 1px solid rgba(0,0,0,0.2); }
-        .corner-accent.tr { top: -8px; right: -8px; border-top: 1px solid rgba(0,0,0,0.2); border-right: 1px solid rgba(0,0,0,0.2); }
-        .corner-accent.bl { bottom: -8px; left: -8px; border-bottom: 1px solid rgba(0,0,0,0.2); border-left: 1px solid rgba(0,0,0,0.2); }
-        .corner-accent.br { bottom: -8px; right: -8px; border-bottom: 1px solid rgba(0,0,0,0.2); border-right: 1px solid rgba(0,0,0,0.2); }
-
-        .bottom-label {
-            font-family: 'Playfair Display', serif;
-            font-size: 0.8rem;
-            letter-spacing: 3px;
-            color: rgba(0,0,0,0.2);
-            margin-top: 50px;
-            font-style: italic;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: opacity 1s ease 0.8s, transform 1s ease 0.8s;
-        }
-
-        .content.visible .bottom-label {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .content.visible.image-zoomed .bottom-label {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-
-        .deco-line {
-            width: 40px;
-            height: 1px;
-            background: rgba(0,0,0,0.1);
-            margin-top: 20px;
-            opacity: 0;
-            transition: opacity 1s ease 1s, width 1s ease 1s;
-        }
-
-        .content.visible .deco-line {
-            opacity: 1;
-            width: 60px;
-        }
-
-        .content.visible.image-zoomed .deco-line {
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .ripple {
-            position: fixed;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(0,0,0,0.04), transparent 70%);
-            pointer-events: none;
-            z-index: 5;
-            animation: rippleExpand 1s ease forwards;
-        }
-
-        @keyframes rippleExpand {
-            from { width: 0; height: 0; opacity: 1; }
-            to { width: 300px; height: 300px; opacity: 0; }
-        }
-
-        .trail {
-            position: fixed;
-            width: 3px;
-            height: 3px;
-            background: rgba(0,0,0,0.08);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 9999;
-            animation: trailFade 0.8s ease forwards;
-        }
-
-        @keyframes trailFade {
-            to { opacity: 0; transform: scale(0); }
-        }
-
-        .ambient-corner {
-            position: fixed;
-            width: 150px;
-            height: 150px;
-            pointer-events: none;
-            z-index: 0;
-            opacity: 0.3;
-        }
-
-        .ambient-corner.top-left { top: 30px; left: 30px; border-top: 1px solid rgba(0,0,0,0.04); border-left: 1px solid rgba(0,0,0,0.04); }
-        .ambient-corner.top-right { top: 30px; right: 30px; border-top: 1px solid rgba(0,0,0,0.04); border-right: 1px solid rgba(0,0,0,0.04); }
-        .ambient-corner.bottom-left { bottom: 30px; left: 30px; border-bottom: 1px solid rgba(0,0,0,0.04); border-left: 1px solid rgba(0,0,0,0.04); }
-        .ambient-corner.bottom-right { bottom: 30px; right: 30px; border-bottom: 1px solid rgba(0,0,0,0.04); border-right: 1px solid rgba(0,0,0,0.04); }
-
-        .floating-dot {
-            position: fixed;
-            width: 2px;
-            height: 2px;
-            background: rgba(0,0,0,0.06);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0); }
-            25% { transform: translate(10px, -15px); }
-            50% { transform: translate(-5px, -25px); }
-            75% { transform: translate(-15px, -10px); }
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 0.06; }
-            50% { opacity: 0.12; }
-        }
-
-        /* Zoom controls HUD */
         .zoom-hud {
-            position: fixed;
-            bottom: 40px;
-            left: 50%;
+            position: fixed; bottom: 35px; left: 50%;
             transform: translateX(-50%) translateY(20px);
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            background: rgba(255,255,255,0.9);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(0,0,0,0.06);
-            border-radius: 50px;
-            padding: 10px 24px;
-            z-index: 100;
-            opacity: 0;
-            transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            display: flex; align-items: center; gap: 14px;
+            background: rgba(255,255,255,0.9); backdrop-filter: blur(20px);
+            border: 1px solid rgba(0,0,0,0.06); border-radius: 50px;
+            padding: 10px 22px; z-index: 8001;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.4s ease, transform 0.4s var(--ease-out-expo);
             box-shadow: 0 4px 30px rgba(0,0,0,0.04);
         }
-
-        .zoom-hud.visible {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
+        .zoom-overlay.active .zoom-hud {
+            opacity: 1; pointer-events: all; transform: translateX(-50%) translateY(0);
+            transition-delay: 0.2s;
         }
 
         .zoom-hud button {
-            background: none;
-            border: 1px solid rgba(0,0,0,0.1);
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            font-size: 16px;
-            color: rgba(0,0,0,0.5);
-            cursor: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background: none; border: 1px solid rgba(0,0,0,0.1);
+            width: 30px; height: 30px; border-radius: 50%; font-size: 15px;
+            color: rgba(0,0,0,0.4); cursor: none;
+            display: flex; align-items: center; justify-content: center;
             transition: all 0.2s ease;
-            font-family: 'Inter', sans-serif;
         }
-
-        .zoom-hud button:hover {
-            background: rgba(0,0,0,0.05);
-            border-color: rgba(0,0,0,0.2);
-            color: rgba(0,0,0,0.8);
-        }
-
-        .zoom-hud button:active {
-            transform: scale(0.92);
-        }
+        .zoom-hud button:hover { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.2); color: rgba(0,0,0,0.7); }
+        .zoom-hud button:active { transform: scale(0.9); }
 
         .zoom-level {
-            font-family: 'Inter', sans-serif;
-            font-size: 0.65rem;
-            letter-spacing: 2px;
-            color: rgba(0,0,0,0.35);
-            min-width: 48px;
-            text-align: center;
+            font-size: 0.6rem; letter-spacing: 2px; color: rgba(0,0,0,0.3);
+            min-width: 45px; text-align: center;
         }
-
-        .zoom-hud .separator {
-            width: 1px;
-            height: 16px;
-            background: rgba(0,0,0,0.08);
-        }
-
+        .zoom-hud .sep { width: 1px; height: 16px; background: rgba(0,0,0,0.06); }
         .zoom-hud .reset-btn {
-            width: auto;
-            padding: 0 14px;
-            border-radius: 20px;
-            font-size: 0.55rem;
-            letter-spacing: 2px;
-            text-transform: uppercase;
+            width: auto; padding: 0 14px; border-radius: 20px;
+            font-size: 0.5rem; letter-spacing: 2px; text-transform: uppercase;
         }
 
-        /* Minimap */
+        /* ===== MINIMAP ===== */
         .minimap {
-            position: fixed;
-            bottom: 100px;
-            right: 30px;
-            width: 120px;
-            height: 90px;
-            border: 1px solid rgba(0,0,0,0.08);
-            border-radius: 6px;
-            overflow: hidden;
-            z-index: 100;
-            opacity: 0;
-            transform: translateY(10px) scale(0.95);
-            transition: opacity 0.4s ease, transform 0.4s ease;
-            background: #fff;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            position: fixed; bottom: 95px; right: 30px;
+            width: 110px; height: 80px;
+            border: 1px solid rgba(0,0,0,0.06); border-radius: 5px;
+            overflow: hidden; z-index: 8001;
+            background: #fff; box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.4s ease;
         }
-
-        .minimap.visible {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-        }
-
-        .minimap img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            opacity: 0.5;
-        }
-
+        .minimap.visible { opacity: 1; }
+        .minimap img { width: 100%; height: 100%; object-fit: contain; opacity: 0.4; }
         .minimap-viewport {
-            position: absolute;
-            border: 1.5px solid rgba(0,0,0,0.4);
-            border-radius: 2px;
-            background: rgba(0,0,0,0.03);
-            pointer-events: none;
-            transition: none;
+            position: absolute; border: 1.5px solid rgba(0,0,0,0.35);
+            border-radius: 2px; background: rgba(0,0,0,0.03); pointer-events: none;
         }
 
-        .minimap-label {
-            position: absolute;
-            top: -18px;
-            left: 0;
-            font-size: 0.45rem;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            color: rgba(0,0,0,0.2);
+        /* ===== DIVIDERS ===== */
+        .act-divider {
+            width: 100%; display: flex; align-items: center;
+            justify-content: center; padding: 40px 0;
+            opacity: 0; transition: opacity 1s ease;
+        }
+        .act-divider.visible { opacity: 1; }
+        .act-divider-inner {
+            display: flex; align-items: center; gap: 20px;
+        }
+        .act-divider-line { width: 60px; height: 1px; background: rgba(0,0,0,0.06); }
+        .act-divider-dot { width: 4px; height: 4px; border-radius: 50%; background: rgba(0,0,0,0.1); }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            padding: 100px 0 60px; text-align: center;
+            opacity: 0; transform: translateY(30px);
+            transition: opacity 1s ease, transform 1s var(--ease-out-expo);
+        }
+        .footer.visible { opacity: 1; transform: translateY(0); }
+        .footer-text {
+            font-family: 'Playfair Display', serif; font-style: italic;
+            font-size: 0.8rem; color: rgba(0,0,0,0.15); letter-spacing: 3px;
+        }
+        .footer-line { width: 30px; height: 1px; background: rgba(0,0,0,0.06); margin: 20px auto 0; }
+
+        /* ===== AMBIENT ===== */
+        .ambient-corner {
+            position: fixed; width: 120px; height: 120px;
+            pointer-events: none; z-index: 0; opacity: 0.3;
+        }
+        .ambient-corner.tl { top: 30px; left: 30px; border-top: 1px solid rgba(0,0,0,0.03); border-left: 1px solid rgba(0,0,0,0.03); }
+        .ambient-corner.tr { top: 30px; right: 30px; border-top: 1px solid rgba(0,0,0,0.03); border-right: 1px solid rgba(0,0,0,0.03); }
+        .ambient-corner.bl { bottom: 30px; left: 30px; border-bottom: 1px solid rgba(0,0,0,0.03); border-left: 1px solid rgba(0,0,0,0.03); }
+        .ambient-corner.br { bottom: 30px; right: 30px; border-bottom: 1px solid rgba(0,0,0,0.03); border-right: 1px solid rgba(0,0,0,0.03); }
+
+        .floating-dot {
+            position: fixed; width: 2px; height: 2px;
+            background: rgba(0,0,0,0.04); border-radius: 50%;
+            pointer-events: none; z-index: 0;
         }
 
-        /* Zoom hint tooltip */
-        .zoom-hint {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-family: 'Inter', sans-serif;
-            font-size: 0.6rem;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            color: rgba(0,0,0,0.2);
-            background: rgba(255,255,255,0.95);
-            padding: 12px 24px;
-            border-radius: 30px;
-            border: 1px solid rgba(0,0,0,0.05);
-            pointer-events: none;
-            z-index: 200;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            white-space: nowrap;
+        .trail {
+            position: fixed; width: 3px; height: 3px;
+            background: rgba(0,0,0,0.06); border-radius: 50%;
+            pointer-events: none; z-index: 9999;
+            animation: trailFade 0.8s ease forwards;
         }
 
-        .zoom-hint.show {
-            opacity: 1;
+        .ripple {
+            position: fixed; border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,0,0,0.03), transparent 70%);
+            pointer-events: none; z-index: 5; animation: rippleExpand 1s ease forwards;
         }
 
-        .sound-wave {
-            position: fixed;
-            bottom: 30px;
-            right: 40px;
-            display: flex;
-            gap: 3px;
-            align-items: flex-end;
-            height: 20px;
-            z-index: 5;
-            opacity: 0.15;
-            transition: opacity 0.3s ease;
-        }
-
-        .image-zoomed ~ .sound-wave,
-        .sound-wave.hide {
-            opacity: 0;
-        }
-
-        .sound-wave .bar {
-            width: 2px;
-            background: #000;
-            border-radius: 1px;
-            animation: soundBar 1.2s ease-in-out infinite;
-        }
-
-        @keyframes soundBar {
-            0%, 100% { height: 4px; }
-            50% { height: 16px; }
-        }
-
-        .brand {
-            position: fixed;
-            top: 35px;
-            left: 40px;
-            font-family: 'Playfair Display', serif;
-            font-size: 0.8rem;
-            letter-spacing: 4px;
-            color: rgba(0,0,0,0.12);
-            z-index: 5;
-            opacity: 0;
-            transition: opacity 1s ease 1.5s;
-        }
-
-        .content.visible ~ .brand { opacity: 1; }
-
-        .frame-counter {
-            position: fixed;
-            top: 35px;
-            right: 40px;
-            font-family: 'Inter', sans-serif;
-            font-size: 0.6rem;
-            letter-spacing: 3px;
-            color: rgba(0,0,0,0.12);
-            z-index: 5;
-            opacity: 0;
-            transition: opacity 1s ease 1.5s;
-        }
-
-        .content.visible ~ .frame-counter { opacity: 1; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes float { 0%,100%{transform:translate(0,0)} 25%{transform:translate(10px,-15px)} 50%{transform:translate(-5px,-25px)} 75%{transform:translate(-15px,-10px)} }
+        @keyframes pulse { 0%,100%{opacity:0.04} 50%{opacity:0.08} }
+        @keyframes trailFade { to { opacity: 0; transform: scale(0); } }
+        @keyframes rippleExpand { from{width:0;height:0;opacity:1} to{width:300px;height:300px;opacity:0} }
 
         @media (max-width: 768px) {
-            .main-image { width: 90vw; }
-            .ambient-corner { width: 60px; height: 60px; }
-            .brand, .frame-counter, .sound-wave { display: none; }
             body { cursor: auto; }
             .cursor, .cursor-dot { display: none; }
-            .minimap { width: 80px; height: 60px; right: 15px; bottom: 90px; }
-            .zoom-hud { padding: 8px 16px; gap: 10px; }
+            .nav { padding: 20px 25px; }
+            .nav-acts { gap: 15px; }
+            .nav-acts a { font-size: 0.45rem; letter-spacing: 3px; }
+            .gallery { padding: 0 20px; gap: 40px; }
+            .gallery-item.layout-offset-left,
+            .gallery-item.layout-offset-right { margin: 0 auto; max-width: 100%; }
+            .gallery-row { flex-direction: column; }
+            .act { padding: 80px 0 60px; }
+            .hero-scroll { display: none; }
+            .ambient-corner { display: none; }
+            .minimap { display: none; }
         }
     </style>
 </head>
@@ -670,540 +460,571 @@
     <div class="cursor" id="cursor"></div>
     <div class="cursor-dot" id="cursorDot"></div>
 
+    <!-- Loader -->
     <div class="loader" id="loader">
-        <div class="loader-text">Preparing</div>
-        <div class="loader-bar-container">
-            <div class="loader-bar" id="loaderBar"></div>
-        </div>
+        <div class="loader-text">The Gallery</div>
+        <div class="loader-sub">A collection in acts</div>
+        <div class="loader-bar-container"><div class="loader-bar" id="loaderBar"></div></div>
         <div class="loader-percentage" id="loaderPercent">0%</div>
     </div>
 
-    <div class="ambient-corner top-left"></div>
-    <div class="ambient-corner top-right"></div>
-    <div class="ambient-corner bottom-left"></div>
-    <div class="ambient-corner bottom-right"></div>
+    <!-- Progress -->
+    <div class="progress-bar" id="progressBar"></div>
 
-    <div class="content" id="content">
-        <div class="top-label">E X H I B I T&nbsp;&nbsp;&nbsp;N O. 1</div>
+    <!-- Nav -->
+    <nav class="nav" id="nav">
+        <div class="nav-brand">G A L L E R Y</div>
+        <div class="nav-acts">
+            <a href="#act-anthony" data-act="anthony">Anthony</a>
+            <a href="#act-confessions" data-act="confessions">Confessions</a>
+        </div>
+    </nav>
 
-        <div class="zoom-viewport" id="zoomViewport">
-            <div class="zoom-container" id="zoomContainer">
-                <div class="image-wrapper" id="imageWrapper">
-                    <div class="corner-accent tl"></div>
-                    <div class="corner-accent tr"></div>
-                    <div class="corner-accent bl"></div>
-                    <div class="corner-accent br"></div>
-                    <div class="image-border">
-                        <div class="image-inner">
-                            <img
-                                src="https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/bullyingpeopletype.png"
-                                alt="The Image"
-                                class="main-image"
-                                id="mainImage"
-                                draggable="false"
-                            >
-                            <div class="image-reflection" id="imageReflection"></div>
-                        </div>
+    <!-- Ambient -->
+    <div class="ambient-corner tl"></div>
+    <div class="ambient-corner tr"></div>
+    <div class="ambient-corner bl"></div>
+    <div class="ambient-corner br"></div>
+
+    <!-- Hero -->
+    <section class="hero" id="hero">
+        <h1 class="hero-title" id="heroTitle">The Gallery</h1>
+        <p class="hero-subtitle" id="heroSubtitle">Presented in two acts</p>
+        <div class="hero-line" id="heroLine"></div>
+        <div class="hero-scroll">↓&nbsp;&nbsp;S C R O L L&nbsp;&nbsp;↓</div>
+    </section>
+
+    <!-- ===== ACT I: ANTHONY ===== -->
+    <section class="act" id="act-anthony">
+        <div class="act-header" data-reveal>
+            <div class="act-number">Act I</div>
+            <h2 class="act-title">Anthony</h2>
+            <p class="act-description">— three studies —</p>
+            <div class="act-line"></div>
+        </div>
+
+        <div class="gallery">
+            <div class="gallery-item layout-full" data-reveal>
+                <div class="image-card" data-zoomable>
+                    <img src="https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/anthony1.jpg" alt="Anthony I" draggable="false" loading="lazy">
+                    <div class="shine"></div>
+                    <div class="card-shadow"></div>
+                    <div class="image-card-label">Anthony — I</div>
+                    <div class="image-card-number">01</div>
+                </div>
+            </div>
+
+            <div class="gallery-row" data-reveal>
+                <div class="gallery-item">
+                    <div class="image-card" data-zoomable>
+                        <img src="https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/anthony2.jpg" alt="Anthony II" draggable="false" loading="lazy">
+                        <div class="shine"></div>
+                        <div class="card-shadow"></div>
+                        <div class="image-card-label">Anthony — II</div>
+                        <div class="image-card-number">02</div>
                     </div>
-                    <div class="image-glow"></div>
-                    <div class="image-shadow"></div>
+                </div>
+                <div class="gallery-item">
+                    <div class="image-card" data-zoomable>
+                        <img src="https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/anthony3.jpg" alt="Anthony III" draggable="false" loading="lazy">
+                        <div class="shine"></div>
+                        <div class="card-shadow"></div>
+                        <div class="image-card-label">Anthony — III</div>
+                        <div class="image-card-number">03</div>
+                    </div>
                 </div>
             </div>
         </div>
+    </section>
 
-        <div class="bottom-label">— scroll to zoom, drag to explore —</div>
-        <div class="deco-line"></div>
+    <!-- Divider -->
+    <div class="act-divider" data-reveal>
+        <div class="act-divider-inner">
+            <div class="act-divider-line"></div>
+            <div class="act-divider-dot"></div>
+            <div class="act-divider-line"></div>
+        </div>
     </div>
 
-    <!-- Zoom HUD -->
-    <div class="zoom-hud" id="zoomHud">
-        <button id="zoomOutBtn" title="Zoom Out">−</button>
-        <div class="zoom-level" id="zoomLevel">100%</div>
-        <button id="zoomInBtn" title="Zoom In">+</button>
-        <div class="separator"></div>
-        <button class="reset-btn" id="resetBtn" title="Reset">Reset</button>
+    <!-- ===== ACT II: SAINT LAURENCE CONFESSIONS ===== -->
+    <section class="act" id="act-confessions">
+        <div class="act-header" data-reveal>
+            <div class="act-number">Act II</div>
+            <h2 class="act-title">Saint Laurence</h2>
+            <p class="act-description">— the confessions —</p>
+            <div class="act-line"></div>
+        </div>
+
+        <div class="gallery">
+            <div class="gallery-item layout-full" data-reveal>
+                <div class="image-card" data-zoomable>
+                    <img src="https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/saintlaurenceconfessions.jpg" alt="Confessions I" draggable="false" loading="lazy">
+                    <div class="shine"></div>
+                    <div class="card-shadow"></div>
+                    <div class="image-card-label">Confessions — I</div>
+                    <div class="image-card-number">01</div>
+                </div>
+            </div>
+
+            <div class="gallery-item layout-offset-left" data-reveal>
+                <div class="image-card" data-zoomable>
+                    <img src="https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/saintlaurenceconfessions2.jpg" alt="Confessions II" draggable="false" loading="lazy">
+                    <div class="shine"></div>
+                    <div class="card-shadow"></div>
+                    <div class="image-card-label">Confessions — II</div>
+                    <div class="image-card-number">02</div>
+                </div>
+            </div>
+
+            <div class="gallery-item layout-offset-right" data-reveal>
+                <div class="image-card" data-zoomable>
+                    <img src="https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/saintlaurenceconfessions3.jpg" alt="Confessions III" draggable="false" loading="lazy">
+                    <div class="shine"></div>
+                    <div class="card-shadow"></div>
+                    <div class="image-card-label">Confessions — III</div>
+                    <div class="image-card-number">03</div>
+                </div>
+            </div>
+
+            <div class="gallery-row" data-reveal>
+                <div class="gallery-item">
+                    <div class="image-card" data-zoomable>
+                        <img src="https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/saintlaurenceconfessions4.jpg" alt="Confessions IV" draggable="false" loading="lazy">
+                        <div class="shine"></div>
+                        <div class="card-shadow"></div>
+                        <div class="image-card-label">Confessions — IV</div>
+                        <div class="image-card-number">04</div>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <div class="image-card" data-zoomable>
+                        <img src="https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/saintlaurenceconfessions5.jpg" alt="Confessions V" draggable="false" loading="lazy">
+                        <div class="shine"></div>
+                        <div class="card-shadow"></div>
+                        <div class="image-card-label">Confessions — V</div>
+                        <div class="image-card-number">05</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <div class="footer" data-reveal>
+        <div class="footer-text">— fin —</div>
+        <div class="footer-line"></div>
     </div>
 
-    <!-- Minimap -->
+    <!-- ===== ZOOM OVERLAY ===== -->
+    <div class="zoom-overlay" id="zoomOverlay">
+        <button class="zoom-close" id="zoomClose">✕</button>
+        <div class="zoom-viewport" id="zoomViewport">
+            <div class="zoom-container" id="zoomContainer">
+                <img id="zoomImage" src="" alt="" draggable="false">
+            </div>
+        </div>
+        <div class="zoom-hud">
+            <button id="zoomOutBtn">−</button>
+            <div class="zoom-level" id="zoomLevelEl">100%</div>
+            <button id="zoomInBtn">+</button>
+            <div class="sep"></div>
+            <button class="reset-btn" id="zoomResetBtn">Reset</button>
+        </div>
+    </div>
+
     <div class="minimap" id="minimap">
-        <div class="minimap-label">Overview</div>
-        <img src="https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/bullyingpeopletype.png" alt="" draggable="false">
+        <img id="minimapImg" src="" alt="" draggable="false">
         <div class="minimap-viewport" id="minimapViewport"></div>
-    </div>
-
-    <!-- Zoom Hint -->
-    <div class="zoom-hint" id="zoomHint"></div>
-
-    <div class="brand">G A L L E R Y</div>
-    <div class="frame-counter" id="frameCounter">001 / 001</div>
-
-    <div class="sound-wave" id="soundWave">
-        <div class="bar" style="animation-delay: 0s;"></div>
-        <div class="bar" style="animation-delay: 0.15s;"></div>
-        <div class="bar" style="animation-delay: 0.3s;"></div>
-        <div class="bar" style="animation-delay: 0.45s;"></div>
-        <div class="bar" style="animation-delay: 0.6s;"></div>
     </div>
 
     <script>
         // ===== CURSOR =====
-        const cursor = document.getElementById('cursor');
-        const cursorDot = document.getElementById('cursorDot');
-        let mouseX = 0, mouseY = 0, cursorX = 0, cursorY = 0;
+        const cursorEl = document.getElementById('cursor');
+        const cursorDotEl = document.getElementById('cursorDot');
+        let mx = 0, my = 0, cx = 0, cy = 0;
 
-        document.addEventListener('mousemove', (e) => {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-            cursorDot.style.left = mouseX + 'px';
-            cursorDot.style.top = mouseY + 'px';
-            if (Math.random() > 0.75) createTrail(mouseX, mouseY);
+        document.addEventListener('mousemove', e => {
+            mx = e.clientX; my = e.clientY;
+            cursorDotEl.style.left = mx + 'px';
+            cursorDotEl.style.top = my + 'px';
+            if (Math.random() > 0.8) spawnTrail(mx, my);
         });
 
-        function animateCursor() {
-            cursorX += (mouseX - cursorX) * 0.15;
-            cursorY += (mouseY - cursorY) * 0.15;
-            cursor.style.left = cursorX + 'px';
-            cursor.style.top = cursorY + 'px';
-            requestAnimationFrame(animateCursor);
-        }
-        animateCursor();
+        (function animCursor() {
+            cx += (mx - cx) * 0.15;
+            cy += (my - cy) * 0.15;
+            cursorEl.style.left = cx + 'px';
+            cursorEl.style.top = cy + 'px';
+            requestAnimationFrame(animCursor);
+        })();
 
-        function createTrail(x, y) {
-            const trail = document.createElement('div');
-            trail.className = 'trail';
-            trail.style.left = (x + (Math.random() - 0.5) * 10) + 'px';
-            trail.style.top = (y + (Math.random() - 0.5) * 10) + 'px';
-            document.body.appendChild(trail);
-            setTimeout(() => trail.remove(), 800);
+        function spawnTrail(x, y) {
+            const t = document.createElement('div');
+            t.className = 'trail';
+            t.style.left = (x + (Math.random() - 0.5) * 8) + 'px';
+            t.style.top = (y + (Math.random() - 0.5) * 8) + 'px';
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 800);
         }
 
-        document.addEventListener('click', (e) => {
-            const ripple = document.createElement('div');
-            ripple.className = 'ripple';
-            ripple.style.left = (e.clientX - 150) + 'px';
-            ripple.style.top = (e.clientY - 150) + 'px';
-            document.body.appendChild(ripple);
-            setTimeout(() => ripple.remove(), 1000);
+        document.addEventListener('click', e => {
+            const r = document.createElement('div');
+            r.className = 'ripple';
+            r.style.left = (e.clientX - 150) + 'px';
+            r.style.top = (e.clientY - 150) + 'px';
+            document.body.appendChild(r);
+            setTimeout(() => r.remove(), 1000);
         });
 
-        // ===== LOADING =====
+        // Hover states
+        document.querySelectorAll('.image-card, .zoom-close, .zoom-hud button, .nav-acts a').forEach(el => {
+            el.addEventListener('mouseenter', () => cursorEl.classList.add('hovering'));
+            el.addEventListener('mouseleave', () => cursorEl.classList.remove('hovering'));
+        });
+
+        // ===== LOADER =====
         const loader = document.getElementById('loader');
         const loaderBar = document.getElementById('loaderBar');
         const loaderPercent = document.getElementById('loaderPercent');
-        const content = document.getElementById('content');
-        const mainImage = document.getElementById('mainImage');
+        let prog = 0;
 
-        let progress = 0, loaded = false;
+        // Preload first images
+        const preloadSrcs = [
+            'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/anthony1.jpg',
+            'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/saintlaurenceconfessions.jpg'
+        ];
+        let preloaded = 0;
+        preloadSrcs.forEach(src => {
+            const img = new Image();
+            img.onload = img.onerror = () => { preloaded++; };
+            img.src = src;
+        });
 
-        mainImage.onload = () => { loaded = true; };
-        mainImage.onerror = () => { loaded = true; };
-        if (mainImage.complete) loaded = true;
-
-        function simulateLoading() {
+        setTimeout(() => {
             const interval = setInterval(() => {
-                if (progress < 90 || loaded) {
-                    progress += loaded ? Math.random() * 15 + 5 : Math.random() * 3 + 1;
-                }
-                if (progress >= 100) {
-                    progress = 100;
+                const allLoaded = preloaded >= preloadSrcs.length;
+                prog += allLoaded ? Math.random() * 12 + 4 : Math.random() * 3 + 1;
+                if (prog >= 100) {
+                    prog = 100;
                     clearInterval(interval);
                     loaderBar.style.width = '100%';
                     loaderPercent.textContent = '100%';
                     setTimeout(() => {
                         loader.classList.add('hidden');
-                        setTimeout(() => {
-                            content.classList.add('visible');
-                            spawnFloatingDots();
-                            setTimeout(() => zoomHud.classList.add('visible'), 1200);
-                            showHint('Scroll to zoom • Drag to pan • Double-click to fit', 3000);
-                        }, 400);
-                    }, 500);
+                        setTimeout(initPage, 500);
+                    }, 600);
                     return;
                 }
-                loaderBar.style.width = Math.floor(progress) + '%';
-                loaderPercent.textContent = Math.floor(progress) + '%';
+                loaderBar.style.width = Math.floor(prog) + '%';
+                loaderPercent.textContent = Math.floor(prog) + '%';
             }, 50);
-        }
-        setTimeout(simulateLoading, 800);
+        }, 600);
 
-        // ===== ZOOM & PAN ENGINE =====
+        function initPage() {
+            document.getElementById('heroTitle').classList.add('visible');
+            document.getElementById('heroSubtitle').classList.add('visible');
+            document.getElementById('heroLine').classList.add('visible');
+            document.getElementById('nav').classList.add('visible');
+            spawnDots();
+            initObservers();
+        }
+
+        // ===== FLOATING DOTS =====
+        function spawnDots() {
+            for (let i = 0; i < 25; i++) {
+                const d = document.createElement('div');
+                d.className = 'floating-dot';
+                d.style.left = Math.random() * 100 + 'vw';
+                d.style.top = Math.random() * 100 + 'vh';
+                d.style.animation = `float ${8 + Math.random() * 14}s ease-in-out infinite, pulse ${3 + Math.random() * 5}s ease-in-out infinite`;
+                d.style.animationDelay = Math.random() * 5 + 's';
+                document.body.appendChild(d);
+            }
+        }
+
+        // ===== SCROLL OBSERVERS =====
+        function initObservers() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+
+            document.querySelectorAll('[data-reveal]').forEach(el => observer.observe(el));
+        }
+
+        // ===== PROGRESS BAR =====
+        const progressBar = document.getElementById('progressBar');
+        window.addEventListener('scroll', () => {
+            const scrolled = window.scrollY;
+            const total = document.documentElement.scrollHeight - window.innerHeight;
+            progressBar.style.width = (scrolled / total * 100) + '%';
+
+            // Active nav
+            const acts = document.querySelectorAll('.act');
+            let activeId = '';
+            acts.forEach(act => {
+                const rect = act.getBoundingClientRect();
+                if (rect.top < window.innerHeight * 0.5) activeId = act.id;
+            });
+            document.querySelectorAll('.nav-acts a').forEach(a => {
+                a.classList.toggle('active', a.getAttribute('href') === '#' + activeId);
+            });
+        });
+
+        // ===== PARALLAX ON MOUSE =====
+        document.addEventListener('mousemove', e => {
+            const px = (e.clientX / window.innerWidth - 0.5) * 2;
+            const py = (e.clientY / window.innerHeight - 0.5) * 2;
+            document.querySelectorAll('.floating-dot').forEach((d, i) => {
+                const s = (i % 3 + 1) * 2;
+                d.style.marginLeft = px * s + 'px';
+                d.style.marginTop = py * s + 'px';
+            });
+        });
+
+        // ===== TILT ON IMAGE CARDS =====
+        document.querySelectorAll('.image-card').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const r = card.getBoundingClientRect();
+                const x = e.clientX - r.left;
+                const y = e.clientY - r.top;
+                const rx = ((y - r.height / 2) / r.height) * -6;
+                const ry = ((x - r.width / 2) / r.width) * 6;
+                card.style.transform = `perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+                card.style.transition = 'transform 0.1s ease';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(800px) rotateX(0) rotateY(0)';
+                card.style.transition = 'transform 0.6s var(--ease-out-expo)';
+            });
+        });
+
+        // ===== ZOOM SYSTEM =====
+        const zoomOverlay = document.getElementById('zoomOverlay');
         const zoomViewport = document.getElementById('zoomViewport');
         const zoomContainer = document.getElementById('zoomContainer');
-        const imageWrapper = document.getElementById('imageWrapper');
-        const zoomHud = document.getElementById('zoomHud');
-        const zoomLevelEl = document.getElementById('zoomLevel');
+        const zoomImage = document.getElementById('zoomImage');
+        const zoomClose = document.getElementById('zoomClose');
+        const zoomLevelEl = document.getElementById('zoomLevelEl');
         const minimapEl = document.getElementById('minimap');
+        const minimapImg = document.getElementById('minimapImg');
         const minimapViewport = document.getElementById('minimapViewport');
-        const zoomHint = document.getElementById('zoomHint');
-        const soundWave = document.getElementById('soundWave');
 
-        let scale = 1;
-        let panX = 0, panY = 0;
-        let isDragging = false;
-        let dragStartX, dragStartY, panStartX, panStartY;
-        const MIN_SCALE = 0.5;
-        const MAX_SCALE = 8;
-        const ZOOM_SENSITIVITY = 0.002;
+        let zScale = 1, zPanX = 0, zPanY = 0;
+        let zDragging = false, zDragSX, zDragSY, zPanSX, zPanSY;
+        const Z_MIN = 0.5, Z_MAX = 10, Z_SENS = 0.002;
 
-        function updateTransform(animate = false) {
+        function openZoom(src) {
+            zoomImage.src = src;
+            minimapImg.src = src;
+            zScale = 1; zPanX = 0; zPanY = 0;
+            updateZoom(false);
+            zoomOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeZoom() {
+            zoomOverlay.classList.remove('active');
+            minimapEl.classList.remove('visible');
+            document.body.style.overflow = '';
+        }
+
+        function updateZoom(animate = false) {
             if (animate) {
                 zoomContainer.classList.add('is-animating');
                 setTimeout(() => zoomContainer.classList.remove('is-animating'), 450);
             } else {
                 zoomContainer.classList.remove('is-animating');
             }
-
-            zoomContainer.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
-            zoomLevelEl.textContent = Math.round(scale * 100) + '%';
-
-            // Toggle zoomed state
-            if (scale > 1.05) {
-                content.classList.add('image-zoomed');
-                minimapEl.classList.add('visible');
-                soundWave.classList.add('hide');
-                cursor.classList.add('zoomed-cursor');
-            } else {
-                content.classList.remove('image-zoomed');
-                minimapEl.classList.remove('visible');
-                soundWave.classList.remove('hide');
-                cursor.classList.remove('zoomed-cursor');
-            }
-
+            zoomContainer.style.transform = `translate(${zPanX}px, ${zPanY}px) scale(${zScale})`;
+            zoomLevelEl.textContent = Math.round(zScale * 100) + '%';
+            minimapEl.classList.toggle('visible', zScale > 1.05);
             updateMinimap();
         }
 
-        function clampPan() {
-            if (scale <= 1) {
-                panX = 0;
-                panY = 0;
-                return;
-            }
-
-            const vpRect = zoomViewport.getBoundingClientRect();
-            const imgRect = mainImage.getBoundingClientRect();
-            const containerW = zoomContainer.scrollWidth * scale;
-            const containerH = zoomContainer.scrollHeight * scale;
-
-            const maxPanX = Math.max(0, (containerW - vpRect.width) / 2);
-            const maxPanY = Math.max(0, (containerH - vpRect.height) / 2);
-
-            panX = Math.max(-maxPanX, Math.min(maxPanX, panX));
-            panY = Math.max(-maxPanY, Math.min(maxPanY, panY));
+        function clampZPan() {
+            if (zScale <= 1) { zPanX = 0; zPanY = 0; return; }
+            const vpR = zoomViewport.getBoundingClientRect();
+            const cW = zoomContainer.scrollWidth * zScale;
+            const cH = zoomContainer.scrollHeight * zScale;
+            const maxX = Math.max(0, (cW - vpR.width) / 2);
+            const maxY = Math.max(0, (cH - vpR.height) / 2);
+            zPanX = Math.max(-maxX, Math.min(maxX, zPanX));
+            zPanY = Math.max(-maxY, Math.min(maxY, zPanY));
         }
 
-        // Scroll to zoom
-        zoomViewport.addEventListener('wheel', (e) => {
+        function updateMinimap() {
+            if (zScale <= 1.05) return;
+            const vpR = zoomViewport.getBoundingClientRect();
+            const cW = zoomContainer.scrollWidth;
+            const cH = zoomContainer.scrollHeight;
+            const mmW = minimapEl.clientWidth;
+            const mmH = minimapEl.clientHeight;
+            const vwR = vpR.width / zScale / cW;
+            const vhR = vpR.height / zScale / cH;
+            const mvW = Math.max(8, vwR * mmW);
+            const mvH = Math.max(8, vhR * mmH);
+            const offX = -zPanX / zScale / cW;
+            const offY = -zPanY / zScale / cH;
+            const mvX = (mmW - mvW) / 2 + offX * mmW;
+            const mvY = (mmH - mvH) / 2 + offY * mmH;
+            minimapViewport.style.width = mvW + 'px';
+            minimapViewport.style.height = mvH + 'px';
+            minimapViewport.style.left = Math.max(0, Math.min(mmW - mvW, mvX)) + 'px';
+            minimapViewport.style.top = Math.max(0, Math.min(mmH - mvH, mvY)) + 'px';
+        }
+
+        // Click to open
+        document.querySelectorAll('[data-zoomable]').forEach(card => {
+            card.addEventListener('click', () => {
+                const img = card.querySelector('img');
+                if (img) openZoom(img.src);
+            });
+        });
+
+        zoomClose.addEventListener('click', closeZoom);
+        zoomOverlay.addEventListener('click', e => { if (e.target === zoomOverlay) closeZoom(); });
+
+        // Scroll zoom
+        zoomViewport.addEventListener('wheel', e => {
             e.preventDefault();
-
-            const rect = zoomViewport.getBoundingClientRect();
-            const offsetX = e.clientX - rect.left - rect.width / 2;
-            const offsetY = e.clientY - rect.top - rect.height / 2;
-
-            const delta = -e.deltaY * ZOOM_SENSITIVITY;
-            const newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, scale * (1 + delta)));
-
-            const factor = newScale / scale;
-
-            panX = offsetX - factor * (offsetX - panX);
-            panY = offsetY - factor * (offsetY - panY);
-
-            scale = newScale;
-            clampPan();
-            updateTransform();
+            const r = zoomViewport.getBoundingClientRect();
+            const ox = e.clientX - r.left - r.width / 2;
+            const oy = e.clientY - r.top - r.height / 2;
+            const d = -e.deltaY * Z_SENS;
+            const ns = Math.max(Z_MIN, Math.min(Z_MAX, zScale * (1 + d)));
+            const f = ns / zScale;
+            zPanX = ox - f * (ox - zPanX);
+            zPanY = oy - f * (oy - zPanY);
+            zScale = ns;
+            clampZPan();
+            updateZoom();
         }, { passive: false });
 
-        // Drag to pan
-        zoomViewport.addEventListener('mousedown', (e) => {
+        // Drag pan
+        zoomViewport.addEventListener('mousedown', e => {
             if (e.button !== 0) return;
-            isDragging = true;
-            dragStartX = e.clientX;
-            dragStartY = e.clientY;
-            panStartX = panX;
-            panStartY = panY;
-            zoomContainer.classList.add('is-dragging');
-            cursor.classList.add('grabbing');
+            zDragging = true;
+            zDragSX = e.clientX; zDragSY = e.clientY;
+            zPanSX = zPanX; zPanSY = zPanY;
+            cursorEl.classList.add('grabbing');
         });
-
-        document.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            const dx = e.clientX - dragStartX;
-            const dy = e.clientY - dragStartY;
-            panX = panStartX + dx;
-            panY = panStartY + dy;
-            clampPan();
-            updateTransform();
+        document.addEventListener('mousemove', e => {
+            if (!zDragging) return;
+            zPanX = zPanSX + (e.clientX - zDragSX);
+            zPanY = zPanSY + (e.clientY - zDragSY);
+            clampZPan();
+            updateZoom();
         });
-
         document.addEventListener('mouseup', () => {
-            if (isDragging) {
-                isDragging = false;
-                zoomContainer.classList.remove('is-dragging');
-                cursor.classList.remove('grabbing');
-                // Snap back with nice elastic if needed
-                clampPan();
-                updateTransform(true);
+            if (zDragging) {
+                zDragging = false;
+                cursorEl.classList.remove('grabbing');
+                clampZPan();
+                updateZoom(true);
             }
         });
 
-        // Touch support
-        let lastTouchDist = 0;
-        let lastTouchCenter = { x: 0, y: 0 };
-
-        zoomViewport.addEventListener('touchstart', (e) => {
+        // Touch
+        let lastTD = 0, lastTC = { x: 0, y: 0 };
+        zoomViewport.addEventListener('touchstart', e => {
             if (e.touches.length === 1) {
-                isDragging = true;
-                dragStartX = e.touches[0].clientX;
-                dragStartY = e.touches[0].clientY;
-                panStartX = panX;
-                panStartY = panY;
+                zDragging = true;
+                zDragSX = e.touches[0].clientX; zDragSY = e.touches[0].clientY;
+                zPanSX = zPanX; zPanSY = zPanY;
             } else if (e.touches.length === 2) {
-                isDragging = false;
+                zDragging = false;
                 const dx = e.touches[0].clientX - e.touches[1].clientX;
                 const dy = e.touches[0].clientY - e.touches[1].clientY;
-                lastTouchDist = Math.sqrt(dx * dx + dy * dy);
-                lastTouchCenter = {
-                    x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
-                    y: (e.touches[0].clientY + e.touches[1].clientY) / 2
-                };
+                lastTD = Math.sqrt(dx * dx + dy * dy);
+                lastTC = { x: (e.touches[0].clientX + e.touches[1].clientX) / 2, y: (e.touches[0].clientY + e.touches[1].clientY) / 2 };
             }
         }, { passive: false });
 
-        zoomViewport.addEventListener('touchmove', (e) => {
+        zoomViewport.addEventListener('touchmove', e => {
             e.preventDefault();
-            if (e.touches.length === 1 && isDragging) {
-                const dx = e.touches[0].clientX - dragStartX;
-                const dy = e.touches[0].clientY - dragStartY;
-                panX = panStartX + dx;
-                panY = panStartY + dy;
-                clampPan();
-                updateTransform();
+            if (e.touches.length === 1 && zDragging) {
+                zPanX = zPanSX + (e.touches[0].clientX - zDragSX);
+                zPanY = zPanSY + (e.touches[0].clientY - zDragSY);
+                clampZPan(); updateZoom();
             } else if (e.touches.length === 2) {
                 const dx = e.touches[0].clientX - e.touches[1].clientX;
                 const dy = e.touches[0].clientY - e.touches[1].clientY;
                 const dist = Math.sqrt(dx * dx + dy * dy);
-                const center = {
-                    x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
-                    y: (e.touches[0].clientY + e.touches[1].clientY) / 2
-                };
-
-                if (lastTouchDist > 0) {
-                    const factor = dist / lastTouchDist;
-                    const newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, scale * factor));
-
-                    const rect = zoomViewport.getBoundingClientRect();
-                    const offsetX = center.x - rect.left - rect.width / 2;
-                    const offsetY = center.y - rect.top - rect.height / 2;
-
-                    const sf = newScale / scale;
-                    panX = offsetX - sf * (offsetX - panX);
-                    panY = offsetY - sf * (offsetY - panY);
-
-                    // Also pan with center movement
-                    panX += center.x - lastTouchCenter.x;
-                    panY += center.y - lastTouchCenter.y;
-
-                    scale = newScale;
-                    clampPan();
-                    updateTransform();
+                const c = { x: (e.touches[0].clientX + e.touches[1].clientX) / 2, y: (e.touches[0].clientY + e.touches[1].clientY) / 2 };
+                if (lastTD > 0) {
+                    const f = dist / lastTD;
+                    const ns = Math.max(Z_MIN, Math.min(Z_MAX, zScale * f));
+                    const r = zoomViewport.getBoundingClientRect();
+                    const ox = c.x - r.left - r.width / 2;
+                    const oy = c.y - r.top - r.height / 2;
+                    const sf = ns / zScale;
+                    zPanX = ox - sf * (ox - zPanX) + (c.x - lastTC.x);
+                    zPanY = oy - sf * (oy - zPanY) + (c.y - lastTC.y);
+                    zScale = ns;
+                    clampZPan(); updateZoom();
                 }
-
-                lastTouchDist = dist;
-                lastTouchCenter = center;
+                lastTD = dist; lastTC = c;
             }
         }, { passive: false });
 
-        zoomViewport.addEventListener('touchend', (e) => {
-            isDragging = false;
-            if (e.touches.length < 2) lastTouchDist = 0;
-            clampPan();
-            updateTransform(true);
+        zoomViewport.addEventListener('touchend', e => {
+            zDragging = false;
+            if (e.touches.length < 2) lastTD = 0;
+            clampZPan(); updateZoom(true);
         });
 
-        // Double click to reset / zoom
-        zoomViewport.addEventListener('dblclick', (e) => {
+        // Dbl click
+        zoomViewport.addEventListener('dblclick', e => {
             e.preventDefault();
-            if (scale > 1.05) {
-                // Reset
-                scale = 1;
-                panX = 0;
-                panY = 0;
-                showHint('Reset', 800);
+            if (zScale > 1.05) {
+                zScale = 1; zPanX = 0; zPanY = 0;
             } else {
-                // Zoom to 3x centered on click
-                const rect = zoomViewport.getBoundingClientRect();
-                const offsetX = e.clientX - rect.left - rect.width / 2;
-                const offsetY = e.clientY - rect.top - rect.height / 2;
-                const newScale = 3;
-                const factor = newScale / scale;
-                panX = offsetX - factor * (offsetX - panX);
-                panY = offsetY - factor * (offsetY - panY);
-                scale = newScale;
-                clampPan();
-                showHint('300%', 800);
+                const r = zoomViewport.getBoundingClientRect();
+                const ox = e.clientX - r.left - r.width / 2;
+                const oy = e.clientY - r.top - r.height / 2;
+                const ns = 3;
+                const f = ns / zScale;
+                zPanX = ox - f * (ox - zPanX);
+                zPanY = oy - f * (oy - zPanY);
+                zScale = ns;
+                clampZPan();
             }
-            updateTransform(true);
+            updateZoom(true);
         });
 
-        // HUD Buttons
-        document.getElementById('zoomInBtn').addEventListener('click', () => {
-            scale = Math.min(MAX_SCALE, scale * 1.4);
-            clampPan();
-            updateTransform(true);
-        });
-
-        document.getElementById('zoomOutBtn').addEventListener('click', () => {
-            scale = Math.max(MIN_SCALE, scale / 1.4);
-            clampPan();
-            updateTransform(true);
-        });
-
-        document.getElementById('resetBtn').addEventListener('click', () => {
-            scale = 1;
-            panX = 0;
-            panY = 0;
-            updateTransform(true);
-            showHint('Reset', 800);
-        });
-
-        // Cursor hover on buttons
-        document.querySelectorAll('.zoom-hud button').forEach(btn => {
-            btn.addEventListener('mouseenter', () => cursor.classList.add('hovering'));
-            btn.addEventListener('mouseleave', () => cursor.classList.remove('hovering'));
-        });
-
-        zoomViewport.addEventListener('mouseenter', () => {
-            if (!isDragging) cursor.classList.add('hovering');
-        });
-        zoomViewport.addEventListener('mouseleave', () => {
-            cursor.classList.remove('hovering');
-        });
+        // HUD buttons
+        document.getElementById('zoomInBtn').addEventListener('click', () => { zScale = Math.min(Z_MAX, zScale * 1.5); clampZPan(); updateZoom(true); });
+        document.getElementById('zoomOutBtn').addEventListener('click', () => { zScale = Math.max(Z_MIN, zScale / 1.5); clampZPan(); updateZoom(true); });
+        document.getElementById('zoomResetBtn').addEventListener('click', () => { zScale = 1; zPanX = 0; zPanY = 0; updateZoom(true); });
 
         // Keyboard
-        document.addEventListener('keydown', (e) => {
-            if (e.code === 'Equal' || e.code === 'NumpadAdd') {
-                e.preventDefault();
-                scale = Math.min(MAX_SCALE, scale * 1.3);
-                clampPan();
-                updateTransform(true);
-            } else if (e.code === 'Minus' || e.code === 'NumpadSubtract') {
-                e.preventDefault();
-                scale = Math.max(MIN_SCALE, scale / 1.3);
-                clampPan();
-                updateTransform(true);
-            } else if (e.code === 'Digit0' || e.code === 'Escape') {
-                scale = 1; panX = 0; panY = 0;
-                updateTransform(true);
-            } else if (e.code === 'Space') {
-                e.preventDefault();
-                imageWrapper.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
-                imageWrapper.style.transform = 'scale(1.03)';
-                setTimeout(() => {
-                    imageWrapper.style.transform = 'scale(1)';
-                }, 300);
-                for (let i = 0; i < 20; i++) {
-                    setTimeout(() => {
-                        const rect = imageWrapper.getBoundingClientRect();
-                        createTrail(
-                            rect.left + rect.width / 2 + (Math.random() - 0.5) * rect.width,
-                            rect.top + rect.height / 2 + (Math.random() - 0.5) * rect.height
-                        );
-                    }, i * 30);
-                }
-            } else if (e.code === 'ArrowUp') {
-                e.preventDefault(); panY += 50; clampPan(); updateTransform(true);
-            } else if (e.code === 'ArrowDown') {
-                e.preventDefault(); panY -= 50; clampPan(); updateTransform(true);
-            } else if (e.code === 'ArrowLeft') {
-                e.preventDefault(); panX += 50; clampPan(); updateTransform(true);
-            } else if (e.code === 'ArrowRight') {
-                e.preventDefault(); panX -= 50; clampPan(); updateTransform(true);
+        document.addEventListener('keydown', e => {
+            if (e.code === 'Escape') {
+                if (zoomOverlay.classList.contains('active')) closeZoom();
             }
+            if (!zoomOverlay.classList.contains('active')) return;
+            if (e.code === 'Equal' || e.code === 'NumpadAdd') { e.preventDefault(); zScale = Math.min(Z_MAX, zScale * 1.3); clampZPan(); updateZoom(true); }
+            if (e.code === 'Minus' || e.code === 'NumpadSubtract') { e.preventDefault(); zScale = Math.max(Z_MIN, zScale / 1.3); clampZPan(); updateZoom(true); }
+            if (e.code === 'Digit0') { zScale = 1; zPanX = 0; zPanY = 0; updateZoom(true); }
+            if (e.code === 'ArrowUp') { e.preventDefault(); zPanY += 60; clampZPan(); updateZoom(true); }
+            if (e.code === 'ArrowDown') { e.preventDefault(); zPanY -= 60; clampZPan(); updateZoom(true); }
+            if (e.code === 'ArrowLeft') { e.preventDefault(); zPanX += 60; clampZPan(); updateZoom(true); }
+            if (e.code === 'ArrowRight') { e.preventDefault(); zPanX -= 60; clampZPan(); updateZoom(true); }
         });
 
-        // Minimap
-        function updateMinimap() {
-            if (scale <= 1.05) return;
-
-            const vpRect = zoomViewport.getBoundingClientRect();
-            const containerW = zoomContainer.scrollWidth;
-            const containerH = zoomContainer.scrollHeight;
-
-            const minimapW = minimapEl.clientWidth;
-            const minimapH = minimapEl.clientHeight;
-
-            const visibleW = vpRect.width / scale;
-            const visibleH = vpRect.height / scale;
-
-            const vwRatio = visibleW / containerW;
-            const vhRatio = visibleH / containerH;
-
-            const mvW = Math.max(10, vwRatio * minimapW);
-            const mvH = Math.max(10, vhRatio * minimapH);
-
-            const centerOffsetX = -panX / scale / containerW;
-            const centerOffsetY = -panY / scale / containerH;
-
-            const mvX = (minimapW - mvW) / 2 + centerOffsetX * minimapW;
-            const mvY = (minimapH - mvH) / 2 + centerOffsetY * minimapH;
-
-            minimapViewport.style.width = mvW + 'px';
-            minimapViewport.style.height = mvH + 'px';
-            minimapViewport.style.left = Math.max(0, Math.min(minimapW - mvW, mvX)) + 'px';
-            minimapViewport.style.top = Math.max(0, Math.min(minimapH - mvH, mvY)) + 'px';
-        }
-
-        // Hint
-        function showHint(text, duration = 2000) {
-            zoomHint.textContent = text;
-            zoomHint.classList.add('show');
-            setTimeout(() => zoomHint.classList.remove('show'), duration);
-        }
-
-        // ===== FLOATING DOTS =====
-        function spawnFloatingDots() {
-            for (let i = 0; i < 20; i++) {
-                const dot = document.createElement('div');
-                dot.className = 'floating-dot';
-                dot.style.left = Math.random() * 100 + 'vw';
-                dot.style.top = Math.random() * 100 + 'vh';
-                dot.style.animation = `float ${8 + Math.random() * 12}s ease-in-out infinite, pulse ${3 + Math.random() * 4}s ease-in-out infinite`;
-                dot.style.animationDelay = `${Math.random() * 5}s`;
-                document.body.appendChild(dot);
-            }
-        }
-
-        // Shimmer lines
-        for (let i = 0; i < 5; i++) {
-            const line = document.createElement('div');
-            line.className = 'shimmer-line';
-            line.style.top = (15 + Math.random() * 70) + 'vh';
-            line.style.left = '0';
-            line.style.width = '100vw';
-            line.style.opacity = 0.3 + Math.random() * 0.3;
-            line.style.animation = `pulse ${4 + Math.random() * 6}s ease-in-out infinite`;
-            line.style.animationDelay = `${Math.random() * 3}s`;
-            document.body.appendChild(line);
-        }
-
-        // Parallax dots
-        document.addEventListener('mousemove', (e) => {
-            if (isDragging) return;
-            const x = (e.clientX / window.innerWidth - 0.5) * 2;
-            const y = (e.clientY / window.innerHeight - 0.5) * 2;
-            document.querySelectorAll('.floating-dot').forEach((dot, i) => {
-                const speed = (i % 3 + 1) * 3;
-                dot.style.marginLeft = x * speed + 'px';
-                dot.style.marginTop = y * speed + 'px';
+        // Smooth scroll for nav
+        document.querySelectorAll('.nav-acts a').forEach(a => {
+            a.addEventListener('click', e => {
+                e.preventDefault();
+                const target = document.querySelector(a.getAttribute('href'));
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
         });
-
-        // Frame counter
-        const frameCounter = document.getElementById('frameCounter');
-        let frameNum = 0;
-        setInterval(() => {
-            frameNum = (frameNum + 1) % 60;
-            if (frameCounter) frameCounter.textContent = `001 / 001 — F${String(frameNum).padStart(2, '0')}`;
-        }, 1000 / 30);
     </script>
 </body>
 </html>
+```
