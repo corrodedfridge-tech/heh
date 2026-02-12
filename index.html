@@ -2,889 +2,2338 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>✨ Gallery ✨</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>✦ THE GALLERY ✦</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600&family=Inter:wght@200;300;400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap');
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* ============================================
+           RESET & BASE
+           ============================================ */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         :root {
             --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+            --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
             --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+            --ease-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            --color-fg: #000000;
+            --color-bg: #ffffff;
+            --color-subtle: rgba(0,0,0,0.06);
+            --color-muted: rgba(0,0,0,0.12);
+            --color-soft: rgba(0,0,0,0.2);
+            --color-medium: rgba(0,0,0,0.35);
+            --color-text: rgba(0,0,0,0.5);
+            --font-display: 'Playfair Display', serif;
+            --font-body: 'Inter', sans-serif;
+            --font-accent: 'Cormorant Garamond', serif;
+        }
+
+        html {
+            overflow: hidden;
+            height: 100%;
         }
 
         body {
-            background: #ffffff;
-            height: 100vh;
+            background: var(--color-bg);
+            height: 100%;
             overflow: hidden;
-            font-family: 'Inter', sans-serif;
+            font-family: var(--font-body);
             cursor: none;
             user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* CURSOR */
-        .cursor {
-            width: 20px; height: 20px;
-            border: 2px solid rgba(0,0,0,0.25);
-            border-radius: 50%; position: fixed;
-            pointer-events: none; z-index: 10000;
-            transition: width 0.3s ease, height 0.3s ease, background 0.3s ease, border-color 0.3s ease, border-style 0.2s ease;
+        /* ============================================
+           CUSTOM CURSOR SYSTEM
+           ============================================ */
+        .cursor-ring {
+            width: 22px;
+            height: 22px;
+            border: 1.5px solid rgba(0,0,0,0.25);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 100000;
             transform: translate(-50%, -50%);
             mix-blend-mode: difference;
+            transition: width 0.35s var(--ease-out-expo),
+                        height 0.35s var(--ease-out-expo),
+                        background 0.35s ease,
+                        border-color 0.35s ease,
+                        border-style 0.25s ease,
+                        opacity 0.3s ease;
         }
-        .cursor.hover { width: 55px; height: 55px; background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.5); }
-        .cursor.grab { width: 40px; height: 40px; background: rgba(0,0,0,0.08); border-color: rgba(0,0,0,0.6); border-style: dashed; }
-        .cursor.arrow-left, .cursor.arrow-right { width: 60px; height: 60px; background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.4); }
+
+        .cursor-ring.hover {
+            width: 55px;
+            height: 55px;
+            background: rgba(0,0,0,0.04);
+            border-color: rgba(0,0,0,0.45);
+        }
+
+        .cursor-ring.grab {
+            width: 42px;
+            height: 42px;
+            background: rgba(0,0,0,0.08);
+            border-color: rgba(0,0,0,0.55);
+            border-style: dashed;
+        }
+
+        .cursor-ring.arrow-l {
+            width: 60px;
+            height: 60px;
+            background: rgba(0,0,0,0.02);
+            border-color: rgba(0,0,0,0.3);
+        }
+
+        .cursor-ring.arrow-r {
+            width: 60px;
+            height: 60px;
+            background: rgba(0,0,0,0.02);
+            border-color: rgba(0,0,0,0.3);
+        }
+
+        .cursor-ring.zoomed {
+            width: 50px;
+            height: 50px;
+            border-color: rgba(0,0,0,0.2);
+            background: rgba(0,0,0,0.02);
+        }
+
+        .cursor-ring.hidden {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
         .cursor-dot {
-            width: 5px; height: 5px; background: #000; border-radius: 50%;
-            position: fixed; pointer-events: none; z-index: 10001; transform: translate(-50%, -50%);
+            width: 4px;
+            height: 4px;
+            background: var(--color-fg);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 100001;
+            transform: translate(-50%, -50%);
+            transition: opacity 0.3s ease;
         }
-        .trail {
-            position: fixed; width: 3px; height: 3px;
-            background: rgba(0,0,0,0.06); border-radius: 50%;
-            pointer-events: none; z-index: 9999;
-            animation: trailFade 0.6s ease forwards;
-        }
-        @keyframes trailFade { to { opacity: 0; transform: scale(0); } }
 
-        /* LOADER */
-        .loader {
-            position: fixed; inset: 0; background: #fff;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 9999;
-            transition: opacity 0.8s var(--ease-out-expo), transform 0.8s var(--ease-out-expo);
+        .cursor-dot.hidden {
+            opacity: 0;
         }
-        .loader.hidden { opacity: 0; transform: scale(1.03); pointer-events: none; }
-        .loader-title {
-            font-family: 'Playfair Display', serif; font-size: 1.6rem;
-            letter-spacing: 14px; text-transform: uppercase; color: #000;
-            margin-bottom: 50px; opacity: 0; animation: fadeUp 1s ease forwards 0.2s;
-        }
-        .loader-bar-wrap {
-            width: 180px; height: 1px; background: rgba(0,0,0,0.08);
-            overflow: hidden; opacity: 0; animation: fadeUp 1s ease forwards 0.5s;
-        }
-        .loader-bar { height: 100%; background: #000; width: 0%; transition: width 0.2s ease; }
-        .loader-pct {
-            font-size: 0.6rem; color: rgba(0,0,0,0.25); letter-spacing: 5px;
-            margin-top: 18px; opacity: 0; animation: fadeUp 1s ease forwards 0.7s;
-        }
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* MAIN STAGE */
-        .stage {
-            position: fixed; inset: 0;
-            display: flex; align-items: center; justify-content: center;
-            perspective: 1200px;
-            opacity: 0; transition: opacity 1s ease;
+        .cursor-label {
+            position: fixed;
+            pointer-events: none;
+            z-index: 100002;
+            font-family: var(--font-body);
+            font-size: 0.5rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: rgba(0,0,0,0.4);
+            transform: translate(20px, -50%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            white-space: nowrap;
         }
-        .stage.visible { opacity: 1; }
 
-        /* 3D IMAGE CANVAS */
-        .canvas3d {
+        .cursor-label.visible {
+            opacity: 1;
+        }
+
+        /* ============================================
+           MOUSE TRAIL PARTICLES
+           ============================================ */
+        .trail-particle {
+            position: fixed;
+            width: 3px;
+            height: 3px;
+            background: rgba(0,0,0,0.05);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 99999;
+            animation: trailDie 0.7s ease forwards;
+        }
+
+        @keyframes trailDie {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0) translateY(-10px); }
+        }
+
+        /* ============================================
+           CLICK RIPPLE
+           ============================================ */
+        .click-ripple {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 99998;
+            border: 1px solid rgba(0,0,0,0.06);
+            animation: rippleGrow 0.8s var(--ease-out-expo) forwards;
+        }
+
+        @keyframes rippleGrow {
+            0% { width: 0; height: 0; opacity: 1; }
+            100% { width: 200px; height: 200px; opacity: 0; }
+        }
+
+        /* ============================================
+           LOADING SCREEN
+           ============================================ */
+        .loader-screen {
+            position: fixed;
+            inset: 0;
+            background: var(--color-bg);
+            z-index: 50000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 1s var(--ease-out-expo),
+                        transform 1s var(--ease-out-expo);
+        }
+
+        .loader-screen.done {
+            opacity: 0;
+            transform: scale(1.04);
+            pointer-events: none;
+        }
+
+        .loader-logo {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 400;
+            letter-spacing: 18px;
+            text-transform: uppercase;
+            color: var(--color-fg);
+            margin-bottom: 10px;
+            opacity: 0;
+            animation: loaderFadeUp 1s ease forwards 0.2s;
+        }
+
+        .loader-tagline {
+            font-family: var(--font-accent);
+            font-size: 0.9rem;
+            font-style: italic;
+            font-weight: 300;
+            letter-spacing: 4px;
+            color: var(--color-soft);
+            margin-bottom: 60px;
+            opacity: 0;
+            animation: loaderFadeUp 1s ease forwards 0.4s;
+        }
+
+        .loader-progress-track {
+            width: 220px;
+            height: 1px;
+            background: var(--color-subtle);
+            overflow: hidden;
             position: relative;
-            width: 100%; height: 100%;
-            display: flex; align-items: center; justify-content: center;
+            opacity: 0;
+            animation: loaderFadeUp 1s ease forwards 0.6s;
+        }
+
+        .loader-progress-fill {
+            height: 100%;
+            background: var(--color-fg);
+            width: 0%;
+            transition: width 0.25s ease;
+        }
+
+        .loader-percent {
+            font-family: var(--font-body);
+            font-size: 0.6rem;
+            font-weight: 300;
+            letter-spacing: 6px;
+            color: var(--color-soft);
+            margin-top: 22px;
+            opacity: 0;
+            animation: loaderFadeUp 1s ease forwards 0.8s;
+        }
+
+        .loader-count {
+            font-family: var(--font-body);
+            font-size: 0.45rem;
+            letter-spacing: 4px;
+            color: var(--color-muted);
+            margin-top: 10px;
+            text-transform: uppercase;
+            opacity: 0;
+            animation: loaderFadeUp 1s ease forwards 1s;
+        }
+
+        @keyframes loaderFadeUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ============================================
+           INTRO SPLASH (after loader)
+           ============================================ */
+        .intro-splash {
+            position: fixed;
+            inset: 0;
+            background: var(--color-bg);
+            z-index: 40000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.8s ease;
+        }
+
+        .intro-splash.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .intro-splash.exit {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 1.2s var(--ease-out-expo);
+        }
+
+        .intro-big-title {
+            font-family: var(--font-display);
+            font-size: clamp(3rem, 8vw, 7rem);
+            font-weight: 400;
+            letter-spacing: 20px;
+            text-transform: uppercase;
+            color: rgba(0,0,0,0.06);
+            opacity: 0;
+            transform: translateY(50px) scale(0.95);
+            transition: opacity 1.2s ease 0.2s, transform 1.2s var(--ease-out-expo) 0.2s;
+        }
+
+        .intro-splash.active .intro-big-title {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .intro-count-label {
+            font-family: var(--font-body);
+            font-size: 0.55rem;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            color: var(--color-soft);
+            margin-top: 30px;
+            opacity: 0;
+            transform: translateY(15px);
+            transition: opacity 1s ease 0.5s, transform 1s var(--ease-out-expo) 0.5s;
+        }
+
+        .intro-splash.active .intro-count-label {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .intro-line {
+            width: 1px;
+            height: 0;
+            background: var(--color-muted);
+            margin-top: 40px;
+            transition: height 1s var(--ease-out-expo) 0.8s;
+        }
+
+        .intro-splash.active .intro-line {
+            height: 70px;
+        }
+
+        .intro-enter {
+            font-family: var(--font-accent);
+            font-size: 0.8rem;
+            font-style: italic;
+            letter-spacing: 5px;
+            color: var(--color-soft);
+            margin-top: 30px;
+            cursor: none;
+            padding: 12px 30px;
+            border: 1px solid var(--color-subtle);
+            border-radius: 30px;
+            transition: all 0.4s ease;
+            opacity: 0;
+            transform: translateY(15px);
+        }
+
+        .intro-splash.active .intro-enter {
+            opacity: 1;
+            transform: translateY(0);
+            transition-delay: 1.2s;
+        }
+
+        .intro-enter:hover {
+            border-color: var(--color-soft);
+            background: rgba(0,0,0,0.02);
+            letter-spacing: 7px;
+        }
+
+        /* ============================================
+           TOP BAR / HEADER
+           ============================================ */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 75px;
+            z-index: 500;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 45px;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.97) 0%, rgba(255,255,255,0.8) 60%, rgba(255,255,255,0) 100%);
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(-15px);
+            transition: opacity 0.8s ease 0.3s, transform 0.8s var(--ease-out-expo) 0.3s;
+        }
+
+        .top-bar.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .tb-brand {
+            font-family: var(--font-display);
+            font-size: 0.7rem;
+            letter-spacing: 7px;
+            color: var(--color-muted);
+            text-transform: uppercase;
+        }
+
+        .tb-title {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+        }
+
+        .tb-title-main {
+            font-family: var(--font-display);
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 3px;
+            color: var(--color-soft);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            display: block;
+        }
+
+        .tb-title-sub {
+            font-family: var(--font-accent);
+            font-size: 0.6rem;
+            font-style: italic;
+            font-weight: 300;
+            letter-spacing: 2px;
+            color: var(--color-muted);
+            margin-top: 2px;
+            display: block;
+        }
+
+        .tb-meta {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .tb-keys {
+            font-size: 0.42rem;
+            letter-spacing: 3px;
+            color: var(--color-muted);
+            text-transform: uppercase;
+        }
+
+        .tb-counter {
+            font-size: 0.5rem;
+            letter-spacing: 4px;
+            color: var(--color-muted);
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ============================================
+           PROGRESS BAR (top edge)
+           ============================================ */
+        .page-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(0,0,0,0.04), rgba(0,0,0,0.15), rgba(0,0,0,0.04));
+            z-index: 501;
+            width: 0%;
+            transition: width 0.6s var(--ease-out-expo);
+        }
+
+        /* ============================================
+           MAIN 3D STAGE
+           ============================================ */
+        .stage {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1400px;
+            perspective-origin: 50% 50%;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        .stage.visible {
+            opacity: 1;
+        }
+
+        .scene {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transform-style: preserve-3d;
         }
 
+        /* ============================================
+           SLIDES
+           ============================================ */
         .slide {
             position: absolute;
-            max-width: 75vw; max-height: 80vh;
-            transition: transform 0.8s var(--ease-out-expo), opacity 0.8s ease, filter 0.8s ease;
             transform-style: preserve-3d;
             will-change: transform, opacity;
-            border-radius: 8px;
-            overflow: visible;
+            transition: transform 1s var(--ease-out-expo),
+                        opacity 0.8s ease,
+                        filter 0.8s ease;
         }
 
         .slide.active {
-            opacity: 1; z-index: 10;
+            opacity: 1;
+            z-index: 20;
             filter: none;
         }
-        .slide.prev {
-            opacity: 0; z-index: 5;
-            filter: blur(2px) brightness(0.97);
-            pointer-events: none;
-        }
-        .slide.next {
-            opacity: 0; z-index: 5;
-            filter: blur(2px) brightness(0.97);
-            pointer-events: none;
-        }
-        .slide.far {
-            opacity: 0; z-index: 1;
+
+        .slide.prev-1 {
+            opacity: 0.35;
+            z-index: 15;
+            filter: blur(1.5px) brightness(0.98);
             pointer-events: none;
         }
 
-        .slide-inner {
+        .slide.next-1 {
+            opacity: 0.35;
+            z-index: 15;
+            filter: blur(1.5px) brightness(0.98);
+            pointer-events: none;
+        }
+
+        .slide.prev-2 {
+            opacity: 0.12;
+            z-index: 10;
+            filter: blur(3px) brightness(0.95);
+            pointer-events: none;
+        }
+
+        .slide.next-2 {
+            opacity: 0.12;
+            z-index: 10;
+            filter: blur(3px) brightness(0.95);
+            pointer-events: none;
+        }
+
+        .slide.far-away {
+            opacity: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* ============================================
+           SLIDE INNER (3D card)
+           ============================================ */
+        .slide-card {
             position: relative;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 25px 80px rgba(0,0,0,0.08), 0 8px 30px rgba(0,0,0,0.04);
-            transition: box-shadow 0.5s ease;
             transform-style: preserve-3d;
+            border-radius: 10px;
+            transition: box-shadow 0.5s ease, transform 0.12s ease;
         }
 
-        .slide.active .slide-inner {
-            box-shadow: 0 30px 100px rgba(0,0,0,0.1), 0 10px 40px rgba(0,0,0,0.06);
+        .slide.active .slide-card {
+            box-shadow:
+                0 30px 80px rgba(0,0,0,0.07),
+                0 15px 40px rgba(0,0,0,0.04),
+                0 5px 15px rgba(0,0,0,0.03);
         }
 
-        .slide-inner img {
+        .slide.active:hover .slide-card {
+            box-shadow:
+                0 40px 100px rgba(0,0,0,0.09),
+                0 20px 50px rgba(0,0,0,0.05),
+                0 8px 20px rgba(0,0,0,0.04);
+        }
+
+        .slide-card-face {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            backface-visibility: hidden;
+            background: #f8f8f8;
+        }
+
+        .slide-card-face img {
             display: block;
-            max-width: 75vw; max-height: 80vh;
-            border-radius: 8px;
+            max-width: 72vw;
+            max-height: 75vh;
+            border-radius: 10px;
             pointer-events: none;
-            transition: transform 0.6s var(--ease-out-expo), filter 0.5s ease;
-            filter: saturate(1.03) contrast(1.01);
+            filter: saturate(1.04) contrast(1.015);
+            transition: filter 0.5s ease;
         }
 
-        .slide-inner .shine {
-            position: absolute; inset: 0;
-            background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.1) 45%,
-                rgba(255,255,255,0.22) 50%, rgba(255,255,255,0.1) 55%, transparent 60%);
-            pointer-events: none; z-index: 2;
-            transform: translateX(-120%);
-            transition: none;
+        .slide.active:hover .slide-card-face img {
+            filter: saturate(1.1) contrast(1.03);
         }
 
-        .slide.active:hover .slide-inner .shine {
-            animation: shineGo 1.4s ease forwards;
-        }
-        @keyframes shineGo { to { transform: translateX(120%); } }
-
-        .slide-inner .overlay-gradient {
-            position: absolute; bottom: 0; left: 0; right: 0;
-            height: 40%; pointer-events: none; z-index: 1;
-            background: linear-gradient(to top, rgba(0,0,0,0.03), transparent);
-            border-radius: 0 0 8px 8px;
-        }
-
-        /* REFLECTION UNDER IMAGE */
-        .slide-reflection {
+        /* Card border overlay */
+        .slide-card-face::after {
+            content: '';
             position: absolute;
-            bottom: -6px; left: 5%; right: 5%;
-            height: 50px;
-            background: radial-gradient(ellipse at center, rgba(0,0,0,0.04), transparent 70%);
-            filter: blur(12px);
-            z-index: -1;
-            transform: translateZ(-1px);
+            inset: 0;
+            border: 1px solid rgba(0,0,0,0.04);
+            border-radius: 10px;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        /* ============================================
+           SHINE / GLARE EFFECT
+           ============================================ */
+        .card-shine {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                105deg,
+                transparent 38%,
+                rgba(255,255,255,0.08) 42%,
+                rgba(255,255,255,0.18) 48%,
+                rgba(255,255,255,0.25) 50%,
+                rgba(255,255,255,0.18) 52%,
+                rgba(255,255,255,0.08) 58%,
+                transparent 62%
+            );
+            pointer-events: none;
+            z-index: 3;
+            opacity: 0;
+            transform: translateX(-130%);
+            border-radius: 10px;
+        }
+
+        .slide.active:hover .card-shine {
+            animation: shineSwipe 1.6s ease forwards;
+        }
+
+        @keyframes shineSwipe {
+            0% { opacity: 1; transform: translateX(-130%); }
+            100% { opacity: 1; transform: translateX(130%); }
+        }
+
+        /* ============================================
+           SPECULAR HIGHLIGHT (follows mouse)
+           ============================================ */
+        .card-specular {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 4;
+            border-radius: 10px;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            background: radial-gradient(
+                circle at var(--spec-x, 50%) var(--spec-y, 50%),
+                rgba(255,255,255,0.12) 0%,
+                transparent 50%
+            );
+        }
+
+        .slide.active:hover .card-specular {
+            opacity: 1;
+        }
+
+        /* ============================================
+           GRADIENT OVERLAY AT BOTTOM
+           ============================================ */
+        .card-gradient {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 35%;
+            background: linear-gradient(to top, rgba(0,0,0,0.04), transparent);
+            pointer-events: none;
+            z-index: 2;
+            border-radius: 0 0 10px 10px;
+        }
+
+        /* ============================================
+           IMAGE LABEL ON HOVER
+           ============================================ */
+        .card-label {
+            position: absolute;
+            bottom: 18px;
+            left: 22px;
+            z-index: 6;
+            font-family: var(--font-body);
+            font-size: 0.48rem;
+            font-weight: 400;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.55);
+            text-shadow: 0 1px 6px rgba(0,0,0,0.25);
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity 0.5s ease, transform 0.5s var(--ease-out-expo);
+        }
+
+        .slide.active:hover .card-label {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .card-number {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            z-index: 6;
+            font-family: var(--font-body);
+            font-size: 0.45rem;
+            font-weight: 300;
+            letter-spacing: 3px;
+            color: rgba(255,255,255,0.35);
+            opacity: 0;
             transition: opacity 0.5s ease;
         }
 
-        /* NAV ARROWS (edge zones) */
+        .slide.active:hover .card-number {
+            opacity: 1;
+        }
+
+        /* ============================================
+           CARD SHADOW (floor reflection)
+           ============================================ */
+        .card-floor-shadow {
+            position: absolute;
+            bottom: -25px;
+            left: 8%;
+            right: 8%;
+            height: 40px;
+            background: radial-gradient(ellipse at center, rgba(0,0,0,0.05), transparent 70%);
+            filter: blur(14px);
+            z-index: -1;
+            transform: translateZ(-2px) rotateX(85deg);
+            transform-origin: top center;
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .slide.active:hover .card-floor-shadow {
+            opacity: 0.6;
+            transform: translateZ(-2px) rotateX(85deg) translateY(4px);
+        }
+
+        /* ============================================
+           CORNER BRACKETS
+           ============================================ */
+        .corner-bracket {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            z-index: 7;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.4s ease 0.1s;
+        }
+
+        .slide.active:hover .corner-bracket {
+            opacity: 1;
+        }
+
+        .corner-bracket.tl { top: -7px; left: -7px; border-top: 1px solid rgba(0,0,0,0.15); border-left: 1px solid rgba(0,0,0,0.15); }
+        .corner-bracket.tr { top: -7px; right: -7px; border-top: 1px solid rgba(0,0,0,0.15); border-right: 1px solid rgba(0,0,0,0.15); }
+        .corner-bracket.bl { bottom: -7px; left: -7px; border-bottom: 1px solid rgba(0,0,0,0.15); border-left: 1px solid rgba(0,0,0,0.15); }
+        .corner-bracket.br { bottom: -7px; right: -7px; border-bottom: 1px solid rgba(0,0,0,0.15); border-right: 1px solid rgba(0,0,0,0.15); }
+
+        /* ============================================
+           NAVIGATION ZONES (left/right edges)
+           ============================================ */
         .nav-zone {
-            position: fixed; top: 0; width: 15%; height: 100%;
-            z-index: 50; display: flex; align-items: center;
+            position: fixed;
+            top: 0;
+            width: 14%;
+            height: 100%;
+            z-index: 100;
+            display: flex;
+            align-items: center;
             cursor: none;
         }
-        .nav-zone.left { left: 0; justify-content: flex-start; padding-left: 30px; }
-        .nav-zone.right { right: 0; justify-content: flex-end; padding-right: 30px; }
 
-        .nav-arrow {
-            width: 50px; height: 50px;
-            border: 1px solid rgba(0,0,0,0.08);
+        .nav-zone.left {
+            left: 0;
+            justify-content: flex-start;
+            padding-left: 28px;
+        }
+
+        .nav-zone.right {
+            right: 0;
+            justify-content: flex-end;
+            padding-right: 28px;
+        }
+
+        .nav-btn {
+            width: 48px;
+            height: 48px;
+            border: 1px solid rgba(0,0,0,0.06);
             border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 18px; color: rgba(0,0,0,0.2);
-            transition: all 0.4s var(--ease-out-expo);
-            backdrop-filter: blur(10px);
-            background: rgba(255,255,255,0.6);
-            opacity: 0; transform: scale(0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-body);
+            font-size: 16px;
+            font-weight: 300;
+            color: var(--color-soft);
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            opacity: 0;
+            transform: scale(0.75);
+            transition: all 0.45s var(--ease-out-expo);
         }
-        .nav-zone:hover .nav-arrow {
-            opacity: 1; transform: scale(1);
+
+        .nav-zone:hover .nav-btn {
+            opacity: 1;
+            transform: scale(1);
         }
-        .nav-zone:active .nav-arrow {
-            transform: scale(0.9);
+
+        .nav-zone:active .nav-btn {
+            transform: scale(0.88);
             background: rgba(0,0,0,0.03);
         }
 
-        /* BOTTOM BAR */
+        /* ============================================
+           BOTTOM BAR
+           ============================================ */
         .bottom-bar {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            height: 80px; z-index: 100;
-            display: flex; align-items: center; justify-content: center;
-            gap: 30px;
-            background: linear-gradient(to top, rgba(255,255,255,0.95), rgba(255,255,255,0));
-            opacity: 0; transform: translateY(10px);
-            transition: opacity 0.8s ease 0.3s, transform 0.8s var(--ease-out-expo) 0.3s;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 90px;
+            z-index: 500;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background: linear-gradient(to top, rgba(255,255,255,0.97) 0%, rgba(255,255,255,0.7) 60%, transparent 100%);
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(15px);
+            transition: opacity 0.8s ease 0.4s, transform 0.8s var(--ease-out-expo) 0.4s;
         }
-        .bottom-bar.visible { opacity: 1; transform: translateY(0); }
 
-        /* Dots */
-        .dots {
-            display: flex; gap: 10px; align-items: center;
+        .bottom-bar.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
-        .dot {
-            width: 6px; height: 6px; border-radius: 50%;
-            background: rgba(0,0,0,0.1);
-            transition: all 0.4s var(--ease-out-expo);
+
+        /* ============================================
+           THUMBNAIL FILMSTRIP
+           ============================================ */
+        .filmstrip {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            pointer-events: all;
+            padding: 4px 8px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.5);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .filmstrip-thumb {
+            width: 40px;
+            height: 28px;
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1.5px solid transparent;
+            opacity: 0.35;
             cursor: none;
-        }
-        .dot.active {
-            width: 24px; border-radius: 3px;
-            background: rgba(0,0,0,0.3);
-        }
-        .dot:hover { background: rgba(0,0,0,0.25); }
-
-        /* Counter */
-        .counter {
-            font-size: 0.55rem; letter-spacing: 4px;
-            color: rgba(0,0,0,0.18); text-transform: uppercase;
-            min-width: 70px; text-align: center;
+            transition: all 0.35s var(--ease-out-expo);
+            flex-shrink: 0;
         }
 
-        /* Top bar */
-        .top-bar {
-            position: fixed; top: 0; left: 0; right: 0;
-            height: 70px; z-index: 100;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 40px;
-            background: linear-gradient(to bottom, rgba(255,255,255,0.95), rgba(255,255,255,0));
-            opacity: 0; transform: translateY(-10px);
-            transition: opacity 0.8s ease 0.3s, transform 0.8s var(--ease-out-expo) 0.3s;
-        }
-        .top-bar.visible { opacity: 1; transform: translateY(0); }
-
-        .brand {
-            font-family: 'Playfair Display', serif;
-            font-size: 0.75rem; letter-spacing: 6px;
-            color: rgba(0,0,0,0.1);
+        .filmstrip-thumb.active {
+            border-color: rgba(0,0,0,0.25);
+            opacity: 1;
+            transform: scale(1.15);
         }
 
-        .image-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 0.7rem; letter-spacing: 3px; font-style: italic;
-            color: rgba(0,0,0,0.15);
+        .filmstrip-thumb:hover {
+            opacity: 0.75;
+            transform: scale(1.08);
+        }
+
+        .filmstrip-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            pointer-events: none;
+            border-radius: 2.5px;
+        }
+
+        /* ============================================
+           DOT INDICATORS
+           ============================================ */
+        .dot-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            pointer-events: all;
+        }
+
+        .dot-ind {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--color-muted);
+            cursor: none;
+            transition: all 0.4s var(--ease-out-expo);
+        }
+
+        .dot-ind.active {
+            width: 22px;
+            border-radius: 3px;
+            background: var(--color-medium);
+        }
+
+        .dot-ind:hover {
+            background: var(--color-soft);
+        }
+
+        /* ============================================
+           ZOOM CONTROLS HUD
+           ============================================ */
+        .zoom-controls {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(18px);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 9px 20px;
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(22px);
+            -webkit-backdrop-filter: blur(22px);
+            border: 1px solid rgba(0,0,0,0.04);
+            border-radius: 40px;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.03);
+            z-index: 600;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease, transform 0.4s var(--ease-out-expo);
+        }
+
+        .zoom-controls.visible {
+            opacity: 1;
+            pointer-events: all;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .zc-btn {
+            background: none;
+            border: 1px solid rgba(0,0,0,0.07);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            font-size: 14px;
+            font-weight: 300;
+            color: var(--color-medium);
+            cursor: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.25s ease;
+        }
+
+        .zc-btn:hover {
+            background: rgba(0,0,0,0.04);
+            border-color: rgba(0,0,0,0.15);
+            color: var(--color-text);
+        }
+
+        .zc-btn:active { transform: scale(0.88); }
+
+        .zc-pct {
+            font-size: 0.55rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+            color: var(--color-soft);
+            min-width: 42px;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .zc-sep { width: 1px; height: 14px; background: rgba(0,0,0,0.05); }
+
+        .zc-reset {
+            width: auto;
+            padding: 0 13px;
+            border-radius: 16px;
+            font-size: 0.43rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* ============================================
+           MINIMAP
+           ============================================ */
+        .minimap {
+            position: fixed;
+            bottom: 105px;
+            right: 28px;
+            width: 100px;
+            height: 72px;
+            border: 1px solid rgba(0,0,0,0.05);
+            border-radius: 5px;
+            overflow: hidden;
+            z-index: 600;
+            background: var(--color-bg);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(8px) scale(0.95);
+            transition: opacity 0.4s ease, transform 0.4s var(--ease-out-expo);
+        }
+
+        .minimap.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .minimap img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            opacity: 0.35;
+            pointer-events: none;
+        }
+
+        .minimap-vp {
+            position: absolute;
+            border: 1.5px solid rgba(0,0,0,0.3);
+            border-radius: 2px;
+            background: rgba(0,0,0,0.03);
+            pointer-events: none;
+        }
+
+        /* ============================================
+           AMBIENT DECORATION
+           ============================================ */
+        .ambient-corner {
+            position: fixed;
+            width: 110px;
+            height: 110px;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.2;
+        }
+
+        .ambient-corner.tl { top: 22px; left: 22px; border-top: 1px solid rgba(0,0,0,0.03); border-left: 1px solid rgba(0,0,0,0.03); }
+        .ambient-corner.tr { top: 22px; right: 22px; border-top: 1px solid rgba(0,0,0,0.03); border-right: 1px solid rgba(0,0,0,0.03); }
+        .ambient-corner.bl { bottom: 22px; left: 22px; border-bottom: 1px solid rgba(0,0,0,0.03); border-left: 1px solid rgba(0,0,0,0.03); }
+        .ambient-corner.br { bottom: 22px; right: 22px; border-bottom: 1px solid rgba(0,0,0,0.03); border-right: 1px solid rgba(0,0,0,0.03); }
+
+        .ambient-particle {
+            position: fixed;
+            width: 2px;
+            height: 2px;
+            background: rgba(0,0,0,0.03);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .ambient-shimmer {
+            position: fixed;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0,0,0,0.03), transparent);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes ambientFloat {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(12px, -18px); }
+            50% { transform: translate(-8px, -28px); }
+            75% { transform: translate(-14px, -12px); }
+        }
+
+        @keyframes ambientPulse {
+            0%, 100% { opacity: 0.03; }
+            50% { opacity: 0.07; }
+        }
+
+        /* ============================================
+           TRANSITION FLASH
+           ============================================ */
+        .flash-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(255,255,255,0.35);
+            pointer-events: none;
+            z-index: 30000;
+            opacity: 0;
+            transition: opacity 0.12s ease;
+        }
+
+        .flash-overlay.flash {
+            opacity: 1;
+        }
+
+        /* ============================================
+           KEYBOARD SHORTCUTS OVERLAY
+           ============================================ */
+        .shortcuts-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(255,255,255,0.96);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 20000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
             transition: opacity 0.4s ease;
         }
 
-        .keys-hint {
-            font-size: 0.45rem; letter-spacing: 3px;
-            color: rgba(0,0,0,0.1); text-transform: uppercase;
+        .shortcuts-overlay.visible {
+            opacity: 1;
+            pointer-events: all;
         }
 
-        /* Zoom HUD */
-        .zoom-hud {
-            position: fixed; bottom: 90px; left: 50%;
-            transform: translateX(-50%) translateY(15px);
-            display: flex; align-items: center; gap: 12px;
-            background: rgba(255,255,255,0.92); backdrop-filter: blur(20px);
-            border: 1px solid rgba(0,0,0,0.05); border-radius: 40px;
-            padding: 8px 20px; z-index: 100;
-            opacity: 0; pointer-events: none;
-            transition: opacity 0.4s ease, transform 0.4s var(--ease-out-expo);
-            box-shadow: 0 4px 25px rgba(0,0,0,0.03);
-        }
-        .zoom-hud.visible { opacity: 1; pointer-events: all; transform: translateX(-50%) translateY(0); }
-
-        .zoom-hud button {
-            background: none; border: 1px solid rgba(0,0,0,0.08);
-            width: 28px; height: 28px; border-radius: 50%;
-            font-size: 14px; color: rgba(0,0,0,0.35); cursor: none;
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.2s ease;
-        }
-        .zoom-hud button:hover { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.15); color: rgba(0,0,0,0.6); }
-        .zoom-hud button:active { transform: scale(0.88); }
-        .zoom-pct { font-size: 0.55rem; letter-spacing: 2px; color: rgba(0,0,0,0.25); min-width: 40px; text-align: center; }
-        .zoom-hud .sep { width: 1px; height: 14px; background: rgba(0,0,0,0.05); }
-        .zoom-hud .rbtn { width: auto; padding: 0 12px; border-radius: 16px; font-size: 0.45rem; letter-spacing: 2px; text-transform: uppercase; }
-
-        /* Thumbnail strip */
-        .thumb-strip {
-            position: fixed; bottom: 85px; left: 50%;
-            transform: translateX(-50%);
-            display: flex; gap: 8px; align-items: center;
-            z-index: 99;
-            opacity: 0; transition: opacity 0.5s ease 0.5s;
-        }
-        .thumb-strip.visible { opacity: 1; }
-        .thumb {
-            width: 44px; height: 32px; border-radius: 4px; overflow: hidden;
-            border: 2px solid transparent;
-            transition: all 0.3s var(--ease-out-expo);
-            opacity: 0.4; cursor: none;
-            flex-shrink: 0;
-        }
-        .thumb.active { border-color: rgba(0,0,0,0.2); opacity: 1; transform: scale(1.1); }
-        .thumb:hover { opacity: 0.8; transform: scale(1.05); }
-        .thumb img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
-
-        /* Floating particles */
-        .particle {
-            position: fixed; width: 2px; height: 2px;
-            background: rgba(0,0,0,0.03); border-radius: 50%;
-            pointer-events: none; z-index: 0;
+        .shortcuts-title {
+            font-family: var(--font-display);
+            font-size: 1.2rem;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            color: var(--color-soft);
+            margin-bottom: 40px;
         }
 
-        /* Ambient corners */
-        .amb { position: fixed; width: 100px; height: 100px; pointer-events: none; z-index: 0; opacity: 0.25; }
-        .amb.tl { top: 25px; left: 25px; border-top: 1px solid rgba(0,0,0,0.03); border-left: 1px solid rgba(0,0,0,0.03); }
-        .amb.tr { top: 25px; right: 25px; border-top: 1px solid rgba(0,0,0,0.03); border-right: 1px solid rgba(0,0,0,0.03); }
-        .amb.bl { bottom: 25px; left: 25px; border-bottom: 1px solid rgba(0,0,0,0.03); border-left: 1px solid rgba(0,0,0,0.03); }
-        .amb.br { bottom: 25px; right: 25px; border-bottom: 1px solid rgba(0,0,0,0.03); border-right: 1px solid rgba(0,0,0,0.03); }
-
-        /* Transition overlay for slide changes */
-        .transition-flash {
-            position: fixed; inset: 0; background: rgba(255,255,255,0.4);
-            pointer-events: none; z-index: 200; opacity: 0;
-            transition: opacity 0.15s ease;
-        }
-        .transition-flash.flash { opacity: 1; }
-
-        @keyframes float {
-            0%,100% { transform: translate(0,0); }
-            33% { transform: translate(8px,-12px); }
-            66% { transform: translate(-6px,-20px); }
-        }
-        @keyframes pulse {
-            0%,100% { opacity: 0.03; }
-            50% { opacity: 0.06; }
+        .shortcuts-grid {
+            display: grid;
+            grid-template-columns: auto auto;
+            gap: 14px 40px;
         }
 
+        .sc-key {
+            font-family: var(--font-body);
+            font-size: 0.6rem;
+            font-weight: 500;
+            letter-spacing: 2px;
+            color: var(--color-medium);
+            text-align: right;
+            padding: 4px 10px;
+            background: rgba(0,0,0,0.03);
+            border-radius: 4px;
+        }
+
+        .sc-desc {
+            font-family: var(--font-body);
+            font-size: 0.6rem;
+            font-weight: 300;
+            letter-spacing: 1px;
+            color: var(--color-soft);
+            display: flex;
+            align-items: center;
+        }
+
+        .shortcuts-close {
+            margin-top: 40px;
+            font-family: var(--font-accent);
+            font-size: 0.75rem;
+            font-style: italic;
+            letter-spacing: 3px;
+            color: var(--color-soft);
+            cursor: none;
+            padding: 8px 24px;
+            border: 1px solid var(--color-subtle);
+            border-radius: 20px;
+            background: none;
+            transition: all 0.3s ease;
+        }
+
+        .shortcuts-close:hover {
+            border-color: var(--color-soft);
+            background: rgba(0,0,0,0.02);
+        }
+
+        /* ============================================
+           SLIDE COUNTER BADGE
+           ============================================ */
+        .slide-badge {
+            position: fixed;
+            top: 50%;
+            right: 30px;
+            transform: translateY(-50%);
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            opacity: 0;
+            transition: opacity 0.8s ease 0.5s;
+        }
+
+        .slide-badge.visible {
+            opacity: 1;
+        }
+
+        .badge-line {
+            width: 1px;
+            height: 30px;
+            background: var(--color-subtle);
+        }
+
+        .badge-num {
+            font-family: var(--font-display);
+            font-size: 1.4rem;
+            font-weight: 300;
+            color: var(--color-muted);
+            line-height: 1;
+        }
+
+        .badge-total {
+            font-size: 0.4rem;
+            letter-spacing: 3px;
+            color: var(--color-muted);
+            text-transform: uppercase;
+        }
+
+        /* ============================================
+           CATEGORY LABEL
+           ============================================ */
+        .category-label {
+            position: fixed;
+            top: 50%;
+            left: 30px;
+            transform: translateY(-50%) rotate(-90deg);
+            transform-origin: center center;
+            z-index: 200;
+            font-family: var(--font-body);
+            font-size: 0.42rem;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            color: var(--color-muted);
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.6s ease, color 0.4s ease;
+        }
+
+        .category-label.visible {
+            opacity: 1;
+        }
+
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
         @media (max-width: 768px) {
             body { cursor: auto; }
-            .cursor, .cursor-dot { display: none !important; }
-            .nav-zone { width: 20%; }
-            .nav-arrow { width: 36px; height: 36px; font-size: 14px; }
-            .slide-inner img { max-width: 90vw; max-height: 70vh; }
-            .slide { max-width: 90vw; max-height: 70vh; }
-            .top-bar { padding: 0 20px; }
-            .keys-hint { display: none; }
-            .amb { display: none; }
-            .thumb { width: 36px; height: 26px; }
+            .cursor-ring, .cursor-dot, .cursor-label { display: none !important; }
+            .slide-card-face img { max-width: 92vw; max-height: 68vh; }
+            .nav-zone { width: 18%; }
+            .nav-btn { width: 36px; height: 36px; font-size: 13px; }
+            .top-bar { padding: 0 18px; height: 60px; }
+            .tb-keys, .tb-counter { display: none; }
+            .tb-brand { font-size: 0.55rem; letter-spacing: 5px; }
+            .ambient-corner { display: none; }
+            .slide-badge { display: none; }
+            .category-label { display: none; }
+            .filmstrip-thumb { width: 32px; height: 22px; }
+            .minimap { display: none; }
+            .shortcuts-overlay { padding: 20px; }
+        }
+
+        @media (max-width: 480px) {
+            .top-bar { padding: 0 12px; }
+            .tb-title { display: none; }
+            .filmstrip { gap: 4px; }
+            .filmstrip-thumb { width: 26px; height: 18px; }
         }
     </style>
 </head>
 <body>
 
-    <div class="cursor" id="cursor"></div>
+    <!-- Cursor -->
+    <div class="cursor-ring" id="cursorRing"></div>
     <div class="cursor-dot" id="cursorDot"></div>
+    <div class="cursor-label" id="cursorLabel"></div>
 
     <!-- Loader -->
-    <div class="loader" id="loader">
-        <div class="loader-title">Gallery</div>
-        <div class="loader-bar-wrap"><div class="loader-bar" id="loaderBar"></div></div>
-        <div class="loader-pct" id="loaderPct">0%</div>
+    <div class="loader-screen" id="loaderScreen">
+        <div class="loader-logo">Gallery</div>
+        <div class="loader-tagline">a curated collection</div>
+        <div class="loader-progress-track">
+            <div class="loader-progress-fill" id="loaderFill"></div>
+        </div>
+        <div class="loader-percent" id="loaderPct">0%</div>
+        <div class="loader-count" id="loaderCount">Loading images...</div>
     </div>
 
-    <div class="transition-flash" id="flash"></div>
+    <!-- Intro Splash -->
+    <div class="intro-splash" id="introSplash">
+        <div class="intro-big-title">The Gallery</div>
+        <div class="intro-count-label" id="introCount">9 photographs</div>
+        <div class="intro-line"></div>
+        <div class="intro-enter" id="introEnter">Enter Gallery</div>
+    </div>
+
+    <!-- Flash overlay -->
+    <div class="flash-overlay" id="flashOverlay"></div>
 
     <!-- Ambient -->
-    <div class="amb tl"></div><div class="amb tr"></div><div class="amb bl"></div><div class="amb br"></div>
+    <div class="ambient-corner tl"></div>
+    <div class="ambient-corner tr"></div>
+    <div class="ambient-corner bl"></div>
+    <div class="ambient-corner br"></div>
 
-    <!-- Top Bar -->
+    <!-- Progress -->
+    <div class="page-progress" id="pageProgress"></div>
+
+    <!-- Top bar -->
     <div class="top-bar" id="topBar">
-        <div class="brand">G A L L E R Y</div>
-        <div class="image-title" id="imageTitle"></div>
-        <div class="keys-hint">← → &nbsp;or&nbsp; scroll</div>
+        <div class="tb-brand">G A L L E R Y</div>
+        <div class="tb-title">
+            <span class="tb-title-main" id="tbTitleMain"></span>
+            <span class="tb-title-sub" id="tbTitleSub"></span>
+        </div>
+        <div class="tb-meta">
+            <div class="tb-keys">← → &nbsp;|&nbsp; scroll &nbsp;|&nbsp; ? help</div>
+            <div class="tb-counter" id="tbCounter">1 / 9</div>
+        </div>
     </div>
 
     <!-- Stage -->
     <div class="stage" id="stage">
-        <div class="canvas3d" id="canvas3d"></div>
+        <div class="scene" id="scene"></div>
     </div>
 
     <!-- Nav zones -->
-    <div class="nav-zone left" id="navLeft"><div class="nav-arrow">←</div></div>
-    <div class="nav-zone right" id="navRight"><div class="nav-arrow">→</div></div>
+    <div class="nav-zone left" id="navL"><div class="nav-btn">←</div></div>
+    <div class="nav-zone right" id="navR"><div class="nav-btn">→</div></div>
+
+    <!-- Side badges -->
+    <div class="slide-badge" id="slideBadge">
+        <div class="badge-line"></div>
+        <div class="badge-num" id="badgeNum">1</div>
+        <div class="badge-total" id="badgeTotal">of 9</div>
+        <div class="badge-line"></div>
+    </div>
+
+    <div class="category-label" id="categoryLabel">Anthony</div>
 
     <!-- Bottom bar -->
     <div class="bottom-bar" id="bottomBar">
-        <div class="counter" id="counter">1 / 9</div>
-        <div class="dots" id="dots"></div>
+        <div class="filmstrip" id="filmstrip"></div>
+        <div class="dot-row" id="dotRow"></div>
     </div>
 
-    <!-- Thumb strip -->
-    <div class="thumb-strip" id="thumbStrip"></div>
-
     <!-- Zoom HUD -->
-    <div class="zoom-hud" id="zoomHud">
-        <button id="zOutBtn">−</button>
-        <div class="zoom-pct" id="zoomPct">100%</div>
-        <button id="zInBtn">+</button>
-        <div class="sep"></div>
-        <button class="rbtn" id="zResetBtn">Reset</button>
+    <div class="zoom-controls" id="zoomControls">
+        <button class="zc-btn" id="zcOut">−</button>
+        <div class="zc-pct" id="zcPct">100%</div>
+        <button class="zc-btn" id="zcIn">+</button>
+        <div class="zc-sep"></div>
+        <button class="zc-btn zc-reset" id="zcReset">Reset</button>
+    </div>
+
+    <!-- Minimap -->
+    <div class="minimap" id="minimap">
+        <img id="minimapImg" src="" alt="" draggable="false">
+        <div class="minimap-vp" id="minimapVp"></div>
+    </div>
+
+    <!-- Shortcuts overlay -->
+    <div class="shortcuts-overlay" id="shortcutsOverlay">
+        <div class="shortcuts-title">Keyboard Shortcuts</div>
+        <div class="shortcuts-grid">
+            <div class="sc-key">← →</div><div class="sc-desc">Navigate slides</div>
+            <div class="sc-key">SCROLL</div><div class="sc-desc">Navigate or zoom</div>
+            <div class="sc-key">+ −</div><div class="sc-desc">Zoom in / out</div>
+            <div class="sc-key">0 / ESC</div><div class="sc-desc">Reset zoom</div>
+            <div class="sc-key">ARROWS</div><div class="sc-desc">Pan when zoomed</div>
+            <div class="sc-key">SPACE</div><div class="sc-desc">Pulse effect</div>
+            <div class="sc-key">DBL CLICK</div><div class="sc-desc">Toggle 3× zoom</div>
+            <div class="sc-key">DRAG</div><div class="sc-desc">Pan when zoomed</div>
+            <div class="sc-key">F</div><div class="sc-desc">Toggle fullscreen</div>
+            <div class="sc-key">?</div><div class="sc-desc">This menu</div>
+        </div>
+        <button class="shortcuts-close" id="shortcutsClose">Close</button>
     </div>
 
     <script>
+    /* ============================================================
+       IMAGE DATA — organized by name
+       ============================================================ */
     const IMAGES = [
-        { src: 'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/bullyingpeopletype.png', title: 'Bullying People Type' },
-        { src: 'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/anthony1.jpg', title: 'Anthony — I' },
-        { src: 'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/anthony2.jpg', title: 'Anthony — II' },
-        { src: 'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/anthony3.jpg', title: 'Anthony — III' },
-        { src: 'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/saintlaurenceconfessions.jpg', title: 'Saint Laurence Confessions — I' },
-        { src: 'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/saintlaurenceconfessions2.jpg', title: 'Saint Laurence Confessions — II' },
-        { src: 'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/saintlaurenceconfessions3.jpg', title: 'Saint Laurence Confessions — III' },
-        { src: 'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/saintlaurenceconfessions4.jpg', title: 'Saint Laurence Confessions — IV' },
-        { src: 'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/saintlaurenceconfessions5.jpg', title: 'Saint Laurence Confessions — V' },
+        // ——— Bullying People Type ———
+        { src: 'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/bullyingpeopletype.png', title: 'Bullying People Type', category: 'Bullying People Type', group: 'solo' },
+
+        // ——— Anthony (1, 2, 3 in order) ———
+        { src: 'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/anthony1.jpg', title: 'Anthony I', category: 'Anthony', group: 'anthony' },
+        { src: 'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/anthony2.jpg', title: 'Anthony II', category: 'Anthony', group: 'anthony' },
+        { src: 'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/anthony3.jpg', title: 'Anthony III', category: 'Anthony', group: 'anthony' },
+
+        // ——— Saint Laurence Confessions (1–5 in order) ———
+        { src: 'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/saintlaurenceconfessions.jpg', title: 'Confessions I', category: 'Saint Laurence', group: 'confessions' },
+        { src: 'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/saintlaurenceconfessions2.jpg', title: 'Confessions II', category: 'Saint Laurence', group: 'confessions' },
+        { src: 'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/saintlaurenceconfessions3.jpg', title: 'Confessions III', category: 'Saint Laurence', group: 'confessions' },
+        { src: 'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/saintlaurenceconfessions4.jpg', title: 'Confessions IV', category: 'Saint Laurence', group: 'confessions' },
+        { src: 'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/saintlaurenceconfessions5.jpg', title: 'Confessions V', category: 'Saint Laurence', group: 'confessions' },
     ];
 
-    let current = 0;
-    let imgScale = 1, panX = 0, panY = 0;
-    let dragging = false, dragSX, dragSY, panSX, panSY;
-    let tiltX = 0, tiltY = 0;
-    const MIN_S = 0.5, MAX_S = 8;
+    const TOTAL = IMAGES.length;
 
-    const cursorEl = document.getElementById('cursor');
-    const cursorDotEl = document.getElementById('cursorDot');
-    const canvas3d = document.getElementById('canvas3d');
-    const stage = document.getElementById('stage');
-    const flash = document.getElementById('flash');
-    const topBar = document.getElementById('topBar');
-    const bottomBar = document.getElementById('bottomBar');
-    const thumbStrip = document.getElementById('thumbStrip');
-    const dotsEl = document.getElementById('dots');
-    const counterEl = document.getElementById('counter');
-    const titleEl = document.getElementById('imageTitle');
-    const zoomHud = document.getElementById('zoomHud');
-    const zoomPct = document.getElementById('zoomPct');
+    /* ============================================================
+       STATE
+       ============================================================ */
+    let currentSlide = 0;
+    let zoomScale = 1;
+    let panX = 0, panY = 0;
+    let isDragging = false;
+    let dragStartX, dragStartY, panStartX, panStartY;
+    let tiltRX = 0, tiltRY = 0;
+    let mouseX = 0, mouseY = 0, curRingX = 0, curRingY = 0;
+    let appReady = false;
+    let shortcutsOpen = false;
+    let lastWheelTime = 0;
+    let wheelAccum = 0;
 
-    let mouseX = 0, mouseY = 0, cX = 0, cY = 0;
+    const ZOOM_MIN = 0.5;
+    const ZOOM_MAX = 10;
 
-    // ===== CURSOR =====
+    /* ============================================================
+       DOM REFS
+       ============================================================ */
+    const $cursorRing = document.getElementById('cursorRing');
+    const $cursorDot = document.getElementById('cursorDot');
+    const $cursorLabel = document.getElementById('cursorLabel');
+    const $loader = document.getElementById('loaderScreen');
+    const $loaderFill = document.getElementById('loaderFill');
+    const $loaderPct = document.getElementById('loaderPct');
+    const $loaderCount = document.getElementById('loaderCount');
+    const $introSplash = document.getElementById('introSplash');
+    const $introEnter = document.getElementById('introEnter');
+    const $introCount = document.getElementById('introCount');
+    const $flash = document.getElementById('flashOverlay');
+    const $topBar = document.getElementById('topBar');
+    const $tbTitleMain = document.getElementById('tbTitleMain');
+    const $tbTitleSub = document.getElementById('tbTitleSub');
+    const $tbCounter = document.getElementById('tbCounter');
+    const $stage = document.getElementById('stage');
+    const $scene = document.getElementById('scene');
+    const $navL = document.getElementById('navL');
+    const $navR = document.getElementById('navR');
+    const $bottomBar = document.getElementById('bottomBar');
+    const $filmstrip = document.getElementById('filmstrip');
+    const $dotRow = document.getElementById('dotRow');
+    const $slideBadge = document.getElementById('slideBadge');
+    const $badgeNum = document.getElementById('badgeNum');
+    const $badgeTotal = document.getElementById('badgeTotal');
+    const $categoryLabel = document.getElementById('categoryLabel');
+    const $pageProgress = document.getElementById('pageProgress');
+    const $zoomControls = document.getElementById('zoomControls');
+    const $zcPct = document.getElementById('zcPct');
+    const $minimap = document.getElementById('minimap');
+    const $minimapImg = document.getElementById('minimapImg');
+    const $minimapVp = document.getElementById('minimapVp');
+    const $shortcuts = document.getElementById('shortcutsOverlay');
+    const $shortcutsClose = document.getElementById('shortcutsClose');
+
+    /* ============================================================
+       CURSOR SYSTEM
+       ============================================================ */
     document.addEventListener('mousemove', e => {
-        mouseX = e.clientX; mouseY = e.clientY;
-        cursorDotEl.style.left = mouseX + 'px';
-        cursorDotEl.style.top = mouseY + 'px';
-        if (Math.random() > 0.82) {
-            const t = document.createElement('div');
-            t.className = 'trail';
-            t.style.left = (mouseX + (Math.random()-.5)*8) + 'px';
-            t.style.top = (mouseY + (Math.random()-.5)*8) + 'px';
-            document.body.appendChild(t);
-            setTimeout(() => t.remove(), 600);
-        }
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+        $cursorDot.style.left = mouseX + 'px';
+        $cursorDot.style.top = mouseY + 'px';
+        $cursorLabel.style.left = mouseX + 'px';
+        $cursorLabel.style.top = mouseY + 'px';
+
+        if (Math.random() > 0.84) spawnTrail(mouseX, mouseY);
     });
-    (function aCur() {
-        cX += (mouseX - cX) * 0.14;
-        cY += (mouseY - cY) * 0.14;
-        cursorEl.style.left = cX + 'px';
-        cursorEl.style.top = cY + 'px';
-        requestAnimationFrame(aCur);
+
+    (function cursorLoop() {
+        curRingX += (mouseX - curRingX) * 0.13;
+        curRingY += (mouseY - curRingY) * 0.13;
+        $cursorRing.style.left = curRingX + 'px';
+        $cursorRing.style.top = curRingY + 'px';
+        requestAnimationFrame(cursorLoop);
     })();
 
-    function setHover(el) {
-        el.addEventListener('mouseenter', () => cursorEl.classList.add('hover'));
-        el.addEventListener('mouseleave', () => cursorEl.classList.remove('hover'));
+    function setCursorState(state) {
+        $cursorRing.className = 'cursor-ring' + (state ? ' ' + state : '');
     }
 
-    // ===== LOADER =====
-    const loaderEl = document.getElementById('loader');
-    const loaderBar = document.getElementById('loaderBar');
-    const loaderPct = document.getElementById('loaderPct');
+    function setCursorLabel(text) {
+        if (text) {
+            $cursorLabel.textContent = text;
+            $cursorLabel.classList.add('visible');
+        } else {
+            $cursorLabel.classList.remove('visible');
+        }
+    }
 
-    let loadProg = 0, loadedCount = 0;
+    function bindHover(el, label) {
+        el.addEventListener('mouseenter', () => { setCursorState('hover'); if (label) setCursorLabel(label); });
+        el.addEventListener('mouseleave', () => { setCursorState(''); setCursorLabel(''); });
+    }
+
+    function spawnTrail(x, y) {
+        const t = document.createElement('div');
+        t.className = 'trail-particle';
+        t.style.left = (x + (Math.random() - 0.5) * 10) + 'px';
+        t.style.top = (y + (Math.random() - 0.5) * 10) + 'px';
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 700);
+    }
+
+    document.addEventListener('click', e => {
+        const r = document.createElement('div');
+        r.className = 'click-ripple';
+        r.style.left = (e.clientX - 100) + 'px';
+        r.style.top = (e.clientY - 100) + 'px';
+        document.body.appendChild(r);
+        setTimeout(() => r.remove(), 800);
+    });
+
+    /* ============================================================
+       LOADING SYSTEM
+       ============================================================ */
+    let loadProgress = 0;
+    let imagesLoaded = 0;
 
     IMAGES.forEach(img => {
         const i = new Image();
-        i.onload = i.onerror = () => { loadedCount++; };
+        i.onload = i.onerror = () => {
+            imagesLoaded++;
+            $loaderCount.textContent = `${imagesLoaded} of ${TOTAL} loaded`;
+        };
         i.src = img.src;
     });
 
     setTimeout(() => {
-        const iv = setInterval(() => {
-            const done = loadedCount >= IMAGES.length;
-            loadProg += done ? Math.random() * 14 + 5 : Math.random() * 2.5 + 0.8;
-            if (loadProg >= 100) {
-                loadProg = 100; clearInterval(iv);
-                loaderBar.style.width = '100%';
-                loaderPct.textContent = '100%';
+        const loadInterval = setInterval(() => {
+            const allDone = imagesLoaded >= TOTAL;
+            loadProgress += allDone
+                ? Math.random() * 12 + 5
+                : Math.random() * 2.2 + 0.6;
+
+            if (loadProgress >= 100) {
+                loadProgress = 100;
+                clearInterval(loadInterval);
+                $loaderFill.style.width = '100%';
+                $loaderPct.textContent = '100%';
+                $loaderCount.textContent = `All ${TOTAL} images ready`;
+
                 setTimeout(() => {
-                    loaderEl.classList.add('hidden');
-                    setTimeout(initApp, 500);
-                }, 600);
+                    $loader.classList.add('done');
+                    setTimeout(showIntro, 600);
+                }, 700);
                 return;
             }
-            loaderBar.style.width = Math.floor(loadProg) + '%';
-            loaderPct.textContent = Math.floor(loadProg) + '%';
-        }, 45);
-    }, 500);
 
-    // ===== INIT =====
-    function initApp() {
-        buildSlides();
-        buildDots();
-        buildThumbs();
-        spawnParticles();
-        goTo(0, false);
-        stage.classList.add('visible');
-        topBar.classList.add('visible');
-        bottomBar.classList.add('visible');
-        thumbStrip.classList.add('visible');
-        bindEvents();
+            $loaderFill.style.width = Math.floor(loadProgress) + '%';
+            $loaderPct.textContent = Math.floor(loadProgress) + '%';
+        }, 40);
+    }, 400);
+
+    /* ============================================================
+       INTRO SPLASH
+       ============================================================ */
+    function showIntro() {
+        $introCount.textContent = `${TOTAL} photographs`;
+        $introSplash.classList.add('active');
+
+        bindHover($introEnter, 'view');
+
+        $introEnter.addEventListener('click', () => {
+            $introSplash.classList.remove('active');
+            $introSplash.classList.add('exit');
+            setTimeout(startGallery, 800);
+        });
+
+        // Auto-enter after 6 seconds
+        setTimeout(() => {
+            if ($introSplash.classList.contains('active') && !$introSplash.classList.contains('exit')) {
+                $introEnter.click();
+            }
+        }, 6000);
     }
 
-    // ===== BUILD SLIDES =====
+    /* ============================================================
+       START GALLERY
+       ============================================================ */
+    function startGallery() {
+        appReady = true;
+        buildSlides();
+        buildFilmstrip();
+        buildDots();
+        spawnAmbient();
+        goToSlide(0, false);
+        $stage.classList.add('visible');
+        $topBar.classList.add('visible');
+        $bottomBar.classList.add('visible');
+        $slideBadge.classList.add('visible');
+        $categoryLabel.classList.add('visible');
+        bindAllEvents();
+    }
+
+    /* ============================================================
+       BUILD SLIDES
+       ============================================================ */
     function buildSlides() {
         IMAGES.forEach((img, i) => {
             const slide = document.createElement('div');
-            slide.className = 'slide far';
+            slide.className = 'slide far-away';
             slide.dataset.index = i;
             slide.innerHTML = `
-                <div class="slide-inner">
-                    <img src="${img.src}" alt="${img.title}" draggable="false">
-                    <div class="shine"></div>
-                    <div class="overlay-gradient"></div>
+                <div class="slide-card">
+                    <div class="corner-bracket tl"></div>
+                    <div class="corner-bracket tr"></div>
+                    <div class="corner-bracket bl"></div>
+                    <div class="corner-bracket br"></div>
+                    <div class="slide-card-face">
+                        <img src="${img.src}" alt="${img.title}" draggable="false">
+                        <div class="card-shine"></div>
+                        <div class="card-specular"></div>
+                        <div class="card-gradient"></div>
+                    </div>
+                    <div class="card-label">${img.title}</div>
+                    <div class="card-number">${String(i + 1).padStart(2, '0')}</div>
+                    <div class="card-floor-shadow"></div>
                 </div>
-                <div class="slide-reflection"></div>
             `;
-            canvas3d.appendChild(slide);
+            $scene.appendChild(slide);
+        });
+    }
+
+    function buildFilmstrip() {
+        IMAGES.forEach((img, i) => {
+            const t = document.createElement('div');
+            t.className = 'filmstrip-thumb';
+            t.innerHTML = `<img src="${img.src}" alt="" draggable="false">`;
+            t.addEventListener('click', () => goToSlide(i));
+            bindHover(t, img.title.toLowerCase());
+            $filmstrip.appendChild(t);
         });
     }
 
     function buildDots() {
         IMAGES.forEach((_, i) => {
             const d = document.createElement('div');
-            d.className = 'dot';
-            d.addEventListener('click', () => goTo(i));
-            setHover(d);
-            dotsEl.appendChild(d);
+            d.className = 'dot-ind';
+            d.addEventListener('click', () => goToSlide(i));
+            bindHover(d);
+            $dotRow.appendChild(d);
         });
     }
 
-    function buildThumbs() {
-        IMAGES.forEach((img, i) => {
-            const t = document.createElement('div');
-            t.className = 'thumb';
-            t.innerHTML = `<img src="${img.src}" alt="">`;
-            t.addEventListener('click', () => goTo(i));
-            setHover(t);
-            thumbStrip.appendChild(t);
-        });
-    }
+    /* ============================================================
+       GO TO SLIDE
+       ============================================================ */
+    function goToSlide(index, animate = true) {
+        if (index < 0) index = TOTAL - 1;
+        if (index >= TOTAL) index = 0;
 
-    // ===== GO TO SLIDE =====
-    function goTo(index, animate = true) {
-        if (index < 0) index = IMAGES.length - 1;
-        if (index >= IMAGES.length) index = 0;
+        const changed = index !== currentSlide;
 
-        // Flash
-        if (animate && index !== current) {
-            flash.classList.add('flash');
-            setTimeout(() => flash.classList.remove('flash'), 150);
+        // Flash on change
+        if (animate && changed) {
+            $flash.classList.add('flash');
+            setTimeout(() => $flash.classList.remove('flash'), 130);
         }
 
-        current = index;
+        currentSlide = index;
 
-        // Reset zoom/pan
-        imgScale = 1; panX = 0; panY = 0;
-        updateZoomTransform(false);
+        // Reset zoom
+        zoomScale = 1;
+        panX = 0;
+        panY = 0;
+        tiltRX = 0;
+        tiltRY = 0;
+        $zoomControls.classList.remove('visible');
+        $minimap.classList.remove('visible');
 
-        const slides = canvas3d.querySelectorAll('.slide');
+        // Position all slides in 3D carousel
+        const slides = $scene.querySelectorAll('.slide');
         slides.forEach((s, i) => {
-            s.classList.remove('active', 'prev', 'next', 'far');
-            const diff = i - current;
-            if (diff === 0) {
+            s.className = 'slide';
+
+            const diff = i - currentSlide;
+
+            // Wrap-around
+            let displayDiff = diff;
+            if (diff > TOTAL / 2) displayDiff = diff - TOTAL;
+            if (diff < -TOTAL / 2) displayDiff = diff + TOTAL;
+
+            const card = s.querySelector('.slide-card');
+
+            if (displayDiff === 0) {
                 s.classList.add('active');
-                s.style.transform = `translateX(0) translateZ(0) rotateY(0)`;
-            } else if (diff === -1 || (current === 0 && i === IMAGES.length - 1)) {
-                s.classList.add('prev');
-                s.style.transform = `translateX(-110%) translateZ(-200px) rotateY(25deg)`;
-            } else if (diff === 1 || (current === IMAGES.length - 1 && i === 0)) {
-                s.classList.add('next');
-                s.style.transform = `translateX(110%) translateZ(-200px) rotateY(-25deg)`;
+                s.style.transform = 'translateX(0) translateZ(0) rotateY(0)';
+                card.style.transform = 'rotateX(0) rotateY(0) scale(1)';
+            } else if (displayDiff === -1) {
+                s.classList.add('prev-1');
+                s.style.transform = 'translateX(-75%) translateZ(-350px) rotateY(35deg)';
+                card.style.transform = '';
+            } else if (displayDiff === 1) {
+                s.classList.add('next-1');
+                s.style.transform = 'translateX(75%) translateZ(-350px) rotateY(-35deg)';
+                card.style.transform = '';
+            } else if (displayDiff === -2) {
+                s.classList.add('prev-2');
+                s.style.transform = 'translateX(-130%) translateZ(-600px) rotateY(45deg) scale(0.8)';
+                card.style.transform = '';
+            } else if (displayDiff === 2) {
+                s.classList.add('next-2');
+                s.style.transform = 'translateX(130%) translateZ(-600px) rotateY(-45deg) scale(0.8)';
+                card.style.transform = '';
             } else {
-                s.classList.add('far');
-                s.style.transform = `translateX(${diff > 0 ? 200 : -200}%) translateZ(-500px) scale(0.5)`;
+                s.classList.add('far-away');
+                s.style.transform = `translateX(${displayDiff > 0 ? 200 : -200}%) translateZ(-900px) scale(0.5)`;
+                card.style.transform = '';
             }
         });
 
-        // Update dots
-        dotsEl.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current));
-
-        // Update thumbs
-        thumbStrip.querySelectorAll('.thumb').forEach((t, i) => t.classList.toggle('active', i === current));
-
-        // Counter & title
-        counterEl.textContent = `${current + 1} / ${IMAGES.length}`;
-        titleEl.textContent = IMAGES[current].title;
-
-        // Hide zoom HUD on reset
-        zoomHud.classList.remove('visible');
+        // Update UI
+        updateUI();
     }
 
-    // ===== 3D TILT =====
-    function handleTilt(e) {
-        if (dragging || imgScale > 1.05) return;
-        const slide = canvas3d.querySelector('.slide.active');
-        if (!slide) return;
+    function updateUI() {
+        const img = IMAGES[currentSlide];
 
-        const rect = slide.getBoundingClientRect();
-        const inBounds = e.clientX >= rect.left && e.clientX <= rect.right &&
-                         e.clientY >= rect.top && e.clientY <= rect.bottom;
+        // Counter
+        $tbCounter.textContent = `${currentSlide + 1} / ${TOTAL}`;
+
+        // Title
+        $tbTitleMain.textContent = img.title;
+        $tbTitleSub.textContent = img.category;
+
+        // Badge
+        $badgeNum.textContent = currentSlide + 1;
+        $badgeTotal.textContent = `of ${TOTAL}`;
+
+        // Category
+        $categoryLabel.textContent = img.category;
+
+        // Progress
+        $pageProgress.style.width = ((currentSlide + 1) / TOTAL * 100) + '%';
+
+        // Dots
+        $dotRow.querySelectorAll('.dot-ind').forEach((d, i) => {
+            d.classList.toggle('active', i === currentSlide);
+        });
+
+        // Filmstrip
+        $filmstrip.querySelectorAll('.filmstrip-thumb').forEach((t, i) => {
+            t.classList.toggle('active', i === currentSlide);
+        });
+
+        // Zoom pct
+        $zcPct.textContent = Math.round(zoomScale * 100) + '%';
+    }
+
+    /* ============================================================
+       3D TILT
+       ============================================================ */
+    function handleTilt(ex, ey) {
+        if (isDragging || zoomScale > 1.08) return;
+
+        const activeSlide = $scene.querySelector('.slide.active');
+        if (!activeSlide) return;
+
+        const card = activeSlide.querySelector('.slide-card');
+        const rect = card.getBoundingClientRect();
+
+        const inBounds = ex >= rect.left && ex <= rect.right &&
+                         ey >= rect.top && ey <= rect.bottom;
 
         if (inBounds) {
-            const x = (e.clientX - rect.left) / rect.width;
-            const y = (e.clientY - rect.top) / rect.height;
-            tiltX = (y - 0.5) * -12;
-            tiltY = (x - 0.5) * 12;
+            const nx = (ex - rect.left) / rect.width;   // 0..1
+            const ny = (ey - rect.top) / rect.height;   // 0..1
+
+            tiltRX = (ny - 0.5) * -18;  // rotate X
+            tiltRY = (nx - 0.5) * 18;   // rotate Y
+
+            // Specular highlight position
+            const specular = card.querySelector('.card-specular');
+            if (specular) {
+                specular.style.setProperty('--spec-x', (nx * 100) + '%');
+                specular.style.setProperty('--spec-y', (ny * 100) + '%');
+            }
         } else {
-            tiltX *= 0.92;
-            tiltY *= 0.92;
+            tiltRX *= 0.9;
+            tiltRY *= 0.9;
         }
 
-        const inner = slide.querySelector('.slide-inner');
-        inner.style.transform = `rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale(${imgScale}) translate(${panX}px, ${panY}px)`;
-        inner.style.transition = 'transform 0.1s ease';
+        card.style.transform = `rotateX(${tiltRX}deg) rotateY(${tiltRY}deg) scale(${zoomScale}) translate(${panX / zoomScale}px, ${panY / zoomScale}px)`;
+        card.style.transition = 'transform 0.08s ease-out';
     }
 
     function resetTilt() {
-        const slide = canvas3d.querySelector('.slide.active');
-        if (!slide || imgScale > 1.05) return;
-        tiltX = 0; tiltY = 0;
-        const inner = slide.querySelector('.slide-inner');
-        inner.style.transform = `rotateX(0) rotateY(0) scale(1) translate(0,0)`;
-        inner.style.transition = 'transform 0.6s var(--ease-out-expo)';
+        tiltRX = 0;
+        tiltRY = 0;
+        const activeSlide = $scene.querySelector('.slide.active');
+        if (!activeSlide || zoomScale > 1.08) return;
+        const card = activeSlide.querySelector('.slide-card');
+        card.style.transform = 'rotateX(0) rotateY(0) scale(1) translate(0,0)';
+        card.style.transition = 'transform 0.7s var(--ease-out-expo)';
     }
 
-    // ===== ZOOM & PAN =====
-    function updateZoomTransform(animate = true) {
-        const slide = canvas3d.querySelector('.slide.active');
-        if (!slide) return;
-        const inner = slide.querySelector('.slide-inner');
+    /* ============================================================
+       ZOOM & PAN
+       ============================================================ */
+    function applyZoom(animate = true) {
+        const activeSlide = $scene.querySelector('.slide.active');
+        if (!activeSlide) return;
+        const card = activeSlide.querySelector('.slide-card');
 
-        if (imgScale > 1.05) {
-            inner.style.transform = `rotateX(0) rotateY(0) scale(${imgScale}) translate(${panX / imgScale}px, ${panY / imgScale}px)`;
-            inner.style.transition = animate ? 'transform 0.35s var(--ease-out-expo)' : 'none';
-            zoomHud.classList.add('visible');
+        if (zoomScale > 1.08) {
+            card.style.transform = `rotateX(0) rotateY(0) scale(${zoomScale}) translate(${panX / zoomScale}px, ${panY / zoomScale}px)`;
+            card.style.transition = animate ? 'transform 0.4s var(--ease-out-expo)' : 'transform 0.05s ease-out';
+            $zoomControls.classList.add('visible');
+            $minimap.classList.add('visible');
+
+            // Minimap image
+            $minimapImg.src = IMAGES[currentSlide].src;
+            updateMinimap();
+
+            setCursorState('zoomed');
         } else {
-            inner.style.transform = `rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale(1) translate(0,0)`;
-            inner.style.transition = animate ? 'transform 0.5s var(--ease-out-expo)' : 'none';
-            zoomHud.classList.remove('visible');
-            panX = 0; panY = 0;
+            card.style.transform = `rotateX(${tiltRX}deg) rotateY(${tiltRY}deg) scale(1) translate(0,0)`;
+            card.style.transition = animate ? 'transform 0.6s var(--ease-out-expo)' : 'none';
+            panX = 0;
+            panY = 0;
+            $zoomControls.classList.remove('visible');
+            $minimap.classList.remove('visible');
+            setCursorState('');
         }
-        zoomPct.textContent = Math.round(imgScale * 100) + '%';
+
+        $zcPct.textContent = Math.round(zoomScale * 100) + '%';
     }
 
     function clampPan() {
-        if (imgScale <= 1) { panX = 0; panY = 0; return; }
-        const slide = canvas3d.querySelector('.slide.active');
-        if (!slide) return;
-        const inner = slide.querySelector('.slide-inner');
-        const img = inner.querySelector('img');
+        if (zoomScale <= 1) { panX = 0; panY = 0; return; }
+        const activeSlide = $scene.querySelector('.slide.active');
+        if (!activeSlide) return;
+        const img = activeSlide.querySelector('img');
+        if (!img) return;
         const r = img.getBoundingClientRect();
-        const maxX = Math.max(0, (r.width * imgScale - window.innerWidth) / 2 / imgScale * 0.8);
-        const maxY = Math.max(0, (r.height * imgScale - window.innerHeight) / 2 / imgScale * 0.8);
+        const maxX = Math.max(0, (r.width - window.innerWidth) / 2 + 100);
+        const maxY = Math.max(0, (r.height - window.innerHeight) / 2 + 100);
         panX = Math.max(-maxX, Math.min(maxX, panX));
         panY = Math.max(-maxY, Math.min(maxY, panY));
     }
 
-    // ===== EVENTS =====
-    function bindEvents() {
-        const navLeft = document.getElementById('navLeft');
-        const navRight = document.getElementById('navRight');
+    function updateMinimap() {
+        if (zoomScale <= 1.08) return;
+        const mmW = $minimap.clientWidth;
+        const mmH = $minimap.clientHeight;
 
-        navLeft.addEventListener('click', () => { if (imgScale <= 1.05) goTo(current - 1); });
-        navRight.addEventListener('click', () => { if (imgScale <= 1.05) goTo(current + 1); });
-        setHover(navLeft); setHover(navRight);
+        const vpW = Math.max(8, (1 / zoomScale) * mmW);
+        const vpH = Math.max(8, (1 / zoomScale) * mmH);
 
-        navLeft.addEventListener('mouseenter', () => cursorEl.classList.add('arrow-left'));
-        navLeft.addEventListener('mouseleave', () => cursorEl.classList.remove('arrow-left'));
-        navRight.addEventListener('mouseenter', () => cursorEl.classList.add('arrow-right'));
-        navRight.addEventListener('mouseleave', () => cursorEl.classList.remove('arrow-right'));
+        const activeSlide = $scene.querySelector('.slide.active');
+        if (!activeSlide) return;
+        const img = activeSlide.querySelector('img');
+        if (!img) return;
+        const ir = img.getBoundingClientRect();
 
-        // Keyboard
-        document.addEventListener('keydown', e => {
-            if (e.code === 'ArrowLeft' && imgScale <= 1.05) { e.preventDefault(); goTo(current - 1); }
-            if (e.code === 'ArrowRight' && imgScale <= 1.05) { e.preventDefault(); goTo(current + 1); }
-            if (e.code === 'ArrowLeft' && imgScale > 1.05) { e.preventDefault(); panX += 80; clampPan(); updateZoomTransform(); }
-            if (e.code === 'ArrowRight' && imgScale > 1.05) { e.preventDefault(); panX -= 80; clampPan(); updateZoomTransform(); }
-            if (e.code === 'ArrowUp' && imgScale > 1.05) { e.preventDefault(); panY += 80; clampPan(); updateZoomTransform(); }
-            if (e.code === 'ArrowDown' && imgScale > 1.05) { e.preventDefault(); panY -= 80; clampPan(); updateZoomTransform(); }
-            if (e.code === 'Equal' || e.code === 'NumpadAdd') { e.preventDefault(); imgScale = Math.min(MAX_S, imgScale * 1.35); clampPan(); updateZoomTransform(); }
-            if (e.code === 'Minus' || e.code === 'NumpadSubtract') { e.preventDefault(); imgScale = Math.max(MIN_S, imgScale / 1.35); clampPan(); updateZoomTransform(); }
-            if (e.code === 'Escape' || e.code === 'Digit0') { imgScale = 1; panX = 0; panY = 0; updateZoomTransform(); }
-        });
+        const offX = -panX / (ir.width * zoomScale) * mmW;
+        const offY = -panY / (ir.height * zoomScale) * mmH;
 
-        // Mouse move for tilt
+        const mvX = (mmW - vpW) / 2 + offX;
+        const mvY = (mmH - vpH) / 2 + offY;
+
+        $minimapVp.style.width = vpW + 'px';
+        $minimapVp.style.height = vpH + 'px';
+        $minimapVp.style.left = Math.max(0, Math.min(mmW - vpW, mvX)) + 'px';
+        $minimapVp.style.top = Math.max(0, Math.min(mmH - vpH, mvY)) + 'px';
+    }
+
+    /* ============================================================
+       EVENTS
+       ============================================================ */
+    function bindAllEvents() {
+
+        // === NAV CLICK ===
+        $navL.addEventListener('click', () => { if (zoomScale <= 1.08) goToSlide(currentSlide - 1); });
+        $navR.addEventListener('click', () => { if (zoomScale <= 1.08) goToSlide(currentSlide + 1); });
+
+        $navL.addEventListener('mouseenter', () => { setCursorState('arrow-l'); setCursorLabel('prev'); });
+        $navL.addEventListener('mouseleave', () => { setCursorState(''); setCursorLabel(''); });
+        $navR.addEventListener('mouseenter', () => { setCursorState('arrow-r'); setCursorLabel('next'); });
+        $navR.addEventListener('mouseleave', () => { setCursorState(''); setCursorLabel(''); });
+
+        // === MOUSE TILT ===
         document.addEventListener('mousemove', e => {
-            if (!dragging) handleTilt(e);
+            if (!appReady) return;
+            if (!isDragging) handleTilt(e.clientX, e.clientY);
+
+            // parallax ambient particles
+            const px = (e.clientX / window.innerWidth - 0.5) * 2;
+            const py = (e.clientY / window.innerHeight - 0.5) * 2;
+            document.querySelectorAll('.ambient-particle').forEach((p, i) => {
+                const s = (i % 4 + 1) * 1.8;
+                p.style.marginLeft = px * s + 'px';
+                p.style.marginTop = py * s + 'px';
+            });
         });
 
-        // Wheel: zoom if over image, slide if not
+        $scene.addEventListener('mouseleave', resetTilt);
+
+        // === WHEEL ===
         document.addEventListener('wheel', e => {
-            const slide = canvas3d.querySelector('.slide.active');
-            if (!slide) return;
-            const rect = slide.getBoundingClientRect();
-            const over = e.clientX >= rect.left && e.clientX <= rect.right &&
-                         e.clientY >= rect.top && e.clientY <= rect.bottom;
+            if (!appReady || shortcutsOpen) return;
+            e.preventDefault();
 
-            if (over || imgScale > 1.05) {
-                e.preventDefault();
-                const d = -e.deltaY * 0.002;
-                const ns = Math.max(MIN_S, Math.min(MAX_S, imgScale * (1 + d)));
+            const activeSlide = $scene.querySelector('.slide.active');
+            if (!activeSlide) return;
+            const rect = activeSlide.getBoundingClientRect();
+            const overImage = mouseX >= rect.left && mouseX <= rect.right &&
+                              mouseY >= rect.top && mouseY <= rect.bottom;
 
-                if (imgScale <= 1.05 && ns <= 1.05) {
-                    // Navigate
-                    if (e.deltaY > 30) goTo(current + 1);
-                    else if (e.deltaY < -30) goTo(current - 1);
+            if (zoomScale > 1.08 || (overImage && Math.abs(e.deltaY) < 60)) {
+                // ZOOM
+                const d = -e.deltaY * 0.0022;
+                const newScale = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, zoomScale * (1 + d)));
+
+                if (zoomScale <= 1.08 && newScale <= 1.08) {
+                    // Navigate instead
+                    handleWheelNav(e.deltaY);
                     return;
                 }
 
-                const inner = slide.querySelector('.slide-inner');
-                const ir = inner.getBoundingClientRect();
-                const ox = e.clientX - ir.left - ir.width / 2;
-                const oy = e.clientY - ir.top - ir.height / 2;
-                const f = ns / imgScale;
+                // Zoom toward cursor
+                const card = activeSlide.querySelector('.slide-card');
+                const cr = card.getBoundingClientRect();
+                const ox = mouseX - cr.left - cr.width / 2;
+                const oy = mouseY - cr.top - cr.height / 2;
+                const f = newScale / zoomScale;
                 panX = ox - f * (ox - panX);
                 panY = oy - f * (oy - panY);
-                imgScale = ns;
+
+                zoomScale = newScale;
                 clampPan();
-                updateZoomTransform(false);
+                applyZoom(false);
             } else {
-                if (e.deltaY > 20) goTo(current + 1);
-                else if (e.deltaY < -20) goTo(current - 1);
+                handleWheelNav(e.deltaY);
             }
         }, { passive: false });
 
-        // Drag to pan
-        canvas3d.addEventListener('mousedown', e => {
-            if (e.button !== 0) return;
-            if (imgScale <= 1.05) return;
-            dragging = true;
-            dragSX = e.clientX; dragSY = e.clientY;
-            panSX = panX; panSY = panY;
-            cursorEl.classList.add('grab');
+        function handleWheelNav(deltaY) {
+            const now = Date.now();
+            if (now - lastWheelTime > 600) wheelAccum = 0;
+            lastWheelTime = now;
+            wheelAccum += deltaY;
+
+            if (wheelAccum > 80) {
+                goToSlide(currentSlide + 1);
+                wheelAccum = 0;
+            } else if (wheelAccum < -80) {
+                goToSlide(currentSlide - 1);
+                wheelAccum = 0;
+            }
+        }
+
+        // === DRAG PAN ===
+        $scene.addEventListener('mousedown', e => {
+            if (e.button !== 0 || !appReady) return;
+            if (zoomScale <= 1.08) return;
+            isDragging = true;
+            dragStartX = e.clientX;
+            dragStartY = e.clientY;
+            panStartX = panX;
+            panStartY = panY;
+            setCursorState('grab');
         });
+
         document.addEventListener('mousemove', e => {
-            if (!dragging) return;
-            panX = panSX + (e.clientX - dragSX);
-            panY = panSY + (e.clientY - dragSY);
+            if (!isDragging) return;
+            panX = panStartX + (e.clientX - dragStartX);
+            panY = panStartY + (e.clientY - dragStartY);
             clampPan();
-            updateZoomTransform(false);
+            applyZoom(false);
         });
+
         document.addEventListener('mouseup', () => {
-            if (dragging) {
-                dragging = false;
-                cursorEl.classList.remove('grab');
+            if (isDragging) {
+                isDragging = false;
+                setCursorState(zoomScale > 1.08 ? 'zoomed' : '');
                 clampPan();
-                updateZoomTransform(true);
+                applyZoom(true);
             }
         });
 
-        // Double click to zoom / reset
-        canvas3d.addEventListener('dblclick', e => {
-            if (imgScale > 1.05) {
-                imgScale = 1; panX = 0; panY = 0;
+        // === DOUBLE CLICK ===
+        $scene.addEventListener('dblclick', e => {
+            if (!appReady) return;
+            if (zoomScale > 1.08) {
+                zoomScale = 1;
+                panX = 0;
+                panY = 0;
             } else {
-                const slide = canvas3d.querySelector('.slide.active');
-                if (!slide) return;
-                const inner = slide.querySelector('.slide-inner');
-                const ir = inner.getBoundingClientRect();
-                const ox = e.clientX - ir.left - ir.width / 2;
-                const oy = e.clientY - ir.top - ir.height / 2;
-                imgScale = 3;
-                panX = ox * -2;
-                panY = oy * -2;
+                const activeSlide = $scene.querySelector('.slide.active');
+                if (!activeSlide) return;
+                const card = activeSlide.querySelector('.slide-card');
+                const cr = card.getBoundingClientRect();
+                const ox = e.clientX - cr.left - cr.width / 2;
+                const oy = e.clientY - cr.top - cr.height / 2;
+                zoomScale = 3;
+                panX = -ox * 2;
+                panY = -oy * 2;
                 clampPan();
             }
-            updateZoomTransform(true);
+            applyZoom(true);
         });
 
-        // Touch support
-        let lastTD = 0, lastTC = {x:0,y:0};
+        // === TOUCH ===
+        let lastTouchDist = 0;
+        let lastTouchCenter = { x: 0, y: 0 };
         let touchStartTime = 0;
         let touchStartX = 0;
 
-        canvas3d.addEventListener('touchstart', e => {
+        $scene.addEventListener('touchstart', e => {
+            if (!appReady) return;
             if (e.touches.length === 1) {
                 touchStartTime = Date.now();
                 touchStartX = e.touches[0].clientX;
-                if (imgScale > 1.05) {
-                    dragging = true;
-                    dragSX = e.touches[0].clientX; dragSY = e.touches[0].clientY;
-                    panSX = panX; panSY = panY;
+                if (zoomScale > 1.08) {
+                    isDragging = true;
+                    dragStartX = e.touches[0].clientX;
+                    dragStartY = e.touches[0].clientY;
+                    panStartX = panX;
+                    panStartY = panY;
                 }
             } else if (e.touches.length === 2) {
-                dragging = false;
+                isDragging = false;
                 const dx = e.touches[0].clientX - e.touches[1].clientX;
                 const dy = e.touches[0].clientY - e.touches[1].clientY;
-                lastTD = Math.sqrt(dx*dx+dy*dy);
-                lastTC = { x:(e.touches[0].clientX+e.touches[1].clientX)/2, y:(e.touches[0].clientY+e.touches[1].clientY)/2 };
+                lastTouchDist = Math.sqrt(dx * dx + dy * dy);
+                lastTouchCenter = {
+                    x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+                    y: (e.touches[0].clientY + e.touches[1].clientY) / 2
+                };
             }
-        }, {passive:false});
+        }, { passive: false });
 
-        canvas3d.addEventListener('touchmove', e => {
+        $scene.addEventListener('touchmove', e => {
+            if (!appReady) return;
             e.preventDefault();
-            if (e.touches.length === 1) {
-                if (dragging && imgScale > 1.05) {
-                    panX = panSX + (e.touches[0].clientX - dragSX);
-                    panY = panSY + (e.touches[0].clientY - dragSY);
-                    clampPan();
-                    updateZoomTransform(false);
-                }
+            if (e.touches.length === 1 && isDragging) {
+                panX = panStartX + (e.touches[0].clientX - dragStartX);
+                panY = panStartY + (e.touches[0].clientY - dragStartY);
+                clampPan();
+                applyZoom(false);
             } else if (e.touches.length === 2) {
                 const dx = e.touches[0].clientX - e.touches[1].clientX;
                 const dy = e.touches[0].clientY - e.touches[1].clientY;
-                const dist = Math.sqrt(dx*dx+dy*dy);
-                const c = { x:(e.touches[0].clientX+e.touches[1].clientX)/2, y:(e.touches[0].clientY+e.touches[1].clientY)/2 };
-                if (lastTD > 0) {
-                    const f = dist / lastTD;
-                    const ns = Math.max(MIN_S, Math.min(MAX_S, imgScale * f));
-                    const sf = ns / imgScale;
-                    panX += (c.x - lastTC.x);
-                    panY += (c.y - lastTC.y);
-                    imgScale = ns;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const c = {
+                    x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+                    y: (e.touches[0].clientY + e.touches[1].clientY) / 2
+                };
+                if (lastTouchDist > 0) {
+                    const factor = dist / lastTouchDist;
+                    const ns = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, zoomScale * factor));
+                    panX += (c.x - lastTouchCenter.x);
+                    panY += (c.y - lastTouchCenter.y);
+                    zoomScale = ns;
                     clampPan();
-                    updateZoomTransform(false);
+                    applyZoom(false);
                 }
-                lastTD = dist; lastTC = c;
+                lastTouchDist = dist;
+                lastTouchCenter = c;
             }
-        }, {passive:false});
+        }, { passive: false });
 
-        canvas3d.addEventListener('touchend', e => {
-            if (e.touches.length < 2) lastTD = 0;
-            if (dragging && imgScale <= 1.05) {
-                // Swipe detection
+        $scene.addEventListener('touchend', e => {
+            if (e.touches.length < 2) lastTouchDist = 0;
+            if (isDragging && zoomScale <= 1.08) {
                 const elapsed = Date.now() - touchStartTime;
-                const deltaX = e.changedTouches[0].clientX - touchStartX;
-                if (elapsed < 300 && Math.abs(deltaX) > 50) {
-                    if (deltaX > 0) goTo(current - 1);
-                    else goTo(current + 1);
+                const dxSwipe = e.changedTouches[0].clientX - touchStartX;
+                if (elapsed < 350 && Math.abs(dxSwipe) > 45) {
+                    if (dxSwipe > 0) goToSlide(currentSlide - 1);
+                    else goToSlide(currentSlide + 1);
                 }
             }
-            dragging = false;
-            clampPan(); updateZoomTransform(true);
+            isDragging = false;
+            clampPan();
+            applyZoom(true);
         });
 
-        // Zoom HUD buttons
-        document.getElementById('zInBtn').addEventListener('click', () => { imgScale = Math.min(MAX_S, imgScale * 1.5); clampPan(); updateZoomTransform(); });
-        document.getElementById('zOutBtn').addEventListener('click', () => { imgScale = Math.max(MIN_S, imgScale / 1.5); clampPan(); updateZoomTransform(); });
-        document.getElementById('zResetBtn').addEventListener('click', () => { imgScale = 1; panX = 0; panY = 0; updateZoomTransform(); });
-        document.querySelectorAll('.zoom-hud button').forEach(b => setHover(b));
+        // === ZOOM HUD ===
+        document.getElementById('zcIn').addEventListener('click', () => {
+            zoomScale = Math.min(ZOOM_MAX, zoomScale * 1.5);
+            clampPan(); applyZoom(true);
+        });
+        document.getElementById('zcOut').addEventListener('click', () => {
+            zoomScale = Math.max(ZOOM_MIN, zoomScale / 1.5);
+            clampPan(); applyZoom(true);
+        });
+        document.getElementById('zcReset').addEventListener('click', () => {
+            zoomScale = 1; panX = 0; panY = 0; applyZoom(true);
+        });
 
-        // Leave image = reset tilt
-        canvas3d.addEventListener('mouseleave', resetTilt);
+        document.querySelectorAll('.zc-btn').forEach(b => bindHover(b));
+
+        // === KEYBOARD ===
+        document.addEventListener('keydown', e => {
+            if (!appReady) return;
+
+            // Shortcuts overlay
+            if (e.key === '?' || (e.key === '/' && e.shiftKey)) {
+                toggleShortcuts();
+                return;
+            }
+            if (shortcutsOpen) {
+                if (e.code === 'Escape') toggleShortcuts();
+                return;
+            }
+
+            switch (e.code) {
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    if (zoomScale > 1.08) { panX += 80; clampPan(); applyZoom(true); }
+                    else goToSlide(currentSlide - 1);
+                    break;
+                case 'ArrowRight':
+                    e.preventDefault();
+                    if (zoomScale > 1.08) { panX -= 80; clampPan(); applyZoom(true); }
+                    else goToSlide(currentSlide + 1);
+                    break;
+                case 'ArrowUp':
+                    e.preventDefault();
+                    if (zoomScale > 1.08) { panY += 80; clampPan(); applyZoom(true); }
+                    break;
+                case 'ArrowDown':
+                    e.preventDefault();
+                    if (zoomScale > 1.08) { panY -= 80; clampPan(); applyZoom(true); }
+                    break;
+                case 'Equal':
+                case 'NumpadAdd':
+                    e.preventDefault();
+                    zoomScale = Math.min(ZOOM_MAX, zoomScale * 1.35);
+                    clampPan(); applyZoom(true);
+                    break;
+                case 'Minus':
+                case 'NumpadSubtract':
+                    e.preventDefault();
+                    zoomScale = Math.max(ZOOM_MIN, zoomScale / 1.35);
+                    clampPan(); applyZoom(true);
+                    break;
+                case 'Digit0':
+                case 'Escape':
+                    zoomScale = 1; panX = 0; panY = 0;
+                    applyZoom(true);
+                    break;
+                case 'Space':
+                    e.preventDefault();
+                    pulseEffect();
+                    break;
+                case 'KeyF':
+                    e.preventDefault();
+                    toggleFullscreen();
+                    break;
+                case 'Home':
+                    e.preventDefault();
+                    goToSlide(0);
+                    break;
+                case 'End':
+                    e.preventDefault();
+                    goToSlide(TOTAL - 1);
+                    break;
+            }
+
+            // Number keys 1-9 for direct slide
+            if (e.key >= '1' && e.key <= '9') {
+                const idx = parseInt(e.key) - 1;
+                if (idx < TOTAL) goToSlide(idx);
+            }
+        });
+
+        // === SHORTCUTS OVERLAY ===
+        $shortcutsClose.addEventListener('click', toggleShortcuts);
+        bindHover($shortcutsClose, 'close');
     }
 
-    // ===== PARTICLES =====
-    function spawnParticles() {
-        for (let i = 0; i < 20; i++) {
-            const p = document.createElement('div');
-            p.className = 'particle';
-            p.style.left = Math.random()*100+'vw';
-            p.style.top = Math.random()*100+'vh';
-            p.style.animation = `float ${10+Math.random()*15}s ease-in-out infinite, pulse ${3+Math.random()*5}s ease-in-out infinite`;
-            p.style.animationDelay = Math.random()*6+'s';
-            document.body.appendChild(p);
+    /* ============================================================
+       PULSE EFFECT
+       ============================================================ */
+    function pulseEffect() {
+        const activeSlide = $scene.querySelector('.slide.active');
+        if (!activeSlide) return;
+        const card = activeSlide.querySelector('.slide-card');
+
+        card.style.transition = 'transform 0.35s var(--ease-spring)';
+        const prevTransform = card.style.transform;
+        card.style.transform = `rotateX(${tiltRX}deg) rotateY(${tiltRY}deg) scale(${zoomScale * 1.06})`;
+
+        setTimeout(() => {
+            card.style.transform = prevTransform || `rotateX(0) rotateY(0) scale(${zoomScale})`;
+        }, 350);
+
+        // Burst particles
+        const rect = card.getBoundingClientRect();
+        for (let i = 0; i < 25; i++) {
+            setTimeout(() => {
+                spawnTrail(
+                    rect.left + rect.width / 2 + (Math.random() - 0.5) * rect.width,
+                    rect.top + rect.height / 2 + (Math.random() - 0.5) * rect.height
+                );
+            }, i * 20);
         }
     }
 
-    // Parallax particles
-    document.addEventListener('mousemove', e => {
-        if (dragging) return;
-        const px = (e.clientX/window.innerWidth - 0.5)*2;
-        const py = (e.clientY/window.innerHeight - 0.5)*2;
-        document.querySelectorAll('.particle').forEach((p,i) => {
-            const s = (i%3+1)*2;
-            p.style.marginLeft = px*s+'px';
-            p.style.marginTop = py*s+'px';
-        });
-    });
+    /* ============================================================
+       FULLSCREEN
+       ============================================================ */
+    function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+            document.exitFullscreen();
+        }
+    }
+
+    /* ============================================================
+       SHORTCUTS TOGGLE
+       ============================================================ */
+    function toggleShortcuts() {
+        shortcutsOpen = !shortcutsOpen;
+        $shortcuts.classList.toggle('visible', shortcutsOpen);
+    }
+
+    /* ============================================================
+       AMBIENT PARTICLES & SHIMMERS
+       ============================================================ */
+    function spawnAmbient() {
+        // Floating dots
+        for (let i = 0; i < 28; i++) {
+            const p = document.createElement('div');
+            p.className = 'ambient-particle';
+            p.style.left = Math.random() * 100 + 'vw';
+            p.style.top = Math.random() * 100 + 'vh';
+            p.style.animation = `ambientFloat ${9 + Math.random() * 16}s ease-in-out infinite,
+                                  ambientPulse ${3 + Math.random() * 5}s ease-in-out infinite`;
+            p.style.animationDelay = Math.random() * 7 + 's';
+            document.body.appendChild(p);
+        }
+
+        // Shimmer lines
+        for (let i = 0; i < 6; i++) {
+            const l = document.createElement('div');
+            l.className = 'ambient-shimmer';
+            l.style.top = (12 + Math.random() * 76) + 'vh';
+            l.style.left = '0';
+            l.style.width = '100vw';
+            l.style.opacity = 0.2 + Math.random() * 0.3;
+            l.style.animation = `ambientPulse ${5 + Math.random() * 8}s ease-in-out infinite`;
+            l.style.animationDelay = Math.random() * 4 + 's';
+            document.body.appendChild(l);
+        }
+    }
+
+    /* ============================================================
+       IDLE AUTOPLAY (optional: starts after 15s of no interaction)
+       ============================================================ */
+    let idleTimer = null;
+    let autoplayInterval = null;
+
+    function resetIdle() {
+        clearTimeout(idleTimer);
+        clearInterval(autoplayInterval);
+        autoplayInterval = null;
+
+        idleTimer = setTimeout(() => {
+            autoplayInterval = setInterval(() => {
+                if (zoomScale <= 1.08 && !shortcutsOpen) {
+                    goToSlide(currentSlide + 1);
+                }
+            }, 4000);
+        }, 20000);
+    }
+
+    document.addEventListener('mousemove', resetIdle);
+    document.addEventListener('click', resetIdle);
+    document.addEventListener('keydown', resetIdle);
+    document.addEventListener('wheel', resetIdle);
+    document.addEventListener('touchstart', resetIdle);
+
+    /* ============================================================
+       LIVE CLOCK (bottom-right corner, subtle)
+       ============================================================ */
+    const clockEl = document.createElement('div');
+    clockEl.style.cssText = `
+        position: fixed; bottom: 10px; right: 14px; z-index: 200;
+        font-family: 'Inter', sans-serif; font-size: 0.4rem;
+        letter-spacing: 3px; color: rgba(0,0,0,0.08);
+        font-variant-numeric: tabular-nums;
+        pointer-events: none;
+    `;
+    document.body.appendChild(clockEl);
+
+    setInterval(() => {
+        const now = new Date();
+        clockEl.textContent = now.toLocaleTimeString('en-US', { hour12: false }) +
+            ' · ' + now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }, 1000);
+
+    /* ============================================================
+       FPS COUNTER (dev, very subtle)
+       ============================================================ */
+    const fpsEl = document.createElement('div');
+    fpsEl.style.cssText = `
+        position: fixed; top: 10px; left: 14px; z-index: 200;
+        font-family: 'Inter', sans-serif; font-size: 0.38rem;
+        letter-spacing: 2px; color: rgba(0,0,0,0.06);
+        font-variant-numeric: tabular-nums;
+        pointer-events: none;
+    `;
+    document.body.appendChild(fpsEl);
+
+    let fpsFrames = 0, fpsLast = performance.now();
+    (function fpsLoop() {
+        fpsFrames++;
+        const now = performance.now();
+        if (now - fpsLast >= 1000) {
+            fpsEl.textContent = fpsFrames + ' FPS';
+            fpsFrames = 0;
+            fpsLast = now;
+        }
+        requestAnimationFrame(fpsLoop);
+    })();
+
     </script>
 </body>
 </html>
