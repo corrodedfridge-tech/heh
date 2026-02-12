@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>image</title>
+    <title>✨ The Image ✨</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500&display=swap');
 
@@ -24,9 +24,9 @@
             overflow: hidden;
             position: relative;
             cursor: none;
+            user-select: none;
         }
 
-        /* Custom cursor */
         .cursor {
             width: 20px;
             height: 20px;
@@ -47,6 +47,21 @@
             border-color: rgba(0, 0, 0, 0.6);
         }
 
+        .cursor.grabbing {
+            width: 35px;
+            height: 35px;
+            background: rgba(0, 0, 0, 0.1);
+            border-color: rgba(0, 0, 0, 0.8);
+            border-style: dashed;
+        }
+
+        .cursor.zoomed-cursor {
+            width: 60px;
+            height: 60px;
+            border-color: rgba(0, 0, 0, 0.4);
+            background: rgba(0,0,0,0.02);
+        }
+
         .cursor-dot {
             width: 5px;
             height: 5px;
@@ -58,18 +73,6 @@
             transform: translate(-50%, -50%);
         }
 
-        /* Floating particles */
-        .particle {
-            position: fixed;
-            width: 4px;
-            height: 4px;
-            background: radial-gradient(circle, rgba(0,0,0,0.15), transparent);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        /* Shimmer lines */
         .shimmer-line {
             position: fixed;
             height: 1px;
@@ -78,7 +81,6 @@
             z-index: 0;
         }
 
-        /* Loading screen */
         .loader {
             position: fixed;
             top: 0;
@@ -138,7 +140,6 @@
             animation: fadeInUp 1s ease forwards 0.7s;
         }
 
-        /* Main content */
         .content {
             display: flex;
             flex-direction: column;
@@ -154,7 +155,6 @@
             transform: translateY(0);
         }
 
-        /* Top label */
         .top-label {
             font-family: 'Inter', sans-serif;
             font-size: 0.6rem;
@@ -172,7 +172,43 @@
             transform: translateY(0);
         }
 
-        /* Image container */
+        .content.visible.image-zoomed .top-label {
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        /* Zoom viewport */
+        .zoom-viewport {
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            max-width: min(85vw, 650px);
+            max-height: 75vh;
+            transition: max-width 0.5s ease, max-height 0.5s ease, border-radius 0.5s ease;
+        }
+
+        .image-zoomed .zoom-viewport {
+            max-width: 90vw;
+            max-height: 85vh;
+            border-radius: 4px;
+        }
+
+        .zoom-container {
+            transform-origin: 0 0;
+            transition: none;
+            will-change: transform;
+            cursor: grab;
+        }
+
+        .zoom-container.is-dragging {
+            cursor: grabbing;
+        }
+
+        .zoom-container.is-animating {
+            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
         .image-wrapper {
             position: relative;
             padding: 2px;
@@ -220,20 +256,12 @@
 
         .main-image {
             display: block;
-            max-width: min(80vw, 600px);
-            max-height: 70vh;
+            width: min(80vw, 600px);
             border-radius: 6px;
-            transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), filter 0.6s ease;
-            will-change: transform;
             filter: saturate(1.05) contrast(1.02);
+            pointer-events: none;
         }
 
-        .image-wrapper:hover .main-image {
-            transform: scale(1.02);
-            filter: saturate(1.1) contrast(1.05);
-        }
-
-        /* Image glow effect */
         .image-glow {
             position: absolute;
             top: 50%;
@@ -252,25 +280,16 @@
             opacity: 1;
         }
 
-        /* Reflection */
         .image-reflection {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(
-                105deg,
-                transparent 40%,
-                rgba(255,255,255,0.15) 45%,
-                rgba(255,255,255,0.3) 50%,
-                rgba(255,255,255,0.15) 55%,
-                transparent 60%
-            );
+            background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.15) 45%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0.15) 55%, transparent 60%);
             z-index: 3;
             pointer-events: none;
             transform: translateX(-100%);
-            transition: none;
         }
 
         .image-wrapper:hover .image-reflection {
@@ -281,7 +300,6 @@
             to { transform: translateX(100%); }
         }
 
-        /* Shadow */
         .image-shadow {
             position: absolute;
             bottom: -30px;
@@ -294,12 +312,6 @@
             transition: opacity 0.6s ease, transform 0.6s ease;
         }
 
-        .image-wrapper:hover .image-shadow {
-            opacity: 0.6;
-            transform: translateY(5px) scaleX(0.95);
-        }
-
-        /* Corner accents */
         .corner-accent {
             position: absolute;
             width: 20px;
@@ -319,7 +331,6 @@
         .corner-accent.bl { bottom: -8px; left: -8px; border-bottom: 1px solid rgba(0,0,0,0.2); border-left: 1px solid rgba(0,0,0,0.2); }
         .corner-accent.br { bottom: -8px; right: -8px; border-bottom: 1px solid rgba(0,0,0,0.2); border-right: 1px solid rgba(0,0,0,0.2); }
 
-        /* Bottom label */
         .bottom-label {
             font-family: 'Playfair Display', serif;
             font-size: 0.8rem;
@@ -337,7 +348,12 @@
             transform: translateY(0);
         }
 
-        /* Decorative line */
+        .content.visible.image-zoomed .bottom-label {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
         .deco-line {
             width: 40px;
             height: 1px;
@@ -352,12 +368,11 @@
             width: 60px;
         }
 
-        /* Magnetic tilt container */
-        .tilt-container {
-            perspective: 1000px;
+        .content.visible.image-zoomed .deco-line {
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
-        /* Click ripple */
         .ripple {
             position: fixed;
             border-radius: 50%;
@@ -368,19 +383,10 @@
         }
 
         @keyframes rippleExpand {
-            from {
-                width: 0;
-                height: 0;
-                opacity: 1;
-            }
-            to {
-                width: 300px;
-                height: 300px;
-                opacity: 0;
-            }
+            from { width: 0; height: 0; opacity: 1; }
+            to { width: 300px; height: 300px; opacity: 0; }
         }
 
-        /* Trail particles */
         .trail {
             position: fixed;
             width: 3px;
@@ -393,13 +399,9 @@
         }
 
         @keyframes trailFade {
-            to {
-                opacity: 0;
-                transform: scale(0);
-            }
+            to { opacity: 0; transform: scale(0); }
         }
 
-        /* Ambient corner decorations */
         .ambient-corner {
             position: fixed;
             width: 150px;
@@ -409,35 +411,11 @@
             opacity: 0.3;
         }
 
-        .ambient-corner.top-left {
-            top: 30px;
-            left: 30px;
-            border-top: 1px solid rgba(0,0,0,0.04);
-            border-left: 1px solid rgba(0,0,0,0.04);
-        }
+        .ambient-corner.top-left { top: 30px; left: 30px; border-top: 1px solid rgba(0,0,0,0.04); border-left: 1px solid rgba(0,0,0,0.04); }
+        .ambient-corner.top-right { top: 30px; right: 30px; border-top: 1px solid rgba(0,0,0,0.04); border-right: 1px solid rgba(0,0,0,0.04); }
+        .ambient-corner.bottom-left { bottom: 30px; left: 30px; border-bottom: 1px solid rgba(0,0,0,0.04); border-left: 1px solid rgba(0,0,0,0.04); }
+        .ambient-corner.bottom-right { bottom: 30px; right: 30px; border-bottom: 1px solid rgba(0,0,0,0.04); border-right: 1px solid rgba(0,0,0,0.04); }
 
-        .ambient-corner.top-right {
-            top: 30px;
-            right: 30px;
-            border-top: 1px solid rgba(0,0,0,0.04);
-            border-right: 1px solid rgba(0,0,0,0.04);
-        }
-
-        .ambient-corner.bottom-left {
-            bottom: 30px;
-            left: 30px;
-            border-bottom: 1px solid rgba(0,0,0,0.04);
-            border-left: 1px solid rgba(0,0,0,0.04);
-        }
-
-        .ambient-corner.bottom-right {
-            bottom: 30px;
-            right: 30px;
-            border-bottom: 1px solid rgba(0,0,0,0.04);
-            border-right: 1px solid rgba(0,0,0,0.04);
-        }
-
-        /* Floating dots */
         .floating-dot {
             position: fixed;
             width: 2px;
@@ -449,14 +427,8 @@
         }
 
         @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(15px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         @keyframes float {
@@ -471,7 +443,157 @@
             50% { opacity: 0.12; }
         }
 
-        /* Sound wave visual */
+        /* Zoom controls HUD */
+        .zoom-hud {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(0,0,0,0.06);
+            border-radius: 50px;
+            padding: 10px 24px;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.04);
+        }
+
+        .zoom-hud.visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .zoom-hud button {
+            background: none;
+            border: 1px solid rgba(0,0,0,0.1);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 16px;
+            color: rgba(0,0,0,0.5);
+            cursor: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .zoom-hud button:hover {
+            background: rgba(0,0,0,0.05);
+            border-color: rgba(0,0,0,0.2);
+            color: rgba(0,0,0,0.8);
+        }
+
+        .zoom-hud button:active {
+            transform: scale(0.92);
+        }
+
+        .zoom-level {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.65rem;
+            letter-spacing: 2px;
+            color: rgba(0,0,0,0.35);
+            min-width: 48px;
+            text-align: center;
+        }
+
+        .zoom-hud .separator {
+            width: 1px;
+            height: 16px;
+            background: rgba(0,0,0,0.08);
+        }
+
+        .zoom-hud .reset-btn {
+            width: auto;
+            padding: 0 14px;
+            border-radius: 20px;
+            font-size: 0.55rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* Minimap */
+        .minimap {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 120px;
+            height: 90px;
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 6px;
+            overflow: hidden;
+            z-index: 100;
+            opacity: 0;
+            transform: translateY(10px) scale(0.95);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            background: #fff;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+        }
+
+        .minimap.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .minimap img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            opacity: 0.5;
+        }
+
+        .minimap-viewport {
+            position: absolute;
+            border: 1.5px solid rgba(0,0,0,0.4);
+            border-radius: 2px;
+            background: rgba(0,0,0,0.03);
+            pointer-events: none;
+            transition: none;
+        }
+
+        .minimap-label {
+            position: absolute;
+            top: -18px;
+            left: 0;
+            font-size: 0.45rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: rgba(0,0,0,0.2);
+        }
+
+        /* Zoom hint tooltip */
+        .zoom-hint {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.6rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: rgba(0,0,0,0.2);
+            background: rgba(255,255,255,0.95);
+            padding: 12px 24px;
+            border-radius: 30px;
+            border: 1px solid rgba(0,0,0,0.05);
+            pointer-events: none;
+            z-index: 200;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .zoom-hint.show {
+            opacity: 1;
+        }
+
         .sound-wave {
             position: fixed;
             bottom: 30px;
@@ -482,6 +604,12 @@
             height: 20px;
             z-index: 5;
             opacity: 0.15;
+            transition: opacity 0.3s ease;
+        }
+
+        .image-zoomed ~ .sound-wave,
+        .sound-wave.hide {
+            opacity: 0;
         }
 
         .sound-wave .bar {
@@ -496,77 +624,6 @@
             50% { height: 16px; }
         }
 
-        /* Scroll hint */
-        .scroll-hint {
-            position: fixed;
-            bottom: 35px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            opacity: 0;
-            transition: opacity 1s ease 2s;
-            z-index: 5;
-        }
-
-        .content.visible ~ .scroll-hint {
-            opacity: 0.2;
-        }
-
-        .scroll-hint span {
-            font-size: 0.5rem;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            color: #000;
-        }
-
-        .scroll-hint .mouse {
-            width: 16px;
-            height: 24px;
-            border: 1px solid rgba(0,0,0,0.3);
-            border-radius: 10px;
-            position: relative;
-        }
-
-        .scroll-hint .mouse::after {
-            content: '';
-            width: 2px;
-            height: 5px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 1px;
-            position: absolute;
-            top: 5px;
-            left: 50%;
-            transform: translateX(-50%);
-            animation: scrollDot 2s ease infinite;
-        }
-
-        @keyframes scrollDot {
-            0% { opacity: 1; top: 5px; }
-            100% { opacity: 0; top: 14px; }
-        }
-
-        /* Number counter in corner */
-        .frame-counter {
-            position: fixed;
-            top: 35px;
-            right: 40px;
-            font-family: 'Inter', sans-serif;
-            font-size: 0.6rem;
-            letter-spacing: 3px;
-            color: rgba(0,0,0,0.12);
-            z-index: 5;
-            opacity: 0;
-            transition: opacity 1s ease 1.5s;
-        }
-
-        .content.visible ~ .frame-counter {
-            opacity: 1;
-        }
-
-        /* Top left brand */
         .brand {
             position: fixed;
             top: 35px;
@@ -580,41 +637,39 @@
             transition: opacity 1s ease 1.5s;
         }
 
-        .content.visible ~ .brand {
-            opacity: 1;
+        .content.visible ~ .brand { opacity: 1; }
+
+        .frame-counter {
+            position: fixed;
+            top: 35px;
+            right: 40px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.6rem;
+            letter-spacing: 3px;
+            color: rgba(0,0,0,0.12);
+            z-index: 5;
+            opacity: 0;
+            transition: opacity 1s ease 1.5s;
         }
 
+        .content.visible ~ .frame-counter { opacity: 1; }
+
         @media (max-width: 768px) {
-            .main-image {
-                max-width: 90vw;
-            }
-
-            .ambient-corner {
-                width: 60px;
-                height: 60px;
-            }
-
-            .brand, .frame-counter, .sound-wave {
-                display: none;
-            }
-
-            body {
-                cursor: auto;
-            }
-
-            .cursor, .cursor-dot {
-                display: none;
-            }
+            .main-image { width: 90vw; }
+            .ambient-corner { width: 60px; height: 60px; }
+            .brand, .frame-counter, .sound-wave { display: none; }
+            body { cursor: auto; }
+            .cursor, .cursor-dot { display: none; }
+            .minimap { width: 80px; height: 60px; right: 15px; bottom: 90px; }
+            .zoom-hud { padding: 8px 16px; gap: 10px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Custom Cursor -->
     <div class="cursor" id="cursor"></div>
     <div class="cursor-dot" id="cursorDot"></div>
 
-    <!-- Loading Screen -->
     <div class="loader" id="loader">
         <div class="loader-text">Preparing</div>
         <div class="loader-bar-container">
@@ -623,53 +678,66 @@
         <div class="loader-percentage" id="loaderPercent">0%</div>
     </div>
 
-    <!-- Ambient Corners -->
     <div class="ambient-corner top-left"></div>
     <div class="ambient-corner top-right"></div>
     <div class="ambient-corner bottom-left"></div>
     <div class="ambient-corner bottom-right"></div>
 
-    <!-- Main Content -->
     <div class="content" id="content">
         <div class="top-label">E X H I B I T&nbsp;&nbsp;&nbsp;N O. 1</div>
 
-        <div class="tilt-container" id="tiltContainer">
-            <div class="image-wrapper" id="imageWrapper">
-                <div class="corner-accent tl"></div>
-                <div class="corner-accent tr"></div>
-                <div class="corner-accent bl"></div>
-                <div class="corner-accent br"></div>
-
-                <div class="image-border">
-                    <div class="image-inner">
-                        <img
-                            src="https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/bullyingpeopletype.png"
-                            alt="The Image"
-                            class="main-image"
-                            id="mainImage"
-                            draggable="false"
-                        >
-                        <div class="image-reflection" id="imageReflection"></div>
+        <div class="zoom-viewport" id="zoomViewport">
+            <div class="zoom-container" id="zoomContainer">
+                <div class="image-wrapper" id="imageWrapper">
+                    <div class="corner-accent tl"></div>
+                    <div class="corner-accent tr"></div>
+                    <div class="corner-accent bl"></div>
+                    <div class="corner-accent br"></div>
+                    <div class="image-border">
+                        <div class="image-inner">
+                            <img
+                                src="https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/bullyingpeopletype.png"
+                                alt="The Image"
+                                class="main-image"
+                                id="mainImage"
+                                draggable="false"
+                            >
+                            <div class="image-reflection" id="imageReflection"></div>
+                        </div>
                     </div>
+                    <div class="image-glow"></div>
+                    <div class="image-shadow"></div>
                 </div>
-
-                <div class="image-glow"></div>
-                <div class="image-shadow"></div>
             </div>
         </div>
 
-        <div class="bottom-label">— a moment, preserved —</div>
+        <div class="bottom-label">— scroll to zoom, drag to explore —</div>
         <div class="deco-line"></div>
     </div>
 
-    <!-- Brand -->
-    <div class="brand">G A L L E R Y</div>
+    <!-- Zoom HUD -->
+    <div class="zoom-hud" id="zoomHud">
+        <button id="zoomOutBtn" title="Zoom Out">−</button>
+        <div class="zoom-level" id="zoomLevel">100%</div>
+        <button id="zoomInBtn" title="Zoom In">+</button>
+        <div class="separator"></div>
+        <button class="reset-btn" id="resetBtn" title="Reset">Reset</button>
+    </div>
 
-    <!-- Frame Counter -->
+    <!-- Minimap -->
+    <div class="minimap" id="minimap">
+        <div class="minimap-label">Overview</div>
+        <img src="https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/bullyingpeopletype.png" alt="" draggable="false">
+        <div class="minimap-viewport" id="minimapViewport"></div>
+    </div>
+
+    <!-- Zoom Hint -->
+    <div class="zoom-hint" id="zoomHint"></div>
+
+    <div class="brand">G A L L E R Y</div>
     <div class="frame-counter" id="frameCounter">001 / 001</div>
 
-    <!-- Sound Wave Visual -->
-    <div class="sound-wave">
+    <div class="sound-wave" id="soundWave">
         <div class="bar" style="animation-delay: 0s;"></div>
         <div class="bar" style="animation-delay: 0.15s;"></div>
         <div class="bar" style="animation-delay: 0.3s;"></div>
@@ -678,22 +746,17 @@
     </div>
 
     <script>
-        // ===== CUSTOM CURSOR =====
+        // ===== CURSOR =====
         const cursor = document.getElementById('cursor');
         const cursorDot = document.getElementById('cursorDot');
-        let mouseX = 0, mouseY = 0;
-        let cursorX = 0, cursorY = 0;
+        let mouseX = 0, mouseY = 0, cursorX = 0, cursorY = 0;
 
         document.addEventListener('mousemove', (e) => {
             mouseX = e.clientX;
             mouseY = e.clientY;
             cursorDot.style.left = mouseX + 'px';
             cursorDot.style.top = mouseY + 'px';
-
-            // Spawn trail particles
-            if (Math.random() > 0.7) {
-                createTrail(mouseX, mouseY);
-            }
+            if (Math.random() > 0.75) createTrail(mouseX, mouseY);
         });
 
         function animateCursor() {
@@ -705,12 +768,6 @@
         }
         animateCursor();
 
-        // Hover states
-        const imageWrapper = document.getElementById('imageWrapper');
-        imageWrapper.addEventListener('mouseenter', () => cursor.classList.add('hovering'));
-        imageWrapper.addEventListener('mouseleave', () => cursor.classList.remove('hovering'));
-
-        // ===== TRAIL PARTICLES =====
         function createTrail(x, y) {
             const trail = document.createElement('div');
             trail.className = 'trail';
@@ -720,7 +777,6 @@
             setTimeout(() => trail.remove(), 800);
         }
 
-        // ===== CLICK RIPPLE =====
         document.addEventListener('click', (e) => {
             const ripple = document.createElement('div');
             ripple.className = 'ripple';
@@ -730,20 +786,17 @@
             setTimeout(() => ripple.remove(), 1000);
         });
 
-        // ===== LOADING SCREEN =====
+        // ===== LOADING =====
         const loader = document.getElementById('loader');
         const loaderBar = document.getElementById('loaderBar');
         const loaderPercent = document.getElementById('loaderPercent');
         const content = document.getElementById('content');
         const mainImage = document.getElementById('mainImage');
 
-        let progress = 0;
-        let loaded = false;
+        let progress = 0, loaded = false;
 
         mainImage.onload = () => { loaded = true; };
         mainImage.onerror = () => { loaded = true; };
-
-        // If already cached
         if (mainImage.complete) loaded = true;
 
         function simulateLoading() {
@@ -751,55 +804,360 @@
                 if (progress < 90 || loaded) {
                     progress += loaded ? Math.random() * 15 + 5 : Math.random() * 3 + 1;
                 }
-
                 if (progress >= 100) {
                     progress = 100;
                     clearInterval(interval);
-
                     loaderBar.style.width = '100%';
                     loaderPercent.textContent = '100%';
-
                     setTimeout(() => {
                         loader.classList.add('hidden');
                         setTimeout(() => {
                             content.classList.add('visible');
                             spawnFloatingDots();
+                            setTimeout(() => zoomHud.classList.add('visible'), 1200);
+                            showHint('Scroll to zoom • Drag to pan • Double-click to fit', 3000);
                         }, 400);
                     }, 500);
                     return;
                 }
-
                 loaderBar.style.width = Math.floor(progress) + '%';
                 loaderPercent.textContent = Math.floor(progress) + '%';
             }, 50);
         }
-
         setTimeout(simulateLoading, 800);
 
-        // ===== 3D TILT EFFECT =====
-        const tiltContainer = document.getElementById('tiltContainer');
+        // ===== ZOOM & PAN ENGINE =====
+        const zoomViewport = document.getElementById('zoomViewport');
+        const zoomContainer = document.getElementById('zoomContainer');
+        const imageWrapper = document.getElementById('imageWrapper');
+        const zoomHud = document.getElementById('zoomHud');
+        const zoomLevelEl = document.getElementById('zoomLevel');
+        const minimapEl = document.getElementById('minimap');
+        const minimapViewport = document.getElementById('minimapViewport');
+        const zoomHint = document.getElementById('zoomHint');
+        const soundWave = document.getElementById('soundWave');
 
-        imageWrapper.addEventListener('mousemove', (e) => {
-            const rect = imageWrapper.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            const centerX = rect.width / 2;
-            const centerY = rect.height / 2;
+        let scale = 1;
+        let panX = 0, panY = 0;
+        let isDragging = false;
+        let dragStartX, dragStartY, panStartX, panStartY;
+        const MIN_SCALE = 0.5;
+        const MAX_SCALE = 8;
+        const ZOOM_SENSITIVITY = 0.002;
 
-            const rotateX = ((y - centerY) / centerY) * -5;
-            const rotateY = ((x - centerX) / centerX) * 5;
+        function updateTransform(animate = false) {
+            if (animate) {
+                zoomContainer.classList.add('is-animating');
+                setTimeout(() => zoomContainer.classList.remove('is-animating'), 450);
+            } else {
+                zoomContainer.classList.remove('is-animating');
+            }
 
-            imageWrapper.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+            zoomContainer.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+            zoomLevelEl.textContent = Math.round(scale * 100) + '%';
+
+            // Toggle zoomed state
+            if (scale > 1.05) {
+                content.classList.add('image-zoomed');
+                minimapEl.classList.add('visible');
+                soundWave.classList.add('hide');
+                cursor.classList.add('zoomed-cursor');
+            } else {
+                content.classList.remove('image-zoomed');
+                minimapEl.classList.remove('visible');
+                soundWave.classList.remove('hide');
+                cursor.classList.remove('zoomed-cursor');
+            }
+
+            updateMinimap();
+        }
+
+        function clampPan() {
+            if (scale <= 1) {
+                panX = 0;
+                panY = 0;
+                return;
+            }
+
+            const vpRect = zoomViewport.getBoundingClientRect();
+            const imgRect = mainImage.getBoundingClientRect();
+            const containerW = zoomContainer.scrollWidth * scale;
+            const containerH = zoomContainer.scrollHeight * scale;
+
+            const maxPanX = Math.max(0, (containerW - vpRect.width) / 2);
+            const maxPanY = Math.max(0, (containerH - vpRect.height) / 2);
+
+            panX = Math.max(-maxPanX, Math.min(maxPanX, panX));
+            panY = Math.max(-maxPanY, Math.min(maxPanY, panY));
+        }
+
+        // Scroll to zoom
+        zoomViewport.addEventListener('wheel', (e) => {
+            e.preventDefault();
+
+            const rect = zoomViewport.getBoundingClientRect();
+            const offsetX = e.clientX - rect.left - rect.width / 2;
+            const offsetY = e.clientY - rect.top - rect.height / 2;
+
+            const delta = -e.deltaY * ZOOM_SENSITIVITY;
+            const newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, scale * (1 + delta)));
+
+            const factor = newScale / scale;
+
+            panX = offsetX - factor * (offsetX - panX);
+            panY = offsetY - factor * (offsetY - panY);
+
+            scale = newScale;
+            clampPan();
+            updateTransform();
+        }, { passive: false });
+
+        // Drag to pan
+        zoomViewport.addEventListener('mousedown', (e) => {
+            if (e.button !== 0) return;
+            isDragging = true;
+            dragStartX = e.clientX;
+            dragStartY = e.clientY;
+            panStartX = panX;
+            panStartY = panY;
+            zoomContainer.classList.add('is-dragging');
+            cursor.classList.add('grabbing');
         });
 
-        imageWrapper.addEventListener('mouseleave', () => {
-            imageWrapper.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)';
-            imageWrapper.style.transition = 'transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const dx = e.clientX - dragStartX;
+            const dy = e.clientY - dragStartY;
+            panX = panStartX + dx;
+            panY = panStartY + dy;
+            clampPan();
+            updateTransform();
         });
 
-        imageWrapper.addEventListener('mouseenter', () => {
-            imageWrapper.style.transition = 'transform 0.1s ease';
+        document.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                zoomContainer.classList.remove('is-dragging');
+                cursor.classList.remove('grabbing');
+                // Snap back with nice elastic if needed
+                clampPan();
+                updateTransform(true);
+            }
         });
+
+        // Touch support
+        let lastTouchDist = 0;
+        let lastTouchCenter = { x: 0, y: 0 };
+
+        zoomViewport.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                isDragging = true;
+                dragStartX = e.touches[0].clientX;
+                dragStartY = e.touches[0].clientY;
+                panStartX = panX;
+                panStartY = panY;
+            } else if (e.touches.length === 2) {
+                isDragging = false;
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                lastTouchDist = Math.sqrt(dx * dx + dy * dy);
+                lastTouchCenter = {
+                    x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+                    y: (e.touches[0].clientY + e.touches[1].clientY) / 2
+                };
+            }
+        }, { passive: false });
+
+        zoomViewport.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (e.touches.length === 1 && isDragging) {
+                const dx = e.touches[0].clientX - dragStartX;
+                const dy = e.touches[0].clientY - dragStartY;
+                panX = panStartX + dx;
+                panY = panStartY + dy;
+                clampPan();
+                updateTransform();
+            } else if (e.touches.length === 2) {
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const center = {
+                    x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+                    y: (e.touches[0].clientY + e.touches[1].clientY) / 2
+                };
+
+                if (lastTouchDist > 0) {
+                    const factor = dist / lastTouchDist;
+                    const newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, scale * factor));
+
+                    const rect = zoomViewport.getBoundingClientRect();
+                    const offsetX = center.x - rect.left - rect.width / 2;
+                    const offsetY = center.y - rect.top - rect.height / 2;
+
+                    const sf = newScale / scale;
+                    panX = offsetX - sf * (offsetX - panX);
+                    panY = offsetY - sf * (offsetY - panY);
+
+                    // Also pan with center movement
+                    panX += center.x - lastTouchCenter.x;
+                    panY += center.y - lastTouchCenter.y;
+
+                    scale = newScale;
+                    clampPan();
+                    updateTransform();
+                }
+
+                lastTouchDist = dist;
+                lastTouchCenter = center;
+            }
+        }, { passive: false });
+
+        zoomViewport.addEventListener('touchend', (e) => {
+            isDragging = false;
+            if (e.touches.length < 2) lastTouchDist = 0;
+            clampPan();
+            updateTransform(true);
+        });
+
+        // Double click to reset / zoom
+        zoomViewport.addEventListener('dblclick', (e) => {
+            e.preventDefault();
+            if (scale > 1.05) {
+                // Reset
+                scale = 1;
+                panX = 0;
+                panY = 0;
+                showHint('Reset', 800);
+            } else {
+                // Zoom to 3x centered on click
+                const rect = zoomViewport.getBoundingClientRect();
+                const offsetX = e.clientX - rect.left - rect.width / 2;
+                const offsetY = e.clientY - rect.top - rect.height / 2;
+                const newScale = 3;
+                const factor = newScale / scale;
+                panX = offsetX - factor * (offsetX - panX);
+                panY = offsetY - factor * (offsetY - panY);
+                scale = newScale;
+                clampPan();
+                showHint('300%', 800);
+            }
+            updateTransform(true);
+        });
+
+        // HUD Buttons
+        document.getElementById('zoomInBtn').addEventListener('click', () => {
+            scale = Math.min(MAX_SCALE, scale * 1.4);
+            clampPan();
+            updateTransform(true);
+        });
+
+        document.getElementById('zoomOutBtn').addEventListener('click', () => {
+            scale = Math.max(MIN_SCALE, scale / 1.4);
+            clampPan();
+            updateTransform(true);
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            scale = 1;
+            panX = 0;
+            panY = 0;
+            updateTransform(true);
+            showHint('Reset', 800);
+        });
+
+        // Cursor hover on buttons
+        document.querySelectorAll('.zoom-hud button').forEach(btn => {
+            btn.addEventListener('mouseenter', () => cursor.classList.add('hovering'));
+            btn.addEventListener('mouseleave', () => cursor.classList.remove('hovering'));
+        });
+
+        zoomViewport.addEventListener('mouseenter', () => {
+            if (!isDragging) cursor.classList.add('hovering');
+        });
+        zoomViewport.addEventListener('mouseleave', () => {
+            cursor.classList.remove('hovering');
+        });
+
+        // Keyboard
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Equal' || e.code === 'NumpadAdd') {
+                e.preventDefault();
+                scale = Math.min(MAX_SCALE, scale * 1.3);
+                clampPan();
+                updateTransform(true);
+            } else if (e.code === 'Minus' || e.code === 'NumpadSubtract') {
+                e.preventDefault();
+                scale = Math.max(MIN_SCALE, scale / 1.3);
+                clampPan();
+                updateTransform(true);
+            } else if (e.code === 'Digit0' || e.code === 'Escape') {
+                scale = 1; panX = 0; panY = 0;
+                updateTransform(true);
+            } else if (e.code === 'Space') {
+                e.preventDefault();
+                imageWrapper.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                imageWrapper.style.transform = 'scale(1.03)';
+                setTimeout(() => {
+                    imageWrapper.style.transform = 'scale(1)';
+                }, 300);
+                for (let i = 0; i < 20; i++) {
+                    setTimeout(() => {
+                        const rect = imageWrapper.getBoundingClientRect();
+                        createTrail(
+                            rect.left + rect.width / 2 + (Math.random() - 0.5) * rect.width,
+                            rect.top + rect.height / 2 + (Math.random() - 0.5) * rect.height
+                        );
+                    }, i * 30);
+                }
+            } else if (e.code === 'ArrowUp') {
+                e.preventDefault(); panY += 50; clampPan(); updateTransform(true);
+            } else if (e.code === 'ArrowDown') {
+                e.preventDefault(); panY -= 50; clampPan(); updateTransform(true);
+            } else if (e.code === 'ArrowLeft') {
+                e.preventDefault(); panX += 50; clampPan(); updateTransform(true);
+            } else if (e.code === 'ArrowRight') {
+                e.preventDefault(); panX -= 50; clampPan(); updateTransform(true);
+            }
+        });
+
+        // Minimap
+        function updateMinimap() {
+            if (scale <= 1.05) return;
+
+            const vpRect = zoomViewport.getBoundingClientRect();
+            const containerW = zoomContainer.scrollWidth;
+            const containerH = zoomContainer.scrollHeight;
+
+            const minimapW = minimapEl.clientWidth;
+            const minimapH = minimapEl.clientHeight;
+
+            const visibleW = vpRect.width / scale;
+            const visibleH = vpRect.height / scale;
+
+            const vwRatio = visibleW / containerW;
+            const vhRatio = visibleH / containerH;
+
+            const mvW = Math.max(10, vwRatio * minimapW);
+            const mvH = Math.max(10, vhRatio * minimapH);
+
+            const centerOffsetX = -panX / scale / containerW;
+            const centerOffsetY = -panY / scale / containerH;
+
+            const mvX = (minimapW - mvW) / 2 + centerOffsetX * minimapW;
+            const mvY = (minimapH - mvH) / 2 + centerOffsetY * minimapH;
+
+            minimapViewport.style.width = mvW + 'px';
+            minimapViewport.style.height = mvH + 'px';
+            minimapViewport.style.left = Math.max(0, Math.min(minimapW - mvW, mvX)) + 'px';
+            minimapViewport.style.top = Math.max(0, Math.min(minimapH - mvH, mvY)) + 'px';
+        }
+
+        // Hint
+        function showHint(text, duration = 2000) {
+            zoomHint.textContent = text;
+            zoomHint.classList.add('show');
+            setTimeout(() => zoomHint.classList.remove('show'), duration);
+        }
 
         // ===== FLOATING DOTS =====
         function spawnFloatingDots() {
@@ -814,7 +1172,7 @@
             }
         }
 
-        // ===== SHIMMER LINES =====
+        // Shimmer lines
         for (let i = 0; i < 5; i++) {
             const line = document.createElement('div');
             line.className = 'shimmer-line';
@@ -827,65 +1185,24 @@
             document.body.appendChild(line);
         }
 
-        // ===== PARALLAX ON MOUSE MOVE =====
+        // Parallax dots
         document.addEventListener('mousemove', (e) => {
+            if (isDragging) return;
             const x = (e.clientX / window.innerWidth - 0.5) * 2;
             const y = (e.clientY / window.innerHeight - 0.5) * 2;
-
-            const dots = document.querySelectorAll('.floating-dot');
-            dots.forEach((dot, i) => {
+            document.querySelectorAll('.floating-dot').forEach((dot, i) => {
                 const speed = (i % 3 + 1) * 3;
                 dot.style.marginLeft = x * speed + 'px';
                 dot.style.marginTop = y * speed + 'px';
             });
         });
 
-        // ===== DOUBLE CLICK ZOOM =====
-        let zoomed = false;
-        mainImage.addEventListener('dblclick', () => {
-            if (!zoomed) {
-                mainImage.style.transition = 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
-                mainImage.style.transform = 'scale(1.8)';
-                zoomed = true;
-            } else {
-                mainImage.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-                mainImage.style.transform = 'scale(1)';
-                zoomed = false;
-            }
-        });
-
-        // ===== KEYBOARD INTERACTION =====
-        document.addEventListener('keydown', (e) => {
-            if (e.code === 'Space') {
-                e.preventDefault();
-                // Trigger a fancy pulse
-                imageWrapper.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
-                imageWrapper.style.transform = 'perspective(1000px) scale(1.05)';
-                setTimeout(() => {
-                    imageWrapper.style.transform = 'perspective(1000px) scale(1)';
-                }, 300);
-
-                // Burst particles
-                for (let i = 0; i < 20; i++) {
-                    setTimeout(() => {
-                        const rect = imageWrapper.getBoundingClientRect();
-                        createTrail(
-                            rect.left + rect.width / 2 + (Math.random() - 0.5) * rect.width,
-                            rect.top + rect.height / 2 + (Math.random() - 0.5) * rect.height
-                        );
-                    }, i * 30);
-                }
-            }
-        });
-
-        // ===== FRAME COUNTER ANIMATION =====
+        // Frame counter
         const frameCounter = document.getElementById('frameCounter');
         let frameNum = 0;
         setInterval(() => {
             frameNum = (frameNum + 1) % 60;
-            if (frameCounter) {
-                frameCounter.textContent = `001 / 001 — F${String(frameNum).padStart(2, '0')}`;
-            }
+            if (frameCounter) frameCounter.textContent = `001 / 001 — F${String(frameNum).padStart(2, '0')}`;
         }, 1000 / 30);
     </script>
 </body>
