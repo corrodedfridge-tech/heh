@@ -5,2335 +5,1128 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>✦ THE GALLERY ✦</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600&family=Inter:wght@200;300;400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Inter:wght@200;300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap');
 
-        /* ============================================
-           RESET & BASE
-           ============================================ */
-        *, *::before, *::after {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+        :root{
+            --expo:cubic-bezier(0.16,1,0.3,1);
+            --spring:cubic-bezier(0.34,1.56,0.64,1);
+            --smooth:cubic-bezier(0.25,0.46,0.45,0.94);
+            --fg:#000;
+            --bg:#fff;
+            --sub:rgba(0,0,0,0.06);
+            --mut:rgba(0,0,0,0.12);
+            --soft:rgba(0,0,0,0.2);
+            --med:rgba(0,0,0,0.35);
+            --txt:rgba(0,0,0,0.5);
+            --f-disp:'Playfair Display',serif;
+            --f-body:'Inter',sans-serif;
+            --f-acc:'Cormorant Garamond',serif;
         }
 
-        :root {
-            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-            --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
-            --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-            --ease-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            --color-fg: #000000;
-            --color-bg: #ffffff;
-            --color-subtle: rgba(0,0,0,0.06);
-            --color-muted: rgba(0,0,0,0.12);
-            --color-soft: rgba(0,0,0,0.2);
-            --color-medium: rgba(0,0,0,0.35);
-            --color-text: rgba(0,0,0,0.5);
-            --font-display: 'Playfair Display', serif;
-            --font-body: 'Inter', sans-serif;
-            --font-accent: 'Cormorant Garamond', serif;
+        html{overflow:hidden;height:100%}
+
+        body{
+            background:var(--bg);height:100%;overflow:hidden;
+            font-family:var(--f-body);cursor:none;
+            user-select:none;-webkit-user-select:none;
+            -webkit-tap-highlight-color:transparent;
         }
 
-        html {
-            overflow: hidden;
-            height: 100%;
+        /* ==========================================
+           CURSOR
+           ========================================== */
+        .cur-ring{
+            width:22px;height:22px;border:1.5px solid rgba(0,0,0,0.25);
+            border-radius:50%;position:fixed;pointer-events:none;z-index:100000;
+            transform:translate(-50%,-50%);mix-blend-mode:difference;
+            transition:width .3s ease,height .3s ease,background .3s ease,
+            border-color .3s ease,border-style .2s ease,opacity .3s ease;
         }
-
-        body {
-            background: var(--color-bg);
-            height: 100%;
-            overflow: hidden;
-            font-family: var(--font-body);
-            cursor: none;
-            user-select: none;
-            -webkit-user-select: none;
-            -webkit-tap-highlight-color: transparent;
+        .cur-ring.hov{width:55px;height:55px;background:rgba(0,0,0,0.04);border-color:rgba(0,0,0,0.45)}
+        .cur-ring.grab{width:42px;height:42px;background:rgba(0,0,0,0.08);border-color:rgba(0,0,0,0.55);border-style:dashed}
+        .cur-ring.zoom{width:50px;height:50px;border-color:rgba(0,0,0,0.2);background:rgba(0,0,0,0.02)}
+        .cur-ring.nav{width:60px;height:60px;background:rgba(0,0,0,0.02);border-color:rgba(0,0,0,0.3)}
+        .cur-dot{
+            width:4px;height:4px;background:var(--fg);border-radius:50%;
+            position:fixed;pointer-events:none;z-index:100001;transform:translate(-50%,-50%);
         }
-
-        /* ============================================
-           CUSTOM CURSOR SYSTEM
-           ============================================ */
-        .cursor-ring {
-            width: 22px;
-            height: 22px;
-            border: 1.5px solid rgba(0,0,0,0.25);
-            border-radius: 50%;
-            position: fixed;
-            pointer-events: none;
-            z-index: 100000;
-            transform: translate(-50%, -50%);
-            mix-blend-mode: difference;
-            transition: width 0.35s var(--ease-out-expo),
-                        height 0.35s var(--ease-out-expo),
-                        background 0.35s ease,
-                        border-color 0.35s ease,
-                        border-style 0.25s ease,
-                        opacity 0.3s ease;
+        .cur-lbl{
+            position:fixed;pointer-events:none;z-index:100002;
+            font-family:var(--f-body);font-size:.48rem;letter-spacing:3px;
+            text-transform:uppercase;color:rgba(0,0,0,0.4);
+            transform:translate(22px,-50%);opacity:0;transition:opacity .25s ease;
+            white-space:nowrap;
         }
+        .cur-lbl.on{opacity:1}
 
-        .cursor-ring.hover {
-            width: 55px;
-            height: 55px;
-            background: rgba(0,0,0,0.04);
-            border-color: rgba(0,0,0,0.45);
+        .trail{
+            position:fixed;width:3px;height:3px;background:rgba(0,0,0,0.05);
+            border-radius:50%;pointer-events:none;z-index:99999;
+            animation:trailDie .65s ease forwards;
         }
+        @keyframes trailDie{to{opacity:0;transform:scale(0) translateY(-8px)}}
 
-        .cursor-ring.grab {
-            width: 42px;
-            height: 42px;
-            background: rgba(0,0,0,0.08);
-            border-color: rgba(0,0,0,0.55);
-            border-style: dashed;
+        .ripple{
+            position:fixed;border-radius:50%;pointer-events:none;z-index:99998;
+            border:1px solid rgba(0,0,0,0.05);animation:ripGrow .7s var(--expo) forwards;
         }
+        @keyframes ripGrow{0%{width:0;height:0;opacity:1}100%{width:180px;height:180px;opacity:0}}
 
-        .cursor-ring.arrow-l {
-            width: 60px;
-            height: 60px;
-            background: rgba(0,0,0,0.02);
-            border-color: rgba(0,0,0,0.3);
+        /* ==========================================
+           LOADER
+           ========================================== */
+        .loader{
+            position:fixed;inset:0;background:var(--bg);z-index:50000;
+            display:flex;flex-direction:column;align-items:center;justify-content:center;
+            transition:opacity 1s var(--expo),transform 1s var(--expo);
         }
-
-        .cursor-ring.arrow-r {
-            width: 60px;
-            height: 60px;
-            background: rgba(0,0,0,0.02);
-            border-color: rgba(0,0,0,0.3);
+        .loader.done{opacity:0;transform:scale(1.04);pointer-events:none}
+        .loader h1{
+            font-family:var(--f-disp);font-size:2rem;font-weight:400;
+            letter-spacing:18px;text-transform:uppercase;color:var(--fg);
+            margin-bottom:8px;opacity:0;animation:lfu 1s ease forwards .2s;
         }
-
-        .cursor-ring.zoomed {
-            width: 50px;
-            height: 50px;
-            border-color: rgba(0,0,0,0.2);
-            background: rgba(0,0,0,0.02);
+        .loader .tag{
+            font-family:var(--f-acc);font-size:.9rem;font-style:italic;
+            font-weight:300;letter-spacing:4px;color:var(--soft);
+            margin-bottom:55px;opacity:0;animation:lfu 1s ease forwards .4s;
         }
-
-        .cursor-ring.hidden {
-            opacity: 0;
-            width: 0;
-            height: 0;
+        .loader .track{
+            width:200px;height:1px;background:var(--sub);overflow:hidden;
+            opacity:0;animation:lfu 1s ease forwards .6s;
         }
-
-        .cursor-dot {
-            width: 4px;
-            height: 4px;
-            background: var(--color-fg);
-            border-radius: 50%;
-            position: fixed;
-            pointer-events: none;
-            z-index: 100001;
-            transform: translate(-50%, -50%);
-            transition: opacity 0.3s ease;
+        .loader .fill{height:100%;background:var(--fg);width:0%;transition:width .2s ease}
+        .loader .pct{
+            font-size:.6rem;font-weight:300;letter-spacing:6px;color:var(--soft);
+            margin-top:20px;opacity:0;animation:lfu 1s ease forwards .8s;
         }
-
-        .cursor-dot.hidden {
-            opacity: 0;
+        .loader .cnt{
+            font-size:.42rem;letter-spacing:4px;color:var(--mut);margin-top:8px;
+            text-transform:uppercase;opacity:0;animation:lfu 1s ease forwards 1s;
         }
+        @keyframes lfu{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 
-        .cursor-label {
-            position: fixed;
-            pointer-events: none;
-            z-index: 100002;
-            font-family: var(--font-body);
-            font-size: 0.5rem;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            color: rgba(0,0,0,0.4);
-            transform: translate(20px, -50%);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            white-space: nowrap;
+        /* ==========================================
+           INTRO SPLASH
+           ========================================== */
+        .intro{
+            position:fixed;inset:0;background:var(--bg);z-index:40000;
+            display:flex;flex-direction:column;align-items:center;justify-content:center;
+            opacity:0;pointer-events:none;transition:opacity .8s ease;
         }
-
-        .cursor-label.visible {
-            opacity: 1;
+        .intro.on{opacity:1;pointer-events:all}
+        .intro.bye{opacity:0;pointer-events:none;transition:opacity 1.2s var(--expo)}
+        .intro .big{
+            font-family:var(--f-disp);font-size:clamp(2.5rem,8vw,7rem);
+            font-weight:400;letter-spacing:20px;text-transform:uppercase;
+            color:rgba(0,0,0,0.06);opacity:0;transform:translateY(45px) scale(.96);
+            transition:opacity 1.2s ease .2s,transform 1.2s var(--expo) .2s;
         }
-
-        /* ============================================
-           MOUSE TRAIL PARTICLES
-           ============================================ */
-        .trail-particle {
-            position: fixed;
-            width: 3px;
-            height: 3px;
-            background: rgba(0,0,0,0.05);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 99999;
-            animation: trailDie 0.7s ease forwards;
+        .intro.on .big{opacity:1;transform:translateY(0) scale(1)}
+        .intro .sub{
+            font-size:.55rem;letter-spacing:8px;text-transform:uppercase;color:var(--soft);
+            margin-top:28px;opacity:0;transform:translateY(12px);
+            transition:opacity 1s ease .5s,transform 1s var(--expo) .5s;
         }
-
-        @keyframes trailDie {
-            0% { opacity: 1; transform: scale(1); }
-            100% { opacity: 0; transform: scale(0) translateY(-10px); }
+        .intro.on .sub{opacity:1;transform:translateY(0)}
+        .intro .iline{
+            width:1px;height:0;background:var(--mut);margin-top:35px;
+            transition:height 1s var(--expo) .8s;
         }
-
-        /* ============================================
-           CLICK RIPPLE
-           ============================================ */
-        .click-ripple {
-            position: fixed;
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 99998;
-            border: 1px solid rgba(0,0,0,0.06);
-            animation: rippleGrow 0.8s var(--ease-out-expo) forwards;
+        .intro.on .iline{height:65px}
+        .intro .enter{
+            font-family:var(--f-acc);font-size:.8rem;font-style:italic;
+            letter-spacing:5px;color:var(--soft);cursor:none;
+            padding:12px 28px;border:1px solid var(--sub);border-radius:30px;
+            margin-top:28px;transition:all .4s ease;
+            opacity:0;transform:translateY(12px);background:none;
         }
+        .intro.on .enter{opacity:1;transform:translateY(0);transition-delay:1.1s}
+        .intro .enter:hover{border-color:var(--soft);background:rgba(0,0,0,0.02);letter-spacing:7px}
 
-        @keyframes rippleGrow {
-            0% { width: 0; height: 0; opacity: 1; }
-            100% { width: 200px; height: 200px; opacity: 0; }
+        /* ==========================================
+           TOP BAR
+           ========================================== */
+        .topbar{
+            position:fixed;top:0;left:0;right:0;height:70px;z-index:500;
+            display:flex;align-items:center;justify-content:space-between;
+            padding:0 40px;
+            background:linear-gradient(to bottom,rgba(255,255,255,.97) 0%,rgba(255,255,255,.7) 60%,transparent 100%);
+            pointer-events:none;opacity:0;transform:translateY(-12px);
+            transition:opacity .8s ease .3s,transform .8s var(--expo) .3s;
         }
+        .topbar.on{opacity:1;transform:translateY(0)}
+        .topbar .brand{font-family:var(--f-disp);font-size:.7rem;letter-spacing:7px;color:var(--mut);text-transform:uppercase}
+        .topbar .center{position:absolute;left:50%;transform:translateX(-50%);text-align:center}
+        .topbar .title{font-family:var(--f-disp);font-size:.72rem;font-weight:500;letter-spacing:3px;color:var(--soft);display:block}
+        .topbar .cat{font-family:var(--f-acc);font-size:.58rem;font-style:italic;font-weight:300;letter-spacing:2px;color:var(--mut);display:block;margin-top:1px}
+        .topbar .meta{display:flex;align-items:center;gap:18px}
+        .topbar .keys{font-size:.4rem;letter-spacing:3px;color:var(--mut);text-transform:uppercase}
+        .topbar .ctr{font-size:.48rem;letter-spacing:4px;color:var(--mut);font-variant-numeric:tabular-nums}
 
-        /* ============================================
-           LOADING SCREEN
-           ============================================ */
-        .loader-screen {
-            position: fixed;
-            inset: 0;
-            background: var(--color-bg);
-            z-index: 50000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: opacity 1s var(--ease-out-expo),
-                        transform 1s var(--ease-out-expo);
+        .page-prog{position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,rgba(0,0,0,.04),rgba(0,0,0,.15),rgba(0,0,0,.04));z-index:501;width:0%;transition:width .6s var(--expo)}
+
+        /* ==========================================
+           3D STAGE
+           ========================================== */
+        .stage{
+            position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+            perspective:1500px;perspective-origin:50% 50%;
+            opacity:0;transition:opacity 1s ease;
         }
+        .stage.on{opacity:1}
+        .scene{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;transform-style:preserve-3d}
 
-        .loader-screen.done {
-            opacity: 0;
-            transform: scale(1.04);
-            pointer-events: none;
-        }
-
-        .loader-logo {
-            font-family: var(--font-display);
-            font-size: 2rem;
-            font-weight: 400;
-            letter-spacing: 18px;
-            text-transform: uppercase;
-            color: var(--color-fg);
-            margin-bottom: 10px;
-            opacity: 0;
-            animation: loaderFadeUp 1s ease forwards 0.2s;
-        }
-
-        .loader-tagline {
-            font-family: var(--font-accent);
-            font-size: 0.9rem;
-            font-style: italic;
-            font-weight: 300;
-            letter-spacing: 4px;
-            color: var(--color-soft);
-            margin-bottom: 60px;
-            opacity: 0;
-            animation: loaderFadeUp 1s ease forwards 0.4s;
-        }
-
-        .loader-progress-track {
-            width: 220px;
-            height: 1px;
-            background: var(--color-subtle);
-            overflow: hidden;
-            position: relative;
-            opacity: 0;
-            animation: loaderFadeUp 1s ease forwards 0.6s;
-        }
-
-        .loader-progress-fill {
-            height: 100%;
-            background: var(--color-fg);
-            width: 0%;
-            transition: width 0.25s ease;
-        }
-
-        .loader-percent {
-            font-family: var(--font-body);
-            font-size: 0.6rem;
-            font-weight: 300;
-            letter-spacing: 6px;
-            color: var(--color-soft);
-            margin-top: 22px;
-            opacity: 0;
-            animation: loaderFadeUp 1s ease forwards 0.8s;
-        }
-
-        .loader-count {
-            font-family: var(--font-body);
-            font-size: 0.45rem;
-            letter-spacing: 4px;
-            color: var(--color-muted);
-            margin-top: 10px;
-            text-transform: uppercase;
-            opacity: 0;
-            animation: loaderFadeUp 1s ease forwards 1s;
-        }
-
-        @keyframes loaderFadeUp {
-            from { opacity: 0; transform: translateY(14px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* ============================================
-           INTRO SPLASH (after loader)
-           ============================================ */
-        .intro-splash {
-            position: fixed;
-            inset: 0;
-            background: var(--color-bg);
-            z-index: 40000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.8s ease;
-        }
-
-        .intro-splash.active {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        .intro-splash.exit {
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 1.2s var(--ease-out-expo);
-        }
-
-        .intro-big-title {
-            font-family: var(--font-display);
-            font-size: clamp(3rem, 8vw, 7rem);
-            font-weight: 400;
-            letter-spacing: 20px;
-            text-transform: uppercase;
-            color: rgba(0,0,0,0.06);
-            opacity: 0;
-            transform: translateY(50px) scale(0.95);
-            transition: opacity 1.2s ease 0.2s, transform 1.2s var(--ease-out-expo) 0.2s;
-        }
-
-        .intro-splash.active .intro-big-title {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-        }
-
-        .intro-count-label {
-            font-family: var(--font-body);
-            font-size: 0.55rem;
-            letter-spacing: 8px;
-            text-transform: uppercase;
-            color: var(--color-soft);
-            margin-top: 30px;
-            opacity: 0;
-            transform: translateY(15px);
-            transition: opacity 1s ease 0.5s, transform 1s var(--ease-out-expo) 0.5s;
-        }
-
-        .intro-splash.active .intro-count-label {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .intro-line {
-            width: 1px;
-            height: 0;
-            background: var(--color-muted);
-            margin-top: 40px;
-            transition: height 1s var(--ease-out-expo) 0.8s;
-        }
-
-        .intro-splash.active .intro-line {
-            height: 70px;
-        }
-
-        .intro-enter {
-            font-family: var(--font-accent);
-            font-size: 0.8rem;
-            font-style: italic;
-            letter-spacing: 5px;
-            color: var(--color-soft);
-            margin-top: 30px;
-            cursor: none;
-            padding: 12px 30px;
-            border: 1px solid var(--color-subtle);
-            border-radius: 30px;
-            transition: all 0.4s ease;
-            opacity: 0;
-            transform: translateY(15px);
-        }
-
-        .intro-splash.active .intro-enter {
-            opacity: 1;
-            transform: translateY(0);
-            transition-delay: 1.2s;
-        }
-
-        .intro-enter:hover {
-            border-color: var(--color-soft);
-            background: rgba(0,0,0,0.02);
-            letter-spacing: 7px;
-        }
-
-        /* ============================================
-           TOP BAR / HEADER
-           ============================================ */
-        .top-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 75px;
-            z-index: 500;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 45px;
-            background: linear-gradient(to bottom, rgba(255,255,255,0.97) 0%, rgba(255,255,255,0.8) 60%, rgba(255,255,255,0) 100%);
-            pointer-events: none;
-            opacity: 0;
-            transform: translateY(-15px);
-            transition: opacity 0.8s ease 0.3s, transform 0.8s var(--ease-out-expo) 0.3s;
-        }
-
-        .top-bar.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .tb-brand {
-            font-family: var(--font-display);
-            font-size: 0.7rem;
-            letter-spacing: 7px;
-            color: var(--color-muted);
-            text-transform: uppercase;
-        }
-
-        .tb-title {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            text-align: center;
-        }
-
-        .tb-title-main {
-            font-family: var(--font-display);
-            font-size: 0.75rem;
-            font-weight: 500;
-            letter-spacing: 3px;
-            color: var(--color-soft);
-            transition: opacity 0.4s ease, transform 0.4s ease;
-            display: block;
-        }
-
-        .tb-title-sub {
-            font-family: var(--font-accent);
-            font-size: 0.6rem;
-            font-style: italic;
-            font-weight: 300;
-            letter-spacing: 2px;
-            color: var(--color-muted);
-            margin-top: 2px;
-            display: block;
-        }
-
-        .tb-meta {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .tb-keys {
-            font-size: 0.42rem;
-            letter-spacing: 3px;
-            color: var(--color-muted);
-            text-transform: uppercase;
-        }
-
-        .tb-counter {
-            font-size: 0.5rem;
-            letter-spacing: 4px;
-            color: var(--color-muted);
-            font-variant-numeric: tabular-nums;
-        }
-
-        /* ============================================
-           PROGRESS BAR (top edge)
-           ============================================ */
-        .page-progress {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 2px;
-            background: linear-gradient(90deg, rgba(0,0,0,0.04), rgba(0,0,0,0.15), rgba(0,0,0,0.04));
-            z-index: 501;
-            width: 0%;
-            transition: width 0.6s var(--ease-out-expo);
-        }
-
-        /* ============================================
-           MAIN 3D STAGE
-           ============================================ */
-        .stage {
-            position: fixed;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            perspective: 1400px;
-            perspective-origin: 50% 50%;
-            opacity: 0;
-            transition: opacity 1s ease;
-        }
-
-        .stage.visible {
-            opacity: 1;
-        }
-
-        .scene {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transform-style: preserve-3d;
-        }
-
-        /* ============================================
+        /* ==========================================
            SLIDES
-           ============================================ */
-        .slide {
-            position: absolute;
-            transform-style: preserve-3d;
-            will-change: transform, opacity;
-            transition: transform 1s var(--ease-out-expo),
-                        opacity 0.8s ease,
-                        filter 0.8s ease;
+           ========================================== */
+        .slide{
+            position:absolute;transform-style:preserve-3d;will-change:transform,opacity;
+            transition:transform 1s var(--expo),opacity .8s ease,filter .8s ease;
+        }
+        .slide.active{opacity:1;z-index:20;filter:none}
+        .slide.p1{opacity:.3;z-index:15;filter:blur(1.5px) brightness(.98);pointer-events:none}
+        .slide.n1{opacity:.3;z-index:15;filter:blur(1.5px) brightness(.98);pointer-events:none}
+        .slide.p2{opacity:.1;z-index:10;filter:blur(3px) brightness(.95);pointer-events:none}
+        .slide.n2{opacity:.1;z-index:10;filter:blur(3px) brightness(.95);pointer-events:none}
+        .slide.far{opacity:0;z-index:1;pointer-events:none}
+
+        /* ==========================================
+           CARD (3D transformable)
+           ========================================== */
+        .card{
+            position:relative;transform-style:preserve-3d;border-radius:10px;
+            transition:box-shadow .5s ease;
+        }
+        .slide.active .card{
+            box-shadow:0 30px 80px rgba(0,0,0,.07),0 15px 40px rgba(0,0,0,.04),0 5px 15px rgba(0,0,0,.03);
+        }
+        .slide.active:hover .card{
+            box-shadow:0 40px 100px rgba(0,0,0,.09),0 20px 50px rgba(0,0,0,.05),0 8px 20px rgba(0,0,0,.04);
+        }
+        .card-face{
+            position:relative;border-radius:10px;overflow:hidden;
+            backface-visibility:hidden;background:#f8f8f8;
+        }
+        .card-face::after{
+            content:'';position:absolute;inset:0;border:1px solid rgba(0,0,0,.04);
+            border-radius:10px;pointer-events:none;z-index:5;
+        }
+        .card-face img{
+            display:block;max-width:72vw;max-height:75vh;border-radius:10px;
+            pointer-events:none;filter:saturate(1.04) contrast(1.015);
+            transition:filter .5s ease;
+        }
+        .slide.active:hover .card-face img{filter:saturate(1.1) contrast(1.03)}
+
+        .card-shine{
+            position:absolute;inset:0;
+            background:linear-gradient(105deg,transparent 38%,rgba(255,255,255,.08) 42%,
+            rgba(255,255,255,.2) 48%,rgba(255,255,255,.28) 50%,rgba(255,255,255,.2) 52%,
+            rgba(255,255,255,.08) 58%,transparent 62%);
+            pointer-events:none;z-index:3;opacity:0;transform:translateX(-130%);border-radius:10px;
+        }
+        .slide.active:hover .card-shine{animation:shineGo 1.5s ease forwards}
+        @keyframes shineGo{0%{opacity:1;transform:translateX(-130%)}100%{opacity:1;transform:translateX(130%)}}
+
+        .card-spec{
+            position:absolute;inset:0;pointer-events:none;z-index:4;border-radius:10px;
+            opacity:0;transition:opacity .4s ease;
+            background:radial-gradient(circle at var(--sx,50%) var(--sy,50%),rgba(255,255,255,.14) 0%,transparent 50%);
+        }
+        .slide.active:hover .card-spec{opacity:1}
+
+        .card-grad{
+            position:absolute;bottom:0;left:0;right:0;height:35%;
+            background:linear-gradient(to top,rgba(0,0,0,.04),transparent);
+            pointer-events:none;z-index:2;border-radius:0 0 10px 10px;
         }
 
-        .slide.active {
-            opacity: 1;
-            z-index: 20;
-            filter: none;
+        .card-lbl{
+            position:absolute;bottom:18px;left:22px;z-index:6;
+            font-family:var(--f-body);font-size:.46rem;font-weight:400;
+            letter-spacing:4px;text-transform:uppercase;
+            color:rgba(255,255,255,.55);text-shadow:0 1px 6px rgba(0,0,0,.25);
+            opacity:0;transform:translateY(8px);
+            transition:opacity .5s ease,transform .5s var(--expo);
+        }
+        .slide.active:hover .card-lbl{opacity:1;transform:translateY(0)}
+
+        .card-num{
+            position:absolute;top:16px;right:20px;z-index:6;
+            font-family:var(--f-body);font-size:.43rem;font-weight:300;
+            letter-spacing:3px;color:rgba(255,255,255,.35);
+            opacity:0;transition:opacity .5s ease;
+        }
+        .slide.active:hover .card-num{opacity:1}
+
+        .card-shadow{
+            position:absolute;bottom:-22px;left:8%;right:8%;height:35px;
+            background:radial-gradient(ellipse at center,rgba(0,0,0,.05),transparent 70%);
+            filter:blur(12px);z-index:-1;
         }
 
-        .slide.prev-1 {
-            opacity: 0.35;
-            z-index: 15;
-            filter: blur(1.5px) brightness(0.98);
-            pointer-events: none;
+        .cbr{position:absolute;width:16px;height:16px;z-index:7;pointer-events:none;opacity:0;transition:opacity .4s ease .1s}
+        .slide.active:hover .cbr{opacity:1}
+        .cbr.tl{top:-6px;left:-6px;border-top:1px solid rgba(0,0,0,.15);border-left:1px solid rgba(0,0,0,.15)}
+        .cbr.tr{top:-6px;right:-6px;border-top:1px solid rgba(0,0,0,.15);border-right:1px solid rgba(0,0,0,.15)}
+        .cbr.bl{bottom:-6px;left:-6px;border-bottom:1px solid rgba(0,0,0,.15);border-left:1px solid rgba(0,0,0,.15)}
+        .cbr.br{bottom:-6px;right:-6px;border-bottom:1px solid rgba(0,0,0,.15);border-right:1px solid rgba(0,0,0,.15)}
+
+        /* ==========================================
+           FULLSCREEN VIEWER (click to open)
+           ========================================== */
+        .viewer{
+            position:fixed;inset:0;z-index:8000;
+            background:rgba(255,255,255,.98);
+            backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);
+            display:flex;align-items:center;justify-content:center;
+            opacity:0;pointer-events:none;
+            transition:opacity .5s var(--expo);
+        }
+        .viewer.on{opacity:1;pointer-events:all}
+
+        .viewer-close{
+            position:fixed;top:25px;right:30px;z-index:8001;
+            width:42px;height:42px;border:1px solid rgba(0,0,0,.08);
+            border-radius:50%;background:rgba(255,255,255,.8);
+            backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+            display:flex;align-items:center;justify-content:center;
+            font-size:17px;color:rgba(0,0,0,.35);cursor:none;
+            transition:all .3s ease;
+            opacity:0;pointer-events:none;
+        }
+        .viewer.on .viewer-close{opacity:1;pointer-events:all}
+        .viewer-close:hover{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.18);color:rgba(0,0,0,.6)}
+
+        .vp{
+            width:90vw;height:90vh;overflow:hidden;cursor:grab;
+            display:flex;align-items:center;justify-content:center;
+            position:relative;
+        }
+        .vp:active{cursor:grabbing}
+
+        .vp-container{
+            transform-origin:center center;will-change:transform;
+            display:flex;align-items:center;justify-content:center;
+        }
+        .vp-container.anim{transition:transform .4s var(--expo)}
+
+        .vp-container img{
+            max-width:85vw;max-height:85vh;border-radius:8px;
+            pointer-events:none;filter:saturate(1.04) contrast(1.015);
         }
 
-        .slide.next-1 {
-            opacity: 0.35;
-            z-index: 15;
-            filter: blur(1.5px) brightness(0.98);
-            pointer-events: none;
+        /* zoom controls in viewer */
+        .vz{
+            position:fixed;bottom:30px;left:50%;
+            transform:translateX(-50%) translateY(15px);
+            display:flex;align-items:center;gap:12px;
+            padding:9px 20px;background:rgba(255,255,255,.92);
+            backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+            border:1px solid rgba(0,0,0,.04);border-radius:40px;
+            box-shadow:0 4px 30px rgba(0,0,0,.03);z-index:8002;
+            opacity:0;pointer-events:none;
+            transition:opacity .4s ease,transform .4s var(--expo);
         }
+        .viewer.on .vz{opacity:1;pointer-events:all;transform:translateX(-50%) translateY(0);transition-delay:.15s}
 
-        .slide.prev-2 {
-            opacity: 0.12;
-            z-index: 10;
-            filter: blur(3px) brightness(0.95);
-            pointer-events: none;
+        .vz button{
+            background:none;border:1px solid rgba(0,0,0,.07);
+            width:30px;height:30px;border-radius:50%;font-size:15px;
+            font-weight:300;color:var(--med);cursor:none;
+            display:flex;align-items:center;justify-content:center;
+            transition:all .25s ease;
         }
+        .vz button:hover{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.15);color:var(--txt)}
+        .vz button:active{transform:scale(.88)}
+        .vz .pct{font-size:.55rem;font-weight:300;letter-spacing:2px;color:var(--soft);min-width:42px;text-align:center;font-variant-numeric:tabular-nums}
+        .vz .sep{width:1px;height:14px;background:rgba(0,0,0,.05)}
+        .vz .rst{width:auto;padding:0 13px;border-radius:16px;font-size:.43rem;letter-spacing:2px;text-transform:uppercase}
 
-        .slide.next-2 {
-            opacity: 0.12;
-            z-index: 10;
-            filter: blur(3px) brightness(0.95);
-            pointer-events: none;
+        /* minimap in viewer */
+        .mm{
+            position:fixed;bottom:85px;right:25px;width:110px;height:80px;
+            border:1px solid rgba(0,0,0,.05);border-radius:5px;overflow:hidden;
+            z-index:8002;background:var(--bg);box-shadow:0 4px 18px rgba(0,0,0,.02);
+            opacity:0;pointer-events:none;transform:translateY(6px) scale(.95);
+            transition:opacity .4s ease,transform .4s var(--expo);
         }
+        .mm.on{opacity:1;transform:translateY(0) scale(1)}
+        .mm img{width:100%;height:100%;object-fit:contain;opacity:.35;pointer-events:none}
+        .mm-vp{position:absolute;border:1.5px solid rgba(0,0,0,.3);border-radius:2px;background:rgba(0,0,0,.03);pointer-events:none}
 
-        .slide.far-away {
-            opacity: 0;
-            z-index: 1;
-            pointer-events: none;
+        /* image info panel in viewer */
+        .viewer-info{
+            position:fixed;top:28px;left:35px;z-index:8001;
+            opacity:0;pointer-events:none;transition:opacity .5s ease .3s;
         }
+        .viewer.on .viewer-info{opacity:1}
+        .viewer-info .vi-title{font-family:var(--f-disp);font-size:.9rem;letter-spacing:4px;color:var(--soft)}
+        .viewer-info .vi-cat{font-family:var(--f-acc);font-size:.65rem;font-style:italic;letter-spacing:2px;color:var(--mut);margin-top:3px}
 
-        /* ============================================
-           SLIDE INNER (3D card)
-           ============================================ */
-        .slide-card {
-            position: relative;
-            transform-style: preserve-3d;
-            border-radius: 10px;
-            transition: box-shadow 0.5s ease, transform 0.12s ease;
+        /* ==========================================
+           NAV ZONES
+           ========================================== */
+        .nz{
+            position:fixed;top:0;width:14%;height:100%;z-index:100;
+            display:flex;align-items:center;cursor:none;
         }
-
-        .slide.active .slide-card {
-            box-shadow:
-                0 30px 80px rgba(0,0,0,0.07),
-                0 15px 40px rgba(0,0,0,0.04),
-                0 5px 15px rgba(0,0,0,0.03);
+        .nz.l{left:0;justify-content:flex-start;padding-left:25px}
+        .nz.r{right:0;justify-content:flex-end;padding-right:25px}
+        .nz-btn{
+            width:46px;height:46px;border:1px solid rgba(0,0,0,.06);border-radius:50%;
+            display:flex;align-items:center;justify-content:center;
+            font-size:15px;font-weight:300;color:var(--soft);
+            background:rgba(255,255,255,.7);backdrop-filter:blur(10px);
+            opacity:0;transform:scale(.75);transition:all .4s var(--expo);
         }
+        .nz:hover .nz-btn{opacity:1;transform:scale(1)}
+        .nz:active .nz-btn{transform:scale(.88);background:rgba(0,0,0,.03)}
 
-        .slide.active:hover .slide-card {
-            box-shadow:
-                0 40px 100px rgba(0,0,0,0.09),
-                0 20px 50px rgba(0,0,0,0.05),
-                0 8px 20px rgba(0,0,0,0.04);
-        }
-
-        .slide-card-face {
-            position: relative;
-            border-radius: 10px;
-            overflow: hidden;
-            backface-visibility: hidden;
-            background: #f8f8f8;
-        }
-
-        .slide-card-face img {
-            display: block;
-            max-width: 72vw;
-            max-height: 75vh;
-            border-radius: 10px;
-            pointer-events: none;
-            filter: saturate(1.04) contrast(1.015);
-            transition: filter 0.5s ease;
-        }
-
-        .slide.active:hover .slide-card-face img {
-            filter: saturate(1.1) contrast(1.03);
-        }
-
-        /* Card border overlay */
-        .slide-card-face::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border: 1px solid rgba(0,0,0,0.04);
-            border-radius: 10px;
-            pointer-events: none;
-            z-index: 5;
-        }
-
-        /* ============================================
-           SHINE / GLARE EFFECT
-           ============================================ */
-        .card-shine {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(
-                105deg,
-                transparent 38%,
-                rgba(255,255,255,0.08) 42%,
-                rgba(255,255,255,0.18) 48%,
-                rgba(255,255,255,0.25) 50%,
-                rgba(255,255,255,0.18) 52%,
-                rgba(255,255,255,0.08) 58%,
-                transparent 62%
-            );
-            pointer-events: none;
-            z-index: 3;
-            opacity: 0;
-            transform: translateX(-130%);
-            border-radius: 10px;
-        }
-
-        .slide.active:hover .card-shine {
-            animation: shineSwipe 1.6s ease forwards;
-        }
-
-        @keyframes shineSwipe {
-            0% { opacity: 1; transform: translateX(-130%); }
-            100% { opacity: 1; transform: translateX(130%); }
-        }
-
-        /* ============================================
-           SPECULAR HIGHLIGHT (follows mouse)
-           ============================================ */
-        .card-specular {
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            z-index: 4;
-            border-radius: 10px;
-            opacity: 0;
-            transition: opacity 0.4s ease;
-            background: radial-gradient(
-                circle at var(--spec-x, 50%) var(--spec-y, 50%),
-                rgba(255,255,255,0.12) 0%,
-                transparent 50%
-            );
-        }
-
-        .slide.active:hover .card-specular {
-            opacity: 1;
-        }
-
-        /* ============================================
-           GRADIENT OVERLAY AT BOTTOM
-           ============================================ */
-        .card-gradient {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 35%;
-            background: linear-gradient(to top, rgba(0,0,0,0.04), transparent);
-            pointer-events: none;
-            z-index: 2;
-            border-radius: 0 0 10px 10px;
-        }
-
-        /* ============================================
-           IMAGE LABEL ON HOVER
-           ============================================ */
-        .card-label {
-            position: absolute;
-            bottom: 18px;
-            left: 22px;
-            z-index: 6;
-            font-family: var(--font-body);
-            font-size: 0.48rem;
-            font-weight: 400;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            color: rgba(255,255,255,0.55);
-            text-shadow: 0 1px 6px rgba(0,0,0,0.25);
-            opacity: 0;
-            transform: translateY(8px);
-            transition: opacity 0.5s ease, transform 0.5s var(--ease-out-expo);
-        }
-
-        .slide.active:hover .card-label {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .card-number {
-            position: absolute;
-            top: 16px;
-            right: 20px;
-            z-index: 6;
-            font-family: var(--font-body);
-            font-size: 0.45rem;
-            font-weight: 300;
-            letter-spacing: 3px;
-            color: rgba(255,255,255,0.35);
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        }
-
-        .slide.active:hover .card-number {
-            opacity: 1;
-        }
-
-        /* ============================================
-           CARD SHADOW (floor reflection)
-           ============================================ */
-        .card-floor-shadow {
-            position: absolute;
-            bottom: -25px;
-            left: 8%;
-            right: 8%;
-            height: 40px;
-            background: radial-gradient(ellipse at center, rgba(0,0,0,0.05), transparent 70%);
-            filter: blur(14px);
-            z-index: -1;
-            transform: translateZ(-2px) rotateX(85deg);
-            transform-origin: top center;
-            transition: opacity 0.6s ease, transform 0.6s ease;
-        }
-
-        .slide.active:hover .card-floor-shadow {
-            opacity: 0.6;
-            transform: translateZ(-2px) rotateX(85deg) translateY(4px);
-        }
-
-        /* ============================================
-           CORNER BRACKETS
-           ============================================ */
-        .corner-bracket {
-            position: absolute;
-            width: 18px;
-            height: 18px;
-            z-index: 7;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.4s ease 0.1s;
-        }
-
-        .slide.active:hover .corner-bracket {
-            opacity: 1;
-        }
-
-        .corner-bracket.tl { top: -7px; left: -7px; border-top: 1px solid rgba(0,0,0,0.15); border-left: 1px solid rgba(0,0,0,0.15); }
-        .corner-bracket.tr { top: -7px; right: -7px; border-top: 1px solid rgba(0,0,0,0.15); border-right: 1px solid rgba(0,0,0,0.15); }
-        .corner-bracket.bl { bottom: -7px; left: -7px; border-bottom: 1px solid rgba(0,0,0,0.15); border-left: 1px solid rgba(0,0,0,0.15); }
-        .corner-bracket.br { bottom: -7px; right: -7px; border-bottom: 1px solid rgba(0,0,0,0.15); border-right: 1px solid rgba(0,0,0,0.15); }
-
-        /* ============================================
-           NAVIGATION ZONES (left/right edges)
-           ============================================ */
-        .nav-zone {
-            position: fixed;
-            top: 0;
-            width: 14%;
-            height: 100%;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            cursor: none;
-        }
-
-        .nav-zone.left {
-            left: 0;
-            justify-content: flex-start;
-            padding-left: 28px;
-        }
-
-        .nav-zone.right {
-            right: 0;
-            justify-content: flex-end;
-            padding-right: 28px;
-        }
-
-        .nav-btn {
-            width: 48px;
-            height: 48px;
-            border: 1px solid rgba(0,0,0,0.06);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: var(--font-body);
-            font-size: 16px;
-            font-weight: 300;
-            color: var(--color-soft);
-            background: rgba(255,255,255,0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            opacity: 0;
-            transform: scale(0.75);
-            transition: all 0.45s var(--ease-out-expo);
-        }
-
-        .nav-zone:hover .nav-btn {
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        .nav-zone:active .nav-btn {
-            transform: scale(0.88);
-            background: rgba(0,0,0,0.03);
-        }
-
-        /* ============================================
+        /* ==========================================
            BOTTOM BAR
-           ============================================ */
-        .bottom-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 90px;
-            z-index: 500;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            background: linear-gradient(to top, rgba(255,255,255,0.97) 0%, rgba(255,255,255,0.7) 60%, transparent 100%);
-            pointer-events: none;
-            opacity: 0;
-            transform: translateY(15px);
-            transition: opacity 0.8s ease 0.4s, transform 0.8s var(--ease-out-expo) 0.4s;
+           ========================================== */
+        .botbar{
+            position:fixed;bottom:0;left:0;right:0;height:85px;z-index:500;
+            display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+            background:linear-gradient(to top,rgba(255,255,255,.97) 0%,rgba(255,255,255,.6) 60%,transparent 100%);
+            pointer-events:none;opacity:0;transform:translateY(12px);
+            transition:opacity .8s ease .4s,transform .8s var(--expo) .4s;
         }
+        .botbar.on{opacity:1;transform:translateY(0)}
 
-        .bottom-bar.visible {
-            opacity: 1;
-            transform: translateY(0);
+        .film{
+            display:flex;gap:5px;align-items:center;pointer-events:all;
+            padding:4px 8px;border-radius:8px;
+            background:rgba(255,255,255,.5);backdrop-filter:blur(8px);
         }
-
-        /* ============================================
-           THUMBNAIL FILMSTRIP
-           ============================================ */
-        .filmstrip {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-            pointer-events: all;
-            padding: 4px 8px;
-            border-radius: 8px;
-            background: rgba(255,255,255,0.5);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+        .ft{
+            width:38px;height:26px;border-radius:4px;overflow:hidden;
+            border:1.5px solid transparent;opacity:.3;cursor:none;
+            transition:all .35s var(--expo);flex-shrink:0;
         }
+        .ft.on{border-color:rgba(0,0,0,.25);opacity:1;transform:scale(1.15)}
+        .ft:hover{opacity:.7;transform:scale(1.08)}
+        .ft img{width:100%;height:100%;object-fit:cover;pointer-events:none;border-radius:2.5px}
 
-        .filmstrip-thumb {
-            width: 40px;
-            height: 28px;
-            border-radius: 4px;
-            overflow: hidden;
-            border: 1.5px solid transparent;
-            opacity: 0.35;
-            cursor: none;
-            transition: all 0.35s var(--ease-out-expo);
-            flex-shrink: 0;
+        .dots{display:flex;gap:7px;align-items:center;pointer-events:all}
+        .dot{
+            width:5px;height:5px;border-radius:50%;background:var(--mut);
+            cursor:none;transition:all .4s var(--expo);
         }
+        .dot.on{width:20px;border-radius:3px;background:var(--med)}
+        .dot:hover{background:var(--soft)}
 
-        .filmstrip-thumb.active {
-            border-color: rgba(0,0,0,0.25);
-            opacity: 1;
-            transform: scale(1.15);
+        /* side badge */
+        .badge{
+            position:fixed;top:50%;right:28px;transform:translateY(-50%);z-index:200;
+            display:flex;flex-direction:column;align-items:center;gap:5px;
+            opacity:0;transition:opacity .8s ease .5s;
         }
+        .badge.on{opacity:1}
+        .badge-ln{width:1px;height:28px;background:var(--sub)}
+        .badge-n{font-family:var(--f-disp);font-size:1.3rem;font-weight:300;color:var(--mut);line-height:1}
+        .badge-t{font-size:.38rem;letter-spacing:3px;color:var(--mut);text-transform:uppercase}
 
-        .filmstrip-thumb:hover {
-            opacity: 0.75;
-            transform: scale(1.08);
+        .catlbl{
+            position:fixed;top:50%;left:28px;
+            transform:translateY(-50%) rotate(-90deg);transform-origin:center;
+            z-index:200;font-family:var(--f-body);font-size:.4rem;
+            letter-spacing:6px;text-transform:uppercase;color:var(--mut);
+            white-space:nowrap;opacity:0;transition:opacity .6s ease;
         }
+        .catlbl.on{opacity:1}
 
-        .filmstrip-thumb img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            pointer-events: none;
-            border-radius: 2.5px;
+        /* ==========================================
+           FLASH
+           ========================================== */
+        .flash{
+            position:fixed;inset:0;background:rgba(255,255,255,.35);
+            pointer-events:none;z-index:30000;opacity:0;transition:opacity .12s ease;
         }
+        .flash.go{opacity:1}
 
-        /* ============================================
-           DOT INDICATORS
-           ============================================ */
-        .dot-row {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            pointer-events: all;
+        /* ==========================================
+           HELP OVERLAY
+           ========================================== */
+        .help{
+            position:fixed;inset:0;background:rgba(255,255,255,.97);
+            backdrop-filter:blur(20px);z-index:20000;
+            display:flex;flex-direction:column;align-items:center;justify-content:center;
+            opacity:0;pointer-events:none;transition:opacity .4s ease;
         }
-
-        .dot-ind {
-            width: 5px;
-            height: 5px;
-            border-radius: 50%;
-            background: var(--color-muted);
-            cursor: none;
-            transition: all 0.4s var(--ease-out-expo);
+        .help.on{opacity:1;pointer-events:all}
+        .help h2{font-family:var(--f-disp);font-size:1.1rem;letter-spacing:8px;text-transform:uppercase;color:var(--soft);margin-bottom:35px}
+        .help-grid{display:grid;grid-template-columns:auto auto;gap:12px 35px}
+        .help-k{font-size:.58rem;font-weight:500;letter-spacing:2px;color:var(--med);text-align:right;padding:4px 10px;background:rgba(0,0,0,.03);border-radius:4px}
+        .help-d{font-size:.58rem;font-weight:300;letter-spacing:1px;color:var(--soft);display:flex;align-items:center}
+        .help .close{
+            margin-top:35px;font-family:var(--f-acc);font-size:.75rem;
+            font-style:italic;letter-spacing:3px;color:var(--soft);cursor:none;
+            padding:8px 24px;border:1px solid var(--sub);border-radius:20px;
+            background:none;transition:all .3s ease;
         }
+        .help .close:hover{border-color:var(--soft);background:rgba(0,0,0,.02)}
 
-        .dot-ind.active {
-            width: 22px;
-            border-radius: 3px;
-            background: var(--color-medium);
-        }
+        /* ==========================================
+           AMBIENT
+           ========================================== */
+        .amb{position:fixed;width:100px;height:100px;pointer-events:none;z-index:0;opacity:.2}
+        .amb.tl{top:22px;left:22px;border-top:1px solid rgba(0,0,0,.03);border-left:1px solid rgba(0,0,0,.03)}
+        .amb.tr{top:22px;right:22px;border-top:1px solid rgba(0,0,0,.03);border-right:1px solid rgba(0,0,0,.03)}
+        .amb.bl{bottom:22px;left:22px;border-bottom:1px solid rgba(0,0,0,.03);border-left:1px solid rgba(0,0,0,.03)}
+        .amb.br{bottom:22px;right:22px;border-bottom:1px solid rgba(0,0,0,.03);border-right:1px solid rgba(0,0,0,.03)}
+        .ap{position:fixed;width:2px;height:2px;background:rgba(0,0,0,.03);border-radius:50%;pointer-events:none;z-index:0}
+        @keyframes aFloat{0%,100%{transform:translate(0,0)}33%{transform:translate(10px,-16px)}66%{transform:translate(-8px,-24px)}}
+        @keyframes aPulse{0%,100%{opacity:.03}50%{opacity:.07}}
 
-        .dot-ind:hover {
-            background: var(--color-soft);
-        }
-
-        /* ============================================
-           ZOOM CONTROLS HUD
-           ============================================ */
-        .zoom-controls {
-            position: fixed;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%) translateY(18px);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 9px 20px;
-            background: rgba(255,255,255,0.92);
-            backdrop-filter: blur(22px);
-            -webkit-backdrop-filter: blur(22px);
-            border: 1px solid rgba(0,0,0,0.04);
-            border-radius: 40px;
-            box-shadow: 0 4px 30px rgba(0,0,0,0.03);
-            z-index: 600;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.4s ease, transform 0.4s var(--ease-out-expo);
-        }
-
-        .zoom-controls.visible {
-            opacity: 1;
-            pointer-events: all;
-            transform: translateX(-50%) translateY(0);
-        }
-
-        .zc-btn {
-            background: none;
-            border: 1px solid rgba(0,0,0,0.07);
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            font-size: 14px;
-            font-weight: 300;
-            color: var(--color-medium);
-            cursor: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.25s ease;
-        }
-
-        .zc-btn:hover {
-            background: rgba(0,0,0,0.04);
-            border-color: rgba(0,0,0,0.15);
-            color: var(--color-text);
-        }
-
-        .zc-btn:active { transform: scale(0.88); }
-
-        .zc-pct {
-            font-size: 0.55rem;
-            font-weight: 300;
-            letter-spacing: 2px;
-            color: var(--color-soft);
-            min-width: 42px;
-            text-align: center;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .zc-sep { width: 1px; height: 14px; background: rgba(0,0,0,0.05); }
-
-        .zc-reset {
-            width: auto;
-            padding: 0 13px;
-            border-radius: 16px;
-            font-size: 0.43rem;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        /* ============================================
-           MINIMAP
-           ============================================ */
-        .minimap {
-            position: fixed;
-            bottom: 105px;
-            right: 28px;
-            width: 100px;
-            height: 72px;
-            border: 1px solid rgba(0,0,0,0.05);
-            border-radius: 5px;
-            overflow: hidden;
-            z-index: 600;
-            background: var(--color-bg);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
-            opacity: 0;
-            pointer-events: none;
-            transform: translateY(8px) scale(0.95);
-            transition: opacity 0.4s ease, transform 0.4s var(--ease-out-expo);
-        }
-
-        .minimap.visible {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-        }
-
-        .minimap img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            opacity: 0.35;
-            pointer-events: none;
-        }
-
-        .minimap-vp {
-            position: absolute;
-            border: 1.5px solid rgba(0,0,0,0.3);
-            border-radius: 2px;
-            background: rgba(0,0,0,0.03);
-            pointer-events: none;
-        }
-
-        /* ============================================
-           AMBIENT DECORATION
-           ============================================ */
-        .ambient-corner {
-            position: fixed;
-            width: 110px;
-            height: 110px;
-            pointer-events: none;
-            z-index: 0;
-            opacity: 0.2;
-        }
-
-        .ambient-corner.tl { top: 22px; left: 22px; border-top: 1px solid rgba(0,0,0,0.03); border-left: 1px solid rgba(0,0,0,0.03); }
-        .ambient-corner.tr { top: 22px; right: 22px; border-top: 1px solid rgba(0,0,0,0.03); border-right: 1px solid rgba(0,0,0,0.03); }
-        .ambient-corner.bl { bottom: 22px; left: 22px; border-bottom: 1px solid rgba(0,0,0,0.03); border-left: 1px solid rgba(0,0,0,0.03); }
-        .ambient-corner.br { bottom: 22px; right: 22px; border-bottom: 1px solid rgba(0,0,0,0.03); border-right: 1px solid rgba(0,0,0,0.03); }
-
-        .ambient-particle {
-            position: fixed;
-            width: 2px;
-            height: 2px;
-            background: rgba(0,0,0,0.03);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .ambient-shimmer {
-            position: fixed;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(0,0,0,0.03), transparent);
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        @keyframes ambientFloat {
-            0%, 100% { transform: translate(0, 0); }
-            25% { transform: translate(12px, -18px); }
-            50% { transform: translate(-8px, -28px); }
-            75% { transform: translate(-14px, -12px); }
-        }
-
-        @keyframes ambientPulse {
-            0%, 100% { opacity: 0.03; }
-            50% { opacity: 0.07; }
-        }
-
-        /* ============================================
-           TRANSITION FLASH
-           ============================================ */
-        .flash-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(255,255,255,0.35);
-            pointer-events: none;
-            z-index: 30000;
-            opacity: 0;
-            transition: opacity 0.12s ease;
-        }
-
-        .flash-overlay.flash {
-            opacity: 1;
-        }
-
-        /* ============================================
-           KEYBOARD SHORTCUTS OVERLAY
-           ============================================ */
-        .shortcuts-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(255,255,255,0.96);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            z-index: 20000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.4s ease;
-        }
-
-        .shortcuts-overlay.visible {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        .shortcuts-title {
-            font-family: var(--font-display);
-            font-size: 1.2rem;
-            letter-spacing: 8px;
-            text-transform: uppercase;
-            color: var(--color-soft);
-            margin-bottom: 40px;
-        }
-
-        .shortcuts-grid {
-            display: grid;
-            grid-template-columns: auto auto;
-            gap: 14px 40px;
-        }
-
-        .sc-key {
-            font-family: var(--font-body);
-            font-size: 0.6rem;
-            font-weight: 500;
-            letter-spacing: 2px;
-            color: var(--color-medium);
-            text-align: right;
-            padding: 4px 10px;
-            background: rgba(0,0,0,0.03);
-            border-radius: 4px;
-        }
-
-        .sc-desc {
-            font-family: var(--font-body);
-            font-size: 0.6rem;
-            font-weight: 300;
-            letter-spacing: 1px;
-            color: var(--color-soft);
-            display: flex;
-            align-items: center;
-        }
-
-        .shortcuts-close {
-            margin-top: 40px;
-            font-family: var(--font-accent);
-            font-size: 0.75rem;
-            font-style: italic;
-            letter-spacing: 3px;
-            color: var(--color-soft);
-            cursor: none;
-            padding: 8px 24px;
-            border: 1px solid var(--color-subtle);
-            border-radius: 20px;
-            background: none;
-            transition: all 0.3s ease;
-        }
-
-        .shortcuts-close:hover {
-            border-color: var(--color-soft);
-            background: rgba(0,0,0,0.02);
-        }
-
-        /* ============================================
-           SLIDE COUNTER BADGE
-           ============================================ */
-        .slide-badge {
-            position: fixed;
-            top: 50%;
-            right: 30px;
-            transform: translateY(-50%);
-            z-index: 200;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-            opacity: 0;
-            transition: opacity 0.8s ease 0.5s;
-        }
-
-        .slide-badge.visible {
-            opacity: 1;
-        }
-
-        .badge-line {
-            width: 1px;
-            height: 30px;
-            background: var(--color-subtle);
-        }
-
-        .badge-num {
-            font-family: var(--font-display);
-            font-size: 1.4rem;
-            font-weight: 300;
-            color: var(--color-muted);
-            line-height: 1;
-        }
-
-        .badge-total {
-            font-size: 0.4rem;
-            letter-spacing: 3px;
-            color: var(--color-muted);
-            text-transform: uppercase;
-        }
-
-        /* ============================================
-           CATEGORY LABEL
-           ============================================ */
-        .category-label {
-            position: fixed;
-            top: 50%;
-            left: 30px;
-            transform: translateY(-50%) rotate(-90deg);
-            transform-origin: center center;
-            z-index: 200;
-            font-family: var(--font-body);
-            font-size: 0.42rem;
-            letter-spacing: 6px;
-            text-transform: uppercase;
-            color: var(--color-muted);
-            white-space: nowrap;
-            opacity: 0;
-            transition: opacity 0.6s ease, color 0.4s ease;
-        }
-
-        .category-label.visible {
-            opacity: 1;
-        }
-
-        /* ============================================
+        /* ==========================================
            RESPONSIVE
-           ============================================ */
-        @media (max-width: 768px) {
-            body { cursor: auto; }
-            .cursor-ring, .cursor-dot, .cursor-label { display: none !important; }
-            .slide-card-face img { max-width: 92vw; max-height: 68vh; }
-            .nav-zone { width: 18%; }
-            .nav-btn { width: 36px; height: 36px; font-size: 13px; }
-            .top-bar { padding: 0 18px; height: 60px; }
-            .tb-keys, .tb-counter { display: none; }
-            .tb-brand { font-size: 0.55rem; letter-spacing: 5px; }
-            .ambient-corner { display: none; }
-            .slide-badge { display: none; }
-            .category-label { display: none; }
-            .filmstrip-thumb { width: 32px; height: 22px; }
-            .minimap { display: none; }
-            .shortcuts-overlay { padding: 20px; }
+           ========================================== */
+        @media(max-width:768px){
+            body{cursor:auto}
+            .cur-ring,.cur-dot,.cur-lbl{display:none!important}
+            .card-face img{max-width:92vw;max-height:68vh}
+            .nz{width:18%}
+            .nz-btn{width:34px;height:34px;font-size:12px}
+            .topbar{padding:0 16px;height:55px}
+            .topbar .keys,.topbar .ctr{display:none}
+            .topbar .brand{font-size:.5rem;letter-spacing:4px}
+            .amb,.badge,.catlbl{display:none}
+            .ft{width:30px;height:20px}
+            .mm{display:none}
+            .vp-container img{max-width:95vw;max-height:90vh}
         }
-
-        @media (max-width: 480px) {
-            .top-bar { padding: 0 12px; }
-            .tb-title { display: none; }
-            .filmstrip { gap: 4px; }
-            .filmstrip-thumb { width: 26px; height: 18px; }
+        @media(max-width:480px){
+            .topbar .center{display:none}
+            .film{gap:3px}.ft{width:24px;height:16px}
         }
     </style>
 </head>
 <body>
 
-    <!-- Cursor -->
-    <div class="cursor-ring" id="cursorRing"></div>
-    <div class="cursor-dot" id="cursorDot"></div>
-    <div class="cursor-label" id="cursorLabel"></div>
+<div class="cur-ring" id="cR"></div>
+<div class="cur-dot" id="cD"></div>
+<div class="cur-lbl" id="cL"></div>
 
-    <!-- Loader -->
-    <div class="loader-screen" id="loaderScreen">
-        <div class="loader-logo">Gallery</div>
-        <div class="loader-tagline">a curated collection</div>
-        <div class="loader-progress-track">
-            <div class="loader-progress-fill" id="loaderFill"></div>
+<div class="loader" id="loader">
+    <h1>Gallery</h1>
+    <div class="tag">a curated collection</div>
+    <div class="track"><div class="fill" id="lFill"></div></div>
+    <div class="pct" id="lPct">0%</div>
+    <div class="cnt" id="lCnt">Loading images...</div>
+</div>
+
+<div class="intro" id="intro">
+    <div class="big">The Gallery</div>
+    <div class="sub" id="iSub">9 photographs</div>
+    <div class="iline"></div>
+    <button class="enter" id="iEnter">Enter Gallery</button>
+</div>
+
+<div class="flash" id="flash"></div>
+
+<div class="amb tl"></div><div class="amb tr"></div><div class="amb bl"></div><div class="amb br"></div>
+
+<div class="page-prog" id="pProg"></div>
+
+<div class="topbar" id="topbar">
+    <div class="brand">G A L L E R Y</div>
+    <div class="center">
+        <span class="title" id="tTitle"></span>
+        <span class="cat" id="tCat"></span>
+    </div>
+    <div class="meta">
+        <div class="keys">← → scroll | dbl-click to view | ? help</div>
+        <div class="ctr" id="tCtr">1 / 9</div>
+    </div>
+</div>
+
+<div class="stage" id="stage"><div class="scene" id="scene"></div></div>
+
+<div class="nz l" id="nL"><div class="nz-btn">←</div></div>
+<div class="nz r" id="nR"><div class="nz-btn">→</div></div>
+
+<div class="badge" id="badge">
+    <div class="badge-ln"></div>
+    <div class="badge-n" id="bNum">1</div>
+    <div class="badge-t" id="bTot">of 9</div>
+    <div class="badge-ln"></div>
+</div>
+
+<div class="catlbl" id="catLbl">Anthony</div>
+
+<div class="botbar" id="botbar">
+    <div class="film" id="film"></div>
+    <div class="dots" id="dots"></div>
+</div>
+
+<!-- ============ FULLSCREEN VIEWER ============ -->
+<div class="viewer" id="viewer">
+    <button class="viewer-close" id="vClose">✕</button>
+    <div class="viewer-info">
+        <div class="vi-title" id="viTitle"></div>
+        <div class="vi-cat" id="viCat"></div>
+    </div>
+    <div class="vp" id="vp">
+        <div class="vp-container" id="vpc">
+            <img id="vpImg" src="" alt="" draggable="false">
         </div>
-        <div class="loader-percent" id="loaderPct">0%</div>
-        <div class="loader-count" id="loaderCount">Loading images...</div>
     </div>
-
-    <!-- Intro Splash -->
-    <div class="intro-splash" id="introSplash">
-        <div class="intro-big-title">The Gallery</div>
-        <div class="intro-count-label" id="introCount">9 photographs</div>
-        <div class="intro-line"></div>
-        <div class="intro-enter" id="introEnter">Enter Gallery</div>
+    <div class="vz">
+        <button id="vzOut">−</button>
+        <div class="pct" id="vzPct">100%</div>
+        <button id="vzIn">+</button>
+        <div class="sep"></div>
+        <button class="rst" id="vzRst">Reset</button>
     </div>
+</div>
 
-    <!-- Flash overlay -->
-    <div class="flash-overlay" id="flashOverlay"></div>
+<div class="mm" id="mm">
+    <img id="mmImg" src="" alt="" draggable="false">
+    <div class="mm-vp" id="mmVp"></div>
+</div>
 
-    <!-- Ambient -->
-    <div class="ambient-corner tl"></div>
-    <div class="ambient-corner tr"></div>
-    <div class="ambient-corner bl"></div>
-    <div class="ambient-corner br"></div>
-
-    <!-- Progress -->
-    <div class="page-progress" id="pageProgress"></div>
-
-    <!-- Top bar -->
-    <div class="top-bar" id="topBar">
-        <div class="tb-brand">G A L L E R Y</div>
-        <div class="tb-title">
-            <span class="tb-title-main" id="tbTitleMain"></span>
-            <span class="tb-title-sub" id="tbTitleSub"></span>
-        </div>
-        <div class="tb-meta">
-            <div class="tb-keys">← → &nbsp;|&nbsp; scroll &nbsp;|&nbsp; ? help</div>
-            <div class="tb-counter" id="tbCounter">1 / 9</div>
-        </div>
+<div class="help" id="help">
+    <h2>Keyboard Shortcuts</h2>
+    <div class="help-grid">
+        <div class="help-k">← →</div><div class="help-d">Navigate slides</div>
+        <div class="help-k">SCROLL</div><div class="help-d">Navigate slides</div>
+        <div class="help-k">CLICK / ENTER</div><div class="help-d">Open full viewer</div>
+        <div class="help-k">ESC</div><div class="help-d">Close viewer</div>
+        <div class="help-k">+ −</div><div class="help-d">Zoom in / out (in viewer)</div>
+        <div class="help-k">0</div><div class="help-d">Reset zoom</div>
+        <div class="help-k">ARROWS</div><div class="help-d">Pan when zoomed</div>
+        <div class="help-k">DBL CLICK</div><div class="help-d">Toggle 3× zoom</div>
+        <div class="help-k">DRAG</div><div class="help-d">Pan when zoomed</div>
+        <div class="help-k">SPACE</div><div class="help-d">Pulse effect</div>
+        <div class="help-k">F</div><div class="help-d">Fullscreen</div>
+        <div class="help-k">1-9</div><div class="help-d">Jump to slide</div>
+        <div class="help-k">?</div><div class="help-d">This menu</div>
     </div>
+    <button class="close" id="helpClose">Close</button>
+</div>
 
-    <!-- Stage -->
-    <div class="stage" id="stage">
-        <div class="scene" id="scene"></div>
-    </div>
+<script>
+/* ==================================================================
+   DATA — organized by name
+   ================================================================== */
+const IMGS=[
+    {src:'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/bullyingpeopletype.png',title:'Bullying People Type',cat:'Bullying People Type'},
+    {src:'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/anthony1.jpg',title:'Anthony I',cat:'Anthony'},
+    {src:'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/anthony2.jpg',title:'Anthony II',cat:'Anthony'},
+    {src:'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/anthony3.jpg',title:'Anthony III',cat:'Anthony'},
+    {src:'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/saintlaurenceconfessions.jpg',title:'Confessions I',cat:'Saint Laurence'},
+    {src:'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/saintlaurenceconfessions2.jpg',title:'Confessions II',cat:'Saint Laurence'},
+    {src:'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/saintlaurenceconfessions3.jpg',title:'Confessions III',cat:'Saint Laurence'},
+    {src:'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/saintlaurenceconfessions4.jpg',title:'Confessions IV',cat:'Saint Laurence'},
+    {src:'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/saintlaurenceconfessions5.jpg',title:'Confessions V',cat:'Saint Laurence'},
+];
+const N=IMGS.length;
 
-    <!-- Nav zones -->
-    <div class="nav-zone left" id="navL"><div class="nav-btn">←</div></div>
-    <div class="nav-zone right" id="navR"><div class="nav-btn">→</div></div>
+/* ==================================================================
+   STATE
+   ================================================================== */
+let cur=0,ready=false,helpOn=false,viewerOn=false;
+let vZoom=1,vPanX=0,vPanY=0,vDrag=false,vDSX,vDSY,vPSX,vPSY;
+let tiltX=0,tiltY=0;
+let mx=0,my=0,crx=0,cry=0;
+let wheelAcc=0,lastWheel=0;
+const ZMIN=.5,ZMAX=12;
 
-    <!-- Side badges -->
-    <div class="slide-badge" id="slideBadge">
-        <div class="badge-line"></div>
-        <div class="badge-num" id="badgeNum">1</div>
-        <div class="badge-total" id="badgeTotal">of 9</div>
-        <div class="badge-line"></div>
-    </div>
+/* ==================================================================
+   DOM
+   ================================================================== */
+const $=id=>document.getElementById(id);
+const cR=$('cR'),cD=$('cD'),cL=$('cL');
+const loader=$('loader'),lFill=$('lFill'),lPct=$('lPct'),lCnt=$('lCnt');
+const intro=$('intro'),iEnter=$('iEnter'),iSub=$('iSub');
+const flash=$('flash');
+const topbar=$('topbar'),tTitle=$('tTitle'),tCat=$('tCat'),tCtr=$('tCtr');
+const stage=$('stage'),scene=$('scene');
+const nL=$('nL'),nR=$('nR');
+const botbar=$('botbar'),film=$('film'),dots=$('dots');
+const badge=$('badge'),bNum=$('bNum'),bTot=$('bTot');
+const catLbl=$('catLbl'),pProg=$('pProg');
+const viewer=$('viewer'),vClose=$('vClose'),vp=$('vp'),vpc=$('vpc'),vpImg=$('vpImg');
+const vzPct=$('vzPct'),mm=$('mm'),mmImg=$('mmImg'),mmVp=$('mmVp');
+const viTitle=$('viTitle'),viCat=$('viCat');
+const help=$('help'),helpClose=$('helpClose');
 
-    <div class="category-label" id="categoryLabel">Anthony</div>
+/* ==================================================================
+   CURSOR
+   ================================================================== */
+document.addEventListener('mousemove',e=>{
+    mx=e.clientX;my=e.clientY;
+    cD.style.left=mx+'px';cD.style.top=my+'px';
+    cL.style.left=mx+'px';cL.style.top=my+'px';
+    if(Math.random()>.85)spawnTrail(mx,my);
+});
+(function cLoop(){crx+=(mx-crx)*.13;cry+=(my-cry)*.13;cR.style.left=crx+'px';cR.style.top=cry+'px';requestAnimationFrame(cLoop)})();
 
-    <!-- Bottom bar -->
-    <div class="bottom-bar" id="bottomBar">
-        <div class="filmstrip" id="filmstrip"></div>
-        <div class="dot-row" id="dotRow"></div>
-    </div>
+function setCur(s){cR.className='cur-ring'+(s?' '+s:'')}
+function setLbl(t){if(t){cL.textContent=t;cL.classList.add('on')}else cL.classList.remove('on')}
+function hov(el,lbl){
+    el.addEventListener('mouseenter',()=>{setCur('hov');if(lbl)setLbl(lbl)});
+    el.addEventListener('mouseleave',()=>{setCur('');setLbl('')});
+}
+function spawnTrail(x,y){
+    const t=document.createElement('div');t.className='trail';
+    t.style.left=(x+(Math.random()-.5)*8)+'px';t.style.top=(y+(Math.random()-.5)*8)+'px';
+    document.body.appendChild(t);setTimeout(()=>t.remove(),650);
+}
+document.addEventListener('click',e=>{
+    const r=document.createElement('div');r.className='ripple';
+    r.style.left=(e.clientX-90)+'px';r.style.top=(e.clientY-90)+'px';
+    document.body.appendChild(r);setTimeout(()=>r.remove(),700);
+});
 
-    <!-- Zoom HUD -->
-    <div class="zoom-controls" id="zoomControls">
-        <button class="zc-btn" id="zcOut">−</button>
-        <div class="zc-pct" id="zcPct">100%</div>
-        <button class="zc-btn" id="zcIn">+</button>
-        <div class="zc-sep"></div>
-        <button class="zc-btn zc-reset" id="zcReset">Reset</button>
-    </div>
+/* ==================================================================
+   LOADER
+   ================================================================== */
+let lp=0,lc=0;
+IMGS.forEach(i=>{const img=new Image();img.onload=img.onerror=()=>{lc++;lCnt.textContent=lc+' of '+N+' loaded'};img.src=i.src});
+setTimeout(()=>{
+    const iv=setInterval(()=>{
+        lp+=lc>=N?Math.random()*12+5:Math.random()*2+.6;
+        if(lp>=100){lp=100;clearInterval(iv);lFill.style.width='100%';lPct.textContent='100%';lCnt.textContent='All '+N+' ready';
+        setTimeout(()=>{loader.classList.add('done');setTimeout(showIntro,600)},700);return}
+        lFill.style.width=Math.floor(lp)+'%';lPct.textContent=Math.floor(lp)+'%';
+    },40);
+},400);
 
-    <!-- Minimap -->
-    <div class="minimap" id="minimap">
-        <img id="minimapImg" src="" alt="" draggable="false">
-        <div class="minimap-vp" id="minimapVp"></div>
-    </div>
+/* ==================================================================
+   INTRO
+   ================================================================== */
+function showIntro(){
+    iSub.textContent=N+' photographs';
+    intro.classList.add('on');
+    hov(iEnter,'view');
+    iEnter.addEventListener('click',()=>{intro.classList.remove('on');intro.classList.add('bye');setTimeout(startApp,800)});
+    setTimeout(()=>{if(intro.classList.contains('on')&&!intro.classList.contains('bye'))iEnter.click()},7000);
+}
 
-    <!-- Shortcuts overlay -->
-    <div class="shortcuts-overlay" id="shortcutsOverlay">
-        <div class="shortcuts-title">Keyboard Shortcuts</div>
-        <div class="shortcuts-grid">
-            <div class="sc-key">← →</div><div class="sc-desc">Navigate slides</div>
-            <div class="sc-key">SCROLL</div><div class="sc-desc">Navigate or zoom</div>
-            <div class="sc-key">+ −</div><div class="sc-desc">Zoom in / out</div>
-            <div class="sc-key">0 / ESC</div><div class="sc-desc">Reset zoom</div>
-            <div class="sc-key">ARROWS</div><div class="sc-desc">Pan when zoomed</div>
-            <div class="sc-key">SPACE</div><div class="sc-desc">Pulse effect</div>
-            <div class="sc-key">DBL CLICK</div><div class="sc-desc">Toggle 3× zoom</div>
-            <div class="sc-key">DRAG</div><div class="sc-desc">Pan when zoomed</div>
-            <div class="sc-key">F</div><div class="sc-desc">Toggle fullscreen</div>
-            <div class="sc-key">?</div><div class="sc-desc">This menu</div>
-        </div>
-        <button class="shortcuts-close" id="shortcutsClose">Close</button>
-    </div>
+/* ==================================================================
+   START
+   ================================================================== */
+function startApp(){
+    ready=true;buildSlides();buildFilm();buildDots();spawnAmb();
+    go(0,false);
+    stage.classList.add('on');topbar.classList.add('on');botbar.classList.add('on');badge.classList.add('on');catLbl.classList.add('on');
+    bind();
+}
 
-    <script>
-    /* ============================================================
-       IMAGE DATA — organized by name
-       ============================================================ */
-    const IMAGES = [
-        // ——— Bullying People Type ———
-        { src: 'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/bullyingpeopletype.png', title: 'Bullying People Type', category: 'Bullying People Type', group: 'solo' },
+/* ==================================================================
+   BUILD
+   ================================================================== */
+function buildSlides(){
+    IMGS.forEach((img,i)=>{
+        const s=document.createElement('div');s.className='slide far';s.dataset.i=i;
+        s.innerHTML=`<div class="card">
+            <div class="cbr tl"></div><div class="cbr tr"></div><div class="cbr bl"></div><div class="cbr br"></div>
+            <div class="card-face">
+                <img src="${img.src}" alt="${img.title}" draggable="false">
+                <div class="card-shine"></div><div class="card-spec"></div><div class="card-grad"></div>
+            </div>
+            <div class="card-lbl">${img.title}</div>
+            <div class="card-num">${String(i+1).padStart(2,'0')}</div>
+            <div class="card-shadow"></div>
+        </div>`;
+        scene.appendChild(s);
+    });
+}
+function buildFilm(){
+    IMGS.forEach((img,i)=>{
+        const t=document.createElement('div');t.className='ft';
+        t.innerHTML=`<img src="${img.src}" alt="" draggable="false">`;
+        t.addEventListener('click',()=>go(i));hov(t,img.title.toLowerCase());
+        film.appendChild(t);
+    });
+}
+function buildDots(){
+    IMGS.forEach((_,i)=>{
+        const d=document.createElement('div');d.className='dot';
+        d.addEventListener('click',()=>go(i));hov(d);
+        dots.appendChild(d);
+    });
+}
 
-        // ——— Anthony (1, 2, 3 in order) ———
-        { src: 'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/anthony1.jpg', title: 'Anthony I', category: 'Anthony', group: 'anthony' },
-        { src: 'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/anthony2.jpg', title: 'Anthony II', category: 'Anthony', group: 'anthony' },
-        { src: 'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/anthony3.jpg', title: 'Anthony III', category: 'Anthony', group: 'anthony' },
+/* ==================================================================
+   GO TO SLIDE (carousel only, no zoom here)
+   ================================================================== */
+function go(i,anim=true){
+    if(i<0)i=N-1;if(i>=N)i=0;
+    if(anim&&i!==cur){flash.classList.add('go');setTimeout(()=>flash.classList.remove('go'),120)}
+    cur=i;tiltX=0;tiltY=0;
+    const slides=scene.querySelectorAll('.slide');
+    slides.forEach((s,si)=>{
+        s.className='slide';
+        let d=si-cur;if(d>N/2)d-=N;if(d<-N/2)d+=N;
+        const card=s.querySelector('.card');
+        if(d===0){s.classList.add('active');s.style.transform='translateX(0) translateZ(0) rotateY(0)';card.style.transform='rotateX(0) rotateY(0)';card.style.transition='transform .12s ease-out'}
+        else if(d===-1){s.classList.add('p1');s.style.transform='translateX(-78%) translateZ(-380px) rotateY(38deg)'}
+        else if(d===1){s.classList.add('n1');s.style.transform='translateX(78%) translateZ(-380px) rotateY(-38deg)'}
+        else if(d===-2){s.classList.add('p2');s.style.transform='translateX(-135%) translateZ(-650px) rotateY(48deg) scale(.8)'}
+        else if(d===2){s.classList.add('n2');s.style.transform='translateX(135%) translateZ(-650px) rotateY(-48deg) scale(.8)'}
+        else{s.classList.add('far');s.style.transform=`translateX(${d>0?200:-200}%) translateZ(-900px) scale(.5)`}
+    });
+    updateUI();
+}
 
-        // ——— Saint Laurence Confessions (1–5 in order) ———
-        { src: 'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/saintlaurenceconfessions.jpg', title: 'Confessions I', category: 'Saint Laurence', group: 'confessions' },
-        { src: 'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/saintlaurenceconfessions2.jpg', title: 'Confessions II', category: 'Saint Laurence', group: 'confessions' },
-        { src: 'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/saintlaurenceconfessions3.jpg', title: 'Confessions III', category: 'Saint Laurence', group: 'confessions' },
-        { src: 'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/saintlaurenceconfessions4.jpg', title: 'Confessions IV', category: 'Saint Laurence', group: 'confessions' },
-        { src: 'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/saintlaurenceconfessions5.jpg', title: 'Confessions V', category: 'Saint Laurence', group: 'confessions' },
-    ];
+function updateUI(){
+    const img=IMGS[cur];
+    tCtr.textContent=(cur+1)+' / '+N;
+    tTitle.textContent=img.title;tCat.textContent=img.cat;
+    bNum.textContent=cur+1;bTot.textContent='of '+N;
+    catLbl.textContent=img.cat;
+    pProg.style.width=((cur+1)/N*100)+'%';
+    dots.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i===cur));
+    film.querySelectorAll('.ft').forEach((t,i)=>t.classList.toggle('on',i===cur));
+}
 
-    const TOTAL = IMAGES.length;
+/* ==================================================================
+   3D TILT (carousel card)
+   ================================================================== */
+function doTilt(ex,ey){
+    if(viewerOn)return;
+    const as=scene.querySelector('.slide.active');if(!as)return;
+    const card=as.querySelector('.card');
+    const r=card.getBoundingClientRect();
+    const inside=ex>=r.left&&ex<=r.right&&ey>=r.top&&ey<=r.bottom;
+    if(inside){
+        const nx=(ex-r.left)/r.width,ny=(ey-r.top)/r.height;
+        tiltX=(ny-.5)*-16;tiltY=(nx-.5)*16;
+        const sp=card.querySelector('.card-spec');
+        if(sp){sp.style.setProperty('--sx',(nx*100)+'%');sp.style.setProperty('--sy',(ny*100)+'%')}
+    }else{tiltX*=.9;tiltY*=.9}
+    card.style.transform=`rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+    card.style.transition='transform .08s ease-out';
+}
+function resetTilt(){
+    tiltX=0;tiltY=0;
+    const as=scene.querySelector('.slide.active');if(!as)return;
+    const card=as.querySelector('.card');
+    card.style.transform='rotateX(0) rotateY(0)';
+    card.style.transition='transform .7s var(--expo)';
+}
 
-    /* ============================================================
-       STATE
-       ============================================================ */
-    let currentSlide = 0;
-    let zoomScale = 1;
-    let panX = 0, panY = 0;
-    let isDragging = false;
-    let dragStartX, dragStartY, panStartX, panStartY;
-    let tiltRX = 0, tiltRY = 0;
-    let mouseX = 0, mouseY = 0, curRingX = 0, curRingY = 0;
-    let appReady = false;
-    let shortcutsOpen = false;
-    let lastWheelTime = 0;
-    let wheelAccum = 0;
+/* ==================================================================
+   OPEN VIEWER (fullscreen image view with zoom+pan)
+   ================================================================== */
+function openViewer(i){
+    const img=IMGS[i];
+    vpImg.src=img.src;mmImg.src=img.src;
+    viTitle.textContent=img.title;viCat.textContent=img.cat;
+    vZoom=1;vPanX=0;vPanY=0;
+    applyVZoom(false);
+    viewer.classList.add('on');
+    viewerOn=true;
+}
+function closeViewer(){
+    viewer.classList.remove('on');
+    mm.classList.remove('on');
+    viewerOn=false;
+}
 
-    const ZOOM_MIN = 0.5;
-    const ZOOM_MAX = 10;
+function applyVZoom(anim=true){
+    if(anim){vpc.classList.add('anim');setTimeout(()=>vpc.classList.remove('anim'),450)}
+    else vpc.classList.remove('anim');
+    vpc.style.transform=`scale(${vZoom}) translate(${vPanX/vZoom}px,${vPanY/vZoom}px)`;
+    vzPct.textContent=Math.round(vZoom*100)+'%';
+    mm.classList.toggle('on',vZoom>1.08);
+    if(vZoom>1.08)updateMM();
+    setCur(vZoom>1.08?'zoom':'');
+}
 
-    /* ============================================================
-       DOM REFS
-       ============================================================ */
-    const $cursorRing = document.getElementById('cursorRing');
-    const $cursorDot = document.getElementById('cursorDot');
-    const $cursorLabel = document.getElementById('cursorLabel');
-    const $loader = document.getElementById('loaderScreen');
-    const $loaderFill = document.getElementById('loaderFill');
-    const $loaderPct = document.getElementById('loaderPct');
-    const $loaderCount = document.getElementById('loaderCount');
-    const $introSplash = document.getElementById('introSplash');
-    const $introEnter = document.getElementById('introEnter');
-    const $introCount = document.getElementById('introCount');
-    const $flash = document.getElementById('flashOverlay');
-    const $topBar = document.getElementById('topBar');
-    const $tbTitleMain = document.getElementById('tbTitleMain');
-    const $tbTitleSub = document.getElementById('tbTitleSub');
-    const $tbCounter = document.getElementById('tbCounter');
-    const $stage = document.getElementById('stage');
-    const $scene = document.getElementById('scene');
-    const $navL = document.getElementById('navL');
-    const $navR = document.getElementById('navR');
-    const $bottomBar = document.getElementById('bottomBar');
-    const $filmstrip = document.getElementById('filmstrip');
-    const $dotRow = document.getElementById('dotRow');
-    const $slideBadge = document.getElementById('slideBadge');
-    const $badgeNum = document.getElementById('badgeNum');
-    const $badgeTotal = document.getElementById('badgeTotal');
-    const $categoryLabel = document.getElementById('categoryLabel');
-    const $pageProgress = document.getElementById('pageProgress');
-    const $zoomControls = document.getElementById('zoomControls');
-    const $zcPct = document.getElementById('zcPct');
-    const $minimap = document.getElementById('minimap');
-    const $minimapImg = document.getElementById('minimapImg');
-    const $minimapVp = document.getElementById('minimapVp');
-    const $shortcuts = document.getElementById('shortcutsOverlay');
-    const $shortcutsClose = document.getElementById('shortcutsClose');
+function clampVPan(){
+    if(vZoom<=1){vPanX=0;vPanY=0;return}
+    const iw=vpImg.naturalWidth,ih=vpImg.naturalHeight;
+    const vr=vp.getBoundingClientRect();
+    // figure displayed size
+    const ar=iw/ih,vAr=vr.width/vr.height;
+    let dw,dh;
+    if(ar>vAr){dw=vr.width*.85;dh=dw/ar}else{dh=vr.height*.85;dw=dh*ar}
+    // recalc with actual rendered
+    const imgR=vpImg.getBoundingClientRect();
+    dw=imgR.width/vZoom;dh=imgR.height/vZoom;
 
-    /* ============================================================
-       CURSOR SYSTEM
-       ============================================================ */
-    document.addEventListener('mousemove', e => {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-        $cursorDot.style.left = mouseX + 'px';
-        $cursorDot.style.top = mouseY + 'px';
-        $cursorLabel.style.left = mouseX + 'px';
-        $cursorLabel.style.top = mouseY + 'px';
+    const maxX=Math.max(0,(dw*vZoom-vr.width)/2+50);
+    const maxY=Math.max(0,(dh*vZoom-vr.height)/2+50);
+    vPanX=Math.max(-maxX,Math.min(maxX,vPanX));
+    vPanY=Math.max(-maxY,Math.min(maxY,vPanY));
+}
 
-        if (Math.random() > 0.84) spawnTrail(mouseX, mouseY);
+function updateMM(){
+    if(vZoom<=1.08)return;
+    const mw=mm.clientWidth,mh=mm.clientHeight;
+    const vpW=Math.max(6,(1/vZoom)*mw),vpH=Math.max(6,(1/vZoom)*mh);
+    const imgR=vpImg.getBoundingClientRect();
+    const offX=-vPanX/(imgR.width)*mw;
+    const offY=-vPanY/(imgR.height)*mh;
+    const mx2=(mw-vpW)/2+offX,my2=(mh-vpH)/2+offY;
+    mmVp.style.width=vpW+'px';mmVp.style.height=vpH+'px';
+    mmVp.style.left=Math.max(0,Math.min(mw-vpW,mx2))+'px';
+    mmVp.style.top=Math.max(0,Math.min(mh-vpH,my2))+'px';
+}
+
+/* ==================================================================
+   BIND ALL EVENTS
+   ================================================================== */
+function bind(){
+
+    // NAV ARROWS (slideshow)
+    nL.addEventListener('click',()=>{if(!viewerOn)go(cur-1)});
+    nR.addEventListener('click',()=>{if(!viewerOn)go(cur+1)});
+    nL.addEventListener('mouseenter',()=>{setCur('nav');setLbl('prev')});
+    nL.addEventListener('mouseleave',()=>{setCur('');setLbl('')});
+    nR.addEventListener('mouseenter',()=>{setCur('nav');setLbl('next')});
+    nR.addEventListener('mouseleave',()=>{setCur('');setLbl('')});
+
+    // CLICK ACTIVE SLIDE → open viewer
+    scene.addEventListener('click',e=>{
+        if(viewerOn)return;
+        const as=scene.querySelector('.slide.active');
+        if(!as)return;
+        const r=as.getBoundingClientRect();
+        if(mx>=r.left&&mx<=r.right&&my>=r.top&&my<=r.bottom){
+            openViewer(cur);
+        }
     });
 
-    (function cursorLoop() {
-        curRingX += (mouseX - curRingX) * 0.13;
-        curRingY += (mouseY - curRingY) * 0.13;
-        $cursorRing.style.left = curRingX + 'px';
-        $cursorRing.style.top = curRingY + 'px';
-        requestAnimationFrame(cursorLoop);
-    })();
+    // TILT on mousemove
+    document.addEventListener('mousemove',e=>{
+        if(!ready)return;
+        if(!viewerOn&&!vDrag)doTilt(e.clientX,e.clientY);
+        // parallax particles
+        const px=(e.clientX/window.innerWidth-.5)*2,py=(e.clientY/window.innerHeight-.5)*2;
+        document.querySelectorAll('.ap').forEach((p,i)=>{
+            const s=(i%4+1)*1.8;p.style.marginLeft=px*s+'px';p.style.marginTop=py*s+'px';
+        });
+    });
+    scene.addEventListener('mouseleave',()=>{if(!viewerOn)resetTilt()});
 
-    function setCursorState(state) {
-        $cursorRing.className = 'cursor-ring' + (state ? ' ' + state : '');
-    }
+    // WHEEL: navigate slideshow when not in viewer
+    document.addEventListener('wheel',e=>{
+        if(!ready||helpOn)return;
+        e.preventDefault();
 
-    function setCursorLabel(text) {
-        if (text) {
-            $cursorLabel.textContent = text;
-            $cursorLabel.classList.add('visible');
-        } else {
-            $cursorLabel.classList.remove('visible');
+        if(viewerOn){
+            // zoom in viewer
+            const d=-e.deltaY*.0025;
+            const ns=Math.max(ZMIN,Math.min(ZMAX,vZoom*(1+d)));
+            // zoom toward cursor
+            const vpR=vp.getBoundingClientRect();
+            const ox=mx-vpR.left-vpR.width/2;
+            const oy=my-vpR.top-vpR.height/2;
+            const f=ns/vZoom;
+            vPanX=ox-f*(ox-vPanX);vPanY=oy-f*(oy-vPanY);
+            vZoom=ns;clampVPan();applyVZoom(false);
+            return;
         }
-    }
 
-    function bindHover(el, label) {
-        el.addEventListener('mouseenter', () => { setCursorState('hover'); if (label) setCursorLabel(label); });
-        el.addEventListener('mouseleave', () => { setCursorState(''); setCursorLabel(''); });
-    }
+        // slideshow nav
+        const now=Date.now();
+        if(now-lastWheel>500)wheelAcc=0;
+        lastWheel=now;wheelAcc+=e.deltaY;
+        if(wheelAcc>60){go(cur+1);wheelAcc=0}
+        else if(wheelAcc<-60){go(cur-1);wheelAcc=0}
+    },{passive:false});
 
-    function spawnTrail(x, y) {
-        const t = document.createElement('div');
-        t.className = 'trail-particle';
-        t.style.left = (x + (Math.random() - 0.5) * 10) + 'px';
-        t.style.top = (y + (Math.random() - 0.5) * 10) + 'px';
-        document.body.appendChild(t);
-        setTimeout(() => t.remove(), 700);
-    }
-
-    document.addEventListener('click', e => {
-        const r = document.createElement('div');
-        r.className = 'click-ripple';
-        r.style.left = (e.clientX - 100) + 'px';
-        r.style.top = (e.clientY - 100) + 'px';
-        document.body.appendChild(r);
-        setTimeout(() => r.remove(), 800);
+    // === VIEWER DRAG PAN ===
+    vp.addEventListener('mousedown',e=>{
+        if(e.button!==0||!viewerOn)return;
+        if(vZoom<=1.08)return;
+        vDrag=true;vDSX=e.clientX;vDSY=e.clientY;vPSX=vPanX;vPSY=vPanY;
+        setCur('grab');
+    });
+    document.addEventListener('mousemove',e=>{
+        if(!vDrag)return;
+        vPanX=vPSX+(e.clientX-vDSX);vPanY=vPSY+(e.clientY-vDSY);
+        clampVPan();applyVZoom(false);
+    });
+    document.addEventListener('mouseup',()=>{
+        if(vDrag){vDrag=false;setCur(vZoom>1.08?'zoom':'');clampVPan();applyVZoom(true)}
     });
 
-    /* ============================================================
-       LOADING SYSTEM
-       ============================================================ */
-    let loadProgress = 0;
-    let imagesLoaded = 0;
-
-    IMAGES.forEach(img => {
-        const i = new Image();
-        i.onload = i.onerror = () => {
-            imagesLoaded++;
-            $loaderCount.textContent = `${imagesLoaded} of ${TOTAL} loaded`;
-        };
-        i.src = img.src;
+    // === VIEWER DOUBLE CLICK (zoom toggle) ===
+    vp.addEventListener('dblclick',e=>{
+        if(!viewerOn)return;
+        if(vZoom>1.08){vZoom=1;vPanX=0;vPanY=0}
+        else{
+            const vpR=vp.getBoundingClientRect();
+            const ox=e.clientX-vpR.left-vpR.width/2;
+            const oy=e.clientY-vpR.top-vpR.height/2;
+            vZoom=3;vPanX=-ox*2;vPanY=-oy*2;clampVPan();
+        }
+        applyVZoom(true);
     });
 
-    setTimeout(() => {
-        const loadInterval = setInterval(() => {
-            const allDone = imagesLoaded >= TOTAL;
-            loadProgress += allDone
-                ? Math.random() * 12 + 5
-                : Math.random() * 2.2 + 0.6;
-
-            if (loadProgress >= 100) {
-                loadProgress = 100;
-                clearInterval(loadInterval);
-                $loaderFill.style.width = '100%';
-                $loaderPct.textContent = '100%';
-                $loaderCount.textContent = `All ${TOTAL} images ready`;
-
-                setTimeout(() => {
-                    $loader.classList.add('done');
-                    setTimeout(showIntro, 600);
-                }, 700);
-                return;
-            }
-
-            $loaderFill.style.width = Math.floor(loadProgress) + '%';
-            $loaderPct.textContent = Math.floor(loadProgress) + '%';
-        }, 40);
-    }, 400);
-
-    /* ============================================================
-       INTRO SPLASH
-       ============================================================ */
-    function showIntro() {
-        $introCount.textContent = `${TOTAL} photographs`;
-        $introSplash.classList.add('active');
-
-        bindHover($introEnter, 'view');
-
-        $introEnter.addEventListener('click', () => {
-            $introSplash.classList.remove('active');
-            $introSplash.classList.add('exit');
-            setTimeout(startGallery, 800);
-        });
-
-        // Auto-enter after 6 seconds
-        setTimeout(() => {
-            if ($introSplash.classList.contains('active') && !$introSplash.classList.contains('exit')) {
-                $introEnter.click();
-            }
-        }, 6000);
-    }
-
-    /* ============================================================
-       START GALLERY
-       ============================================================ */
-    function startGallery() {
-        appReady = true;
-        buildSlides();
-        buildFilmstrip();
-        buildDots();
-        spawnAmbient();
-        goToSlide(0, false);
-        $stage.classList.add('visible');
-        $topBar.classList.add('visible');
-        $bottomBar.classList.add('visible');
-        $slideBadge.classList.add('visible');
-        $categoryLabel.classList.add('visible');
-        bindAllEvents();
-    }
-
-    /* ============================================================
-       BUILD SLIDES
-       ============================================================ */
-    function buildSlides() {
-        IMAGES.forEach((img, i) => {
-            const slide = document.createElement('div');
-            slide.className = 'slide far-away';
-            slide.dataset.index = i;
-            slide.innerHTML = `
-                <div class="slide-card">
-                    <div class="corner-bracket tl"></div>
-                    <div class="corner-bracket tr"></div>
-                    <div class="corner-bracket bl"></div>
-                    <div class="corner-bracket br"></div>
-                    <div class="slide-card-face">
-                        <img src="${img.src}" alt="${img.title}" draggable="false">
-                        <div class="card-shine"></div>
-                        <div class="card-specular"></div>
-                        <div class="card-gradient"></div>
-                    </div>
-                    <div class="card-label">${img.title}</div>
-                    <div class="card-number">${String(i + 1).padStart(2, '0')}</div>
-                    <div class="card-floor-shadow"></div>
-                </div>
-            `;
-            $scene.appendChild(slide);
-        });
-    }
-
-    function buildFilmstrip() {
-        IMAGES.forEach((img, i) => {
-            const t = document.createElement('div');
-            t.className = 'filmstrip-thumb';
-            t.innerHTML = `<img src="${img.src}" alt="" draggable="false">`;
-            t.addEventListener('click', () => goToSlide(i));
-            bindHover(t, img.title.toLowerCase());
-            $filmstrip.appendChild(t);
-        });
-    }
-
-    function buildDots() {
-        IMAGES.forEach((_, i) => {
-            const d = document.createElement('div');
-            d.className = 'dot-ind';
-            d.addEventListener('click', () => goToSlide(i));
-            bindHover(d);
-            $dotRow.appendChild(d);
-        });
-    }
-
-    /* ============================================================
-       GO TO SLIDE
-       ============================================================ */
-    function goToSlide(index, animate = true) {
-        if (index < 0) index = TOTAL - 1;
-        if (index >= TOTAL) index = 0;
-
-        const changed = index !== currentSlide;
-
-        // Flash on change
-        if (animate && changed) {
-            $flash.classList.add('flash');
-            setTimeout(() => $flash.classList.remove('flash'), 130);
+    // === VIEWER TOUCH ===
+    let ltd=0,ltc={x:0,y:0},tst=0,tsx=0;
+    vp.addEventListener('touchstart',e=>{
+        if(!viewerOn)return;
+        if(e.touches.length===1){
+            tst=Date.now();tsx=e.touches[0].clientX;
+            if(vZoom>1.08){vDrag=true;vDSX=e.touches[0].clientX;vDSY=e.touches[0].clientY;vPSX=vPanX;vPSY=vPanY}
+        }else if(e.touches.length===2){
+            vDrag=false;
+            const dx=e.touches[0].clientX-e.touches[1].clientX,dy=e.touches[0].clientY-e.touches[1].clientY;
+            ltd=Math.sqrt(dx*dx+dy*dy);
+            ltc={x:(e.touches[0].clientX+e.touches[1].clientX)/2,y:(e.touches[0].clientY+e.touches[1].clientY)/2};
         }
+    },{passive:false});
 
-        currentSlide = index;
-
-        // Reset zoom
-        zoomScale = 1;
-        panX = 0;
-        panY = 0;
-        tiltRX = 0;
-        tiltRY = 0;
-        $zoomControls.classList.remove('visible');
-        $minimap.classList.remove('visible');
-
-        // Position all slides in 3D carousel
-        const slides = $scene.querySelectorAll('.slide');
-        slides.forEach((s, i) => {
-            s.className = 'slide';
-
-            const diff = i - currentSlide;
-
-            // Wrap-around
-            let displayDiff = diff;
-            if (diff > TOTAL / 2) displayDiff = diff - TOTAL;
-            if (diff < -TOTAL / 2) displayDiff = diff + TOTAL;
-
-            const card = s.querySelector('.slide-card');
-
-            if (displayDiff === 0) {
-                s.classList.add('active');
-                s.style.transform = 'translateX(0) translateZ(0) rotateY(0)';
-                card.style.transform = 'rotateX(0) rotateY(0) scale(1)';
-            } else if (displayDiff === -1) {
-                s.classList.add('prev-1');
-                s.style.transform = 'translateX(-75%) translateZ(-350px) rotateY(35deg)';
-                card.style.transform = '';
-            } else if (displayDiff === 1) {
-                s.classList.add('next-1');
-                s.style.transform = 'translateX(75%) translateZ(-350px) rotateY(-35deg)';
-                card.style.transform = '';
-            } else if (displayDiff === -2) {
-                s.classList.add('prev-2');
-                s.style.transform = 'translateX(-130%) translateZ(-600px) rotateY(45deg) scale(0.8)';
-                card.style.transform = '';
-            } else if (displayDiff === 2) {
-                s.classList.add('next-2');
-                s.style.transform = 'translateX(130%) translateZ(-600px) rotateY(-45deg) scale(0.8)';
-                card.style.transform = '';
-            } else {
-                s.classList.add('far-away');
-                s.style.transform = `translateX(${displayDiff > 0 ? 200 : -200}%) translateZ(-900px) scale(0.5)`;
-                card.style.transform = '';
+    vp.addEventListener('touchmove',e=>{
+        if(!viewerOn)return;e.preventDefault();
+        if(e.touches.length===1&&vDrag){
+            vPanX=vPSX+(e.touches[0].clientX-vDSX);vPanY=vPSY+(e.touches[0].clientY-vDSY);
+            clampVPan();applyVZoom(false);
+        }else if(e.touches.length===2){
+            const dx=e.touches[0].clientX-e.touches[1].clientX,dy=e.touches[0].clientY-e.touches[1].clientY;
+            const dist=Math.sqrt(dx*dx+dy*dy);
+            const c={x:(e.touches[0].clientX+e.touches[1].clientX)/2,y:(e.touches[0].clientY+e.touches[1].clientY)/2};
+            if(ltd>0){
+                const f=dist/ltd;vZoom=Math.max(ZMIN,Math.min(ZMAX,vZoom*f));
+                vPanX+=(c.x-ltc.x);vPanY+=(c.y-ltc.y);clampVPan();applyVZoom(false);
             }
-        });
-
-        // Update UI
-        updateUI();
-    }
-
-    function updateUI() {
-        const img = IMAGES[currentSlide];
-
-        // Counter
-        $tbCounter.textContent = `${currentSlide + 1} / ${TOTAL}`;
-
-        // Title
-        $tbTitleMain.textContent = img.title;
-        $tbTitleSub.textContent = img.category;
-
-        // Badge
-        $badgeNum.textContent = currentSlide + 1;
-        $badgeTotal.textContent = `of ${TOTAL}`;
-
-        // Category
-        $categoryLabel.textContent = img.category;
-
-        // Progress
-        $pageProgress.style.width = ((currentSlide + 1) / TOTAL * 100) + '%';
-
-        // Dots
-        $dotRow.querySelectorAll('.dot-ind').forEach((d, i) => {
-            d.classList.toggle('active', i === currentSlide);
-        });
-
-        // Filmstrip
-        $filmstrip.querySelectorAll('.filmstrip-thumb').forEach((t, i) => {
-            t.classList.toggle('active', i === currentSlide);
-        });
-
-        // Zoom pct
-        $zcPct.textContent = Math.round(zoomScale * 100) + '%';
-    }
-
-    /* ============================================================
-       3D TILT
-       ============================================================ */
-    function handleTilt(ex, ey) {
-        if (isDragging || zoomScale > 1.08) return;
-
-        const activeSlide = $scene.querySelector('.slide.active');
-        if (!activeSlide) return;
-
-        const card = activeSlide.querySelector('.slide-card');
-        const rect = card.getBoundingClientRect();
-
-        const inBounds = ex >= rect.left && ex <= rect.right &&
-                         ey >= rect.top && ey <= rect.bottom;
-
-        if (inBounds) {
-            const nx = (ex - rect.left) / rect.width;   // 0..1
-            const ny = (ey - rect.top) / rect.height;   // 0..1
-
-            tiltRX = (ny - 0.5) * -18;  // rotate X
-            tiltRY = (nx - 0.5) * 18;   // rotate Y
-
-            // Specular highlight position
-            const specular = card.querySelector('.card-specular');
-            if (specular) {
-                specular.style.setProperty('--spec-x', (nx * 100) + '%');
-                specular.style.setProperty('--spec-y', (ny * 100) + '%');
-            }
-        } else {
-            tiltRX *= 0.9;
-            tiltRY *= 0.9;
+            ltd=dist;ltc=c;
         }
+    },{passive:false});
 
-        card.style.transform = `rotateX(${tiltRX}deg) rotateY(${tiltRY}deg) scale(${zoomScale}) translate(${panX / zoomScale}px, ${panY / zoomScale}px)`;
-        card.style.transition = 'transform 0.08s ease-out';
-    }
-
-    function resetTilt() {
-        tiltRX = 0;
-        tiltRY = 0;
-        const activeSlide = $scene.querySelector('.slide.active');
-        if (!activeSlide || zoomScale > 1.08) return;
-        const card = activeSlide.querySelector('.slide-card');
-        card.style.transform = 'rotateX(0) rotateY(0) scale(1) translate(0,0)';
-        card.style.transition = 'transform 0.7s var(--ease-out-expo)';
-    }
-
-    /* ============================================================
-       ZOOM & PAN
-       ============================================================ */
-    function applyZoom(animate = true) {
-        const activeSlide = $scene.querySelector('.slide.active');
-        if (!activeSlide) return;
-        const card = activeSlide.querySelector('.slide-card');
-
-        if (zoomScale > 1.08) {
-            card.style.transform = `rotateX(0) rotateY(0) scale(${zoomScale}) translate(${panX / zoomScale}px, ${panY / zoomScale}px)`;
-            card.style.transition = animate ? 'transform 0.4s var(--ease-out-expo)' : 'transform 0.05s ease-out';
-            $zoomControls.classList.add('visible');
-            $minimap.classList.add('visible');
-
-            // Minimap image
-            $minimapImg.src = IMAGES[currentSlide].src;
-            updateMinimap();
-
-            setCursorState('zoomed');
-        } else {
-            card.style.transform = `rotateX(${tiltRX}deg) rotateY(${tiltRY}deg) scale(1) translate(0,0)`;
-            card.style.transition = animate ? 'transform 0.6s var(--ease-out-expo)' : 'none';
-            panX = 0;
-            panY = 0;
-            $zoomControls.classList.remove('visible');
-            $minimap.classList.remove('visible');
-            setCursorState('');
-        }
-
-        $zcPct.textContent = Math.round(zoomScale * 100) + '%';
-    }
-
-    function clampPan() {
-        if (zoomScale <= 1) { panX = 0; panY = 0; return; }
-        const activeSlide = $scene.querySelector('.slide.active');
-        if (!activeSlide) return;
-        const img = activeSlide.querySelector('img');
-        if (!img) return;
-        const r = img.getBoundingClientRect();
-        const maxX = Math.max(0, (r.width - window.innerWidth) / 2 + 100);
-        const maxY = Math.max(0, (r.height - window.innerHeight) / 2 + 100);
-        panX = Math.max(-maxX, Math.min(maxX, panX));
-        panY = Math.max(-maxY, Math.min(maxY, panY));
-    }
-
-    function updateMinimap() {
-        if (zoomScale <= 1.08) return;
-        const mmW = $minimap.clientWidth;
-        const mmH = $minimap.clientHeight;
-
-        const vpW = Math.max(8, (1 / zoomScale) * mmW);
-        const vpH = Math.max(8, (1 / zoomScale) * mmH);
-
-        const activeSlide = $scene.querySelector('.slide.active');
-        if (!activeSlide) return;
-        const img = activeSlide.querySelector('img');
-        if (!img) return;
-        const ir = img.getBoundingClientRect();
-
-        const offX = -panX / (ir.width * zoomScale) * mmW;
-        const offY = -panY / (ir.height * zoomScale) * mmH;
-
-        const mvX = (mmW - vpW) / 2 + offX;
-        const mvY = (mmH - vpH) / 2 + offY;
-
-        $minimapVp.style.width = vpW + 'px';
-        $minimapVp.style.height = vpH + 'px';
-        $minimapVp.style.left = Math.max(0, Math.min(mmW - vpW, mvX)) + 'px';
-        $minimapVp.style.top = Math.max(0, Math.min(mmH - vpH, mvY)) + 'px';
-    }
-
-    /* ============================================================
-       EVENTS
-       ============================================================ */
-    function bindAllEvents() {
-
-        // === NAV CLICK ===
-        $navL.addEventListener('click', () => { if (zoomScale <= 1.08) goToSlide(currentSlide - 1); });
-        $navR.addEventListener('click', () => { if (zoomScale <= 1.08) goToSlide(currentSlide + 1); });
-
-        $navL.addEventListener('mouseenter', () => { setCursorState('arrow-l'); setCursorLabel('prev'); });
-        $navL.addEventListener('mouseleave', () => { setCursorState(''); setCursorLabel(''); });
-        $navR.addEventListener('mouseenter', () => { setCursorState('arrow-r'); setCursorLabel('next'); });
-        $navR.addEventListener('mouseleave', () => { setCursorState(''); setCursorLabel(''); });
-
-        // === MOUSE TILT ===
-        document.addEventListener('mousemove', e => {
-            if (!appReady) return;
-            if (!isDragging) handleTilt(e.clientX, e.clientY);
-
-            // parallax ambient particles
-            const px = (e.clientX / window.innerWidth - 0.5) * 2;
-            const py = (e.clientY / window.innerHeight - 0.5) * 2;
-            document.querySelectorAll('.ambient-particle').forEach((p, i) => {
-                const s = (i % 4 + 1) * 1.8;
-                p.style.marginLeft = px * s + 'px';
-                p.style.marginTop = py * s + 'px';
-            });
-        });
-
-        $scene.addEventListener('mouseleave', resetTilt);
-
-        // === WHEEL ===
-        document.addEventListener('wheel', e => {
-            if (!appReady || shortcutsOpen) return;
-            e.preventDefault();
-
-            const activeSlide = $scene.querySelector('.slide.active');
-            if (!activeSlide) return;
-            const rect = activeSlide.getBoundingClientRect();
-            const overImage = mouseX >= rect.left && mouseX <= rect.right &&
-                              mouseY >= rect.top && mouseY <= rect.bottom;
-
-            if (zoomScale > 1.08 || (overImage && Math.abs(e.deltaY) < 60)) {
-                // ZOOM
-                const d = -e.deltaY * 0.0022;
-                const newScale = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, zoomScale * (1 + d)));
-
-                if (zoomScale <= 1.08 && newScale <= 1.08) {
-                    // Navigate instead
-                    handleWheelNav(e.deltaY);
-                    return;
-                }
-
-                // Zoom toward cursor
-                const card = activeSlide.querySelector('.slide-card');
-                const cr = card.getBoundingClientRect();
-                const ox = mouseX - cr.left - cr.width / 2;
-                const oy = mouseY - cr.top - cr.height / 2;
-                const f = newScale / zoomScale;
-                panX = ox - f * (ox - panX);
-                panY = oy - f * (oy - panY);
-
-                zoomScale = newScale;
-                clampPan();
-                applyZoom(false);
-            } else {
-                handleWheelNav(e.deltaY);
-            }
-        }, { passive: false });
-
-        function handleWheelNav(deltaY) {
-            const now = Date.now();
-            if (now - lastWheelTime > 600) wheelAccum = 0;
-            lastWheelTime = now;
-            wheelAccum += deltaY;
-
-            if (wheelAccum > 80) {
-                goToSlide(currentSlide + 1);
-                wheelAccum = 0;
-            } else if (wheelAccum < -80) {
-                goToSlide(currentSlide - 1);
-                wheelAccum = 0;
+    vp.addEventListener('touchend',e=>{
+        if(e.touches.length<2)ltd=0;
+        // swipe to navigate in viewer at 1x
+        if(vDrag&&vZoom<=1.08){
+            const el=Date.now()-tst,dx=e.changedTouches[0].clientX-tsx;
+            if(el<350&&Math.abs(dx)>45){
+                closeViewer();
+                setTimeout(()=>{if(dx>0)go(cur-1);else go(cur+1);},200);
             }
         }
+        vDrag=false;clampVPan();applyVZoom(true);
+    });
 
-        // === DRAG PAN ===
-        $scene.addEventListener('mousedown', e => {
-            if (e.button !== 0 || !appReady) return;
-            if (zoomScale <= 1.08) return;
-            isDragging = true;
-            dragStartX = e.clientX;
-            dragStartY = e.clientY;
-            panStartX = panX;
-            panStartY = panY;
-            setCursorState('grab');
-        });
+    // swipe on slideshow (not viewer)
+    let sTST=0,sTSX=0;
+    scene.addEventListener('touchstart',e=>{
+        if(viewerOn||!ready)return;
+        sTST=Date.now();sTSX=e.touches[0].clientX;
+    });
+    scene.addEventListener('touchend',e=>{
+        if(viewerOn||!ready)return;
+        const el=Date.now()-sTST,dx=e.changedTouches[0].clientX-sTSX;
+        if(el<400&&Math.abs(dx)>40){if(dx>0)go(cur-1);else go(cur+1)}
+    });
 
-        document.addEventListener('mousemove', e => {
-            if (!isDragging) return;
-            panX = panStartX + (e.clientX - dragStartX);
-            panY = panStartY + (e.clientY - dragStartY);
-            clampPan();
-            applyZoom(false);
-        });
+    // CLOSE VIEWER
+    vClose.addEventListener('click',closeViewer);
+    hov(vClose,'close');
+    viewer.addEventListener('click',e=>{if(e.target===viewer)closeViewer()});
 
-        document.addEventListener('mouseup', () => {
-            if (isDragging) {
-                isDragging = false;
-                setCursorState(zoomScale > 1.08 ? 'zoomed' : '');
-                clampPan();
-                applyZoom(true);
+    // ZOOM HUD
+    $('vzIn').addEventListener('click',()=>{vZoom=Math.min(ZMAX,vZoom*1.5);clampVPan();applyVZoom(true)});
+    $('vzOut').addEventListener('click',()=>{vZoom=Math.max(ZMIN,vZoom/1.5);clampVPan();applyVZoom(true)});
+    $('vzRst').addEventListener('click',()=>{vZoom=1;vPanX=0;vPanY=0;applyVZoom(true)});
+    document.querySelectorAll('.vz button').forEach(b=>hov(b));
+
+    // HELP
+    helpClose.addEventListener('click',()=>{helpOn=false;help.classList.remove('on')});
+    hov(helpClose,'close');
+
+    // === KEYBOARD ===
+    document.addEventListener('keydown',e=>{
+        if(!ready)return;
+
+        // help toggle
+        if(e.key==='?'||(e.key==='/'&&e.shiftKey)){helpOn=!helpOn;help.classList.toggle('on',helpOn);return}
+        if(helpOn){if(e.code==='Escape'){helpOn=false;help.classList.remove('on')};return}
+
+        // viewer open
+        if(!viewerOn){
+            switch(e.code){
+                case'ArrowLeft':e.preventDefault();go(cur-1);break;
+                case'ArrowRight':e.preventDefault();go(cur+1);break;
+                case'Enter':case'Space':e.preventDefault();
+                    if(e.code==='Space')pulseEffect();else openViewer(cur);break;
+                case'KeyF':e.preventDefault();togFS();break;
             }
-        });
-
-        // === DOUBLE CLICK ===
-        $scene.addEventListener('dblclick', e => {
-            if (!appReady) return;
-            if (zoomScale > 1.08) {
-                zoomScale = 1;
-                panX = 0;
-                panY = 0;
-            } else {
-                const activeSlide = $scene.querySelector('.slide.active');
-                if (!activeSlide) return;
-                const card = activeSlide.querySelector('.slide-card');
-                const cr = card.getBoundingClientRect();
-                const ox = e.clientX - cr.left - cr.width / 2;
-                const oy = e.clientY - cr.top - cr.height / 2;
-                zoomScale = 3;
-                panX = -ox * 2;
-                panY = -oy * 2;
-                clampPan();
-            }
-            applyZoom(true);
-        });
-
-        // === TOUCH ===
-        let lastTouchDist = 0;
-        let lastTouchCenter = { x: 0, y: 0 };
-        let touchStartTime = 0;
-        let touchStartX = 0;
-
-        $scene.addEventListener('touchstart', e => {
-            if (!appReady) return;
-            if (e.touches.length === 1) {
-                touchStartTime = Date.now();
-                touchStartX = e.touches[0].clientX;
-                if (zoomScale > 1.08) {
-                    isDragging = true;
-                    dragStartX = e.touches[0].clientX;
-                    dragStartY = e.touches[0].clientY;
-                    panStartX = panX;
-                    panStartY = panY;
-                }
-            } else if (e.touches.length === 2) {
-                isDragging = false;
-                const dx = e.touches[0].clientX - e.touches[1].clientX;
-                const dy = e.touches[0].clientY - e.touches[1].clientY;
-                lastTouchDist = Math.sqrt(dx * dx + dy * dy);
-                lastTouchCenter = {
-                    x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
-                    y: (e.touches[0].clientY + e.touches[1].clientY) / 2
-                };
-            }
-        }, { passive: false });
-
-        $scene.addEventListener('touchmove', e => {
-            if (!appReady) return;
-            e.preventDefault();
-            if (e.touches.length === 1 && isDragging) {
-                panX = panStartX + (e.touches[0].clientX - dragStartX);
-                panY = panStartY + (e.touches[0].clientY - dragStartY);
-                clampPan();
-                applyZoom(false);
-            } else if (e.touches.length === 2) {
-                const dx = e.touches[0].clientX - e.touches[1].clientX;
-                const dy = e.touches[0].clientY - e.touches[1].clientY;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                const c = {
-                    x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
-                    y: (e.touches[0].clientY + e.touches[1].clientY) / 2
-                };
-                if (lastTouchDist > 0) {
-                    const factor = dist / lastTouchDist;
-                    const ns = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, zoomScale * factor));
-                    panX += (c.x - lastTouchCenter.x);
-                    panY += (c.y - lastTouchCenter.y);
-                    zoomScale = ns;
-                    clampPan();
-                    applyZoom(false);
-                }
-                lastTouchDist = dist;
-                lastTouchCenter = c;
-            }
-        }, { passive: false });
-
-        $scene.addEventListener('touchend', e => {
-            if (e.touches.length < 2) lastTouchDist = 0;
-            if (isDragging && zoomScale <= 1.08) {
-                const elapsed = Date.now() - touchStartTime;
-                const dxSwipe = e.changedTouches[0].clientX - touchStartX;
-                if (elapsed < 350 && Math.abs(dxSwipe) > 45) {
-                    if (dxSwipe > 0) goToSlide(currentSlide - 1);
-                    else goToSlide(currentSlide + 1);
-                }
-            }
-            isDragging = false;
-            clampPan();
-            applyZoom(true);
-        });
-
-        // === ZOOM HUD ===
-        document.getElementById('zcIn').addEventListener('click', () => {
-            zoomScale = Math.min(ZOOM_MAX, zoomScale * 1.5);
-            clampPan(); applyZoom(true);
-        });
-        document.getElementById('zcOut').addEventListener('click', () => {
-            zoomScale = Math.max(ZOOM_MIN, zoomScale / 1.5);
-            clampPan(); applyZoom(true);
-        });
-        document.getElementById('zcReset').addEventListener('click', () => {
-            zoomScale = 1; panX = 0; panY = 0; applyZoom(true);
-        });
-
-        document.querySelectorAll('.zc-btn').forEach(b => bindHover(b));
-
-        // === KEYBOARD ===
-        document.addEventListener('keydown', e => {
-            if (!appReady) return;
-
-            // Shortcuts overlay
-            if (e.key === '?' || (e.key === '/' && e.shiftKey)) {
-                toggleShortcuts();
-                return;
-            }
-            if (shortcutsOpen) {
-                if (e.code === 'Escape') toggleShortcuts();
-                return;
-            }
-
-            switch (e.code) {
-                case 'ArrowLeft':
-                    e.preventDefault();
-                    if (zoomScale > 1.08) { panX += 80; clampPan(); applyZoom(true); }
-                    else goToSlide(currentSlide - 1);
-                    break;
-                case 'ArrowRight':
-                    e.preventDefault();
-                    if (zoomScale > 1.08) { panX -= 80; clampPan(); applyZoom(true); }
-                    else goToSlide(currentSlide + 1);
-                    break;
-                case 'ArrowUp':
-                    e.preventDefault();
-                    if (zoomScale > 1.08) { panY += 80; clampPan(); applyZoom(true); }
-                    break;
-                case 'ArrowDown':
-                    e.preventDefault();
-                    if (zoomScale > 1.08) { panY -= 80; clampPan(); applyZoom(true); }
-                    break;
-                case 'Equal':
-                case 'NumpadAdd':
-                    e.preventDefault();
-                    zoomScale = Math.min(ZOOM_MAX, zoomScale * 1.35);
-                    clampPan(); applyZoom(true);
-                    break;
-                case 'Minus':
-                case 'NumpadSubtract':
-                    e.preventDefault();
-                    zoomScale = Math.max(ZOOM_MIN, zoomScale / 1.35);
-                    clampPan(); applyZoom(true);
-                    break;
-                case 'Digit0':
-                case 'Escape':
-                    zoomScale = 1; panX = 0; panY = 0;
-                    applyZoom(true);
-                    break;
-                case 'Space':
-                    e.preventDefault();
-                    pulseEffect();
-                    break;
-                case 'KeyF':
-                    e.preventDefault();
-                    toggleFullscreen();
-                    break;
-                case 'Home':
-                    e.preventDefault();
-                    goToSlide(0);
-                    break;
-                case 'End':
-                    e.preventDefault();
-                    goToSlide(TOTAL - 1);
-                    break;
-            }
-
-            // Number keys 1-9 for direct slide
-            if (e.key >= '1' && e.key <= '9') {
-                const idx = parseInt(e.key) - 1;
-                if (idx < TOTAL) goToSlide(idx);
-            }
-        });
-
-        // === SHORTCUTS OVERLAY ===
-        $shortcutsClose.addEventListener('click', toggleShortcuts);
-        bindHover($shortcutsClose, 'close');
-    }
-
-    /* ============================================================
-       PULSE EFFECT
-       ============================================================ */
-    function pulseEffect() {
-        const activeSlide = $scene.querySelector('.slide.active');
-        if (!activeSlide) return;
-        const card = activeSlide.querySelector('.slide-card');
-
-        card.style.transition = 'transform 0.35s var(--ease-spring)';
-        const prevTransform = card.style.transform;
-        card.style.transform = `rotateX(${tiltRX}deg) rotateY(${tiltRY}deg) scale(${zoomScale * 1.06})`;
-
-        setTimeout(() => {
-            card.style.transform = prevTransform || `rotateX(0) rotateY(0) scale(${zoomScale})`;
-        }, 350);
-
-        // Burst particles
-        const rect = card.getBoundingClientRect();
-        for (let i = 0; i < 25; i++) {
-            setTimeout(() => {
-                spawnTrail(
-                    rect.left + rect.width / 2 + (Math.random() - 0.5) * rect.width,
-                    rect.top + rect.height / 2 + (Math.random() - 0.5) * rect.height
-                );
-            }, i * 20);
-        }
-    }
-
-    /* ============================================================
-       FULLSCREEN
-       ============================================================ */
-    function toggleFullscreen() {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(() => {});
-        } else {
-            document.exitFullscreen();
-        }
-    }
-
-    /* ============================================================
-       SHORTCUTS TOGGLE
-       ============================================================ */
-    function toggleShortcuts() {
-        shortcutsOpen = !shortcutsOpen;
-        $shortcuts.classList.toggle('visible', shortcutsOpen);
-    }
-
-    /* ============================================================
-       AMBIENT PARTICLES & SHIMMERS
-       ============================================================ */
-    function spawnAmbient() {
-        // Floating dots
-        for (let i = 0; i < 28; i++) {
-            const p = document.createElement('div');
-            p.className = 'ambient-particle';
-            p.style.left = Math.random() * 100 + 'vw';
-            p.style.top = Math.random() * 100 + 'vh';
-            p.style.animation = `ambientFloat ${9 + Math.random() * 16}s ease-in-out infinite,
-                                  ambientPulse ${3 + Math.random() * 5}s ease-in-out infinite`;
-            p.style.animationDelay = Math.random() * 7 + 's';
-            document.body.appendChild(p);
+            if(e.key>='1'&&e.key<='9'){const idx=parseInt(e.key)-1;if(idx<N)go(idx)}
+            return;
         }
 
-        // Shimmer lines
-        for (let i = 0; i < 6; i++) {
-            const l = document.createElement('div');
-            l.className = 'ambient-shimmer';
-            l.style.top = (12 + Math.random() * 76) + 'vh';
-            l.style.left = '0';
-            l.style.width = '100vw';
-            l.style.opacity = 0.2 + Math.random() * 0.3;
-            l.style.animation = `ambientPulse ${5 + Math.random() * 8}s ease-in-out infinite`;
-            l.style.animationDelay = Math.random() * 4 + 's';
-            document.body.appendChild(l);
+        // viewer controls
+        switch(e.code){
+            case'Escape':closeViewer();break;
+            case'ArrowLeft':e.preventDefault();
+                if(vZoom>1.08){vPanX+=80;clampVPan();applyVZoom(true)}
+                else{closeViewer();setTimeout(()=>go(cur-1),150)}
+                break;
+            case'ArrowRight':e.preventDefault();
+                if(vZoom>1.08){vPanX-=80;clampVPan();applyVZoom(true)}
+                else{closeViewer();setTimeout(()=>go(cur+1),150)}
+                break;
+            case'ArrowUp':e.preventDefault();if(vZoom>1.08){vPanY+=80;clampVPan();applyVZoom(true)};break;
+            case'ArrowDown':e.preventDefault();if(vZoom>1.08){vPanY-=80;clampVPan();applyVZoom(true)};break;
+            case'Equal':case'NumpadAdd':e.preventDefault();vZoom=Math.min(ZMAX,vZoom*1.35);clampVPan();applyVZoom(true);break;
+            case'Minus':case'NumpadSubtract':e.preventDefault();vZoom=Math.max(ZMIN,vZoom/1.35);clampVPan();applyVZoom(true);break;
+            case'Digit0':vZoom=1;vPanX=0;vPanY=0;applyVZoom(true);break;
+            case'Space':e.preventDefault();pulseEffect();break;
+            case'KeyF':e.preventDefault();togFS();break;
         }
+    });
+}
+
+/* ==================================================================
+   EFFECTS
+   ================================================================== */
+function pulseEffect(){
+    const as=scene.querySelector('.slide.active');if(!as)return;
+    const card=as.querySelector('.card');
+    card.style.transition='transform .35s var(--spring)';
+    card.style.transform=`rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale(1.06)`;
+    setTimeout(()=>{card.style.transform=`rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale(1)`},350);
+    const r=card.getBoundingClientRect();
+    for(let i=0;i<25;i++)setTimeout(()=>spawnTrail(r.left+r.width/2+(Math.random()-.5)*r.width,r.top+r.height/2+(Math.random()-.5)*r.height),i*18);
+}
+
+function togFS(){
+    if(!document.fullscreenElement)document.documentElement.requestFullscreen().catch(()=>{});
+    else document.exitFullscreen();
+}
+
+/* ==================================================================
+   AMBIENT
+   ================================================================== */
+function spawnAmb(){
+    for(let i=0;i<25;i++){
+        const p=document.createElement('div');p.className='ap';
+        p.style.left=Math.random()*100+'vw';p.style.top=Math.random()*100+'vh';
+        p.style.animation=`aFloat ${9+Math.random()*15}s ease-in-out infinite,aPulse ${3+Math.random()*5}s ease-in-out infinite`;
+        p.style.animationDelay=Math.random()*6+'s';
+        document.body.appendChild(p);
     }
+}
 
-    /* ============================================================
-       IDLE AUTOPLAY (optional: starts after 15s of no interaction)
-       ============================================================ */
-    let idleTimer = null;
-    let autoplayInterval = null;
+/* ==================================================================
+   CLOCK
+   ================================================================== */
+const clk=document.createElement('div');
+clk.style.cssText='position:fixed;bottom:8px;right:12px;z-index:200;font-family:Inter,sans-serif;font-size:.38rem;letter-spacing:3px;color:rgba(0,0,0,.07);font-variant-numeric:tabular-nums;pointer-events:none';
+document.body.appendChild(clk);
+setInterval(()=>{const n=new Date();clk.textContent=n.toLocaleTimeString('en-US',{hour12:false})+' · '+n.toLocaleDateString('en-US',{month:'short',day:'numeric'})},1000);
 
-    function resetIdle() {
-        clearTimeout(idleTimer);
-        clearInterval(autoplayInterval);
-        autoplayInterval = null;
-
-        idleTimer = setTimeout(() => {
-            autoplayInterval = setInterval(() => {
-                if (zoomScale <= 1.08 && !shortcutsOpen) {
-                    goToSlide(currentSlide + 1);
-                }
-            }, 4000);
-        }, 20000);
-    }
-
-    document.addEventListener('mousemove', resetIdle);
-    document.addEventListener('click', resetIdle);
-    document.addEventListener('keydown', resetIdle);
-    document.addEventListener('wheel', resetIdle);
-    document.addEventListener('touchstart', resetIdle);
-
-    /* ============================================================
-       LIVE CLOCK (bottom-right corner, subtle)
-       ============================================================ */
-    const clockEl = document.createElement('div');
-    clockEl.style.cssText = `
-        position: fixed; bottom: 10px; right: 14px; z-index: 200;
-        font-family: 'Inter', sans-serif; font-size: 0.4rem;
-        letter-spacing: 3px; color: rgba(0,0,0,0.08);
-        font-variant-numeric: tabular-nums;
-        pointer-events: none;
-    `;
-    document.body.appendChild(clockEl);
-
-    setInterval(() => {
-        const now = new Date();
-        clockEl.textContent = now.toLocaleTimeString('en-US', { hour12: false }) +
-            ' · ' + now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    }, 1000);
-
-    /* ============================================================
-       FPS COUNTER (dev, very subtle)
-       ============================================================ */
-    const fpsEl = document.createElement('div');
-    fpsEl.style.cssText = `
-        position: fixed; top: 10px; left: 14px; z-index: 200;
-        font-family: 'Inter', sans-serif; font-size: 0.38rem;
-        letter-spacing: 2px; color: rgba(0,0,0,0.06);
-        font-variant-numeric: tabular-nums;
-        pointer-events: none;
-    `;
-    document.body.appendChild(fpsEl);
-
-    let fpsFrames = 0, fpsLast = performance.now();
-    (function fpsLoop() {
-        fpsFrames++;
-        const now = performance.now();
-        if (now - fpsLast >= 1000) {
-            fpsEl.textContent = fpsFrames + ' FPS';
-            fpsFrames = 0;
-            fpsLast = now;
-        }
-        requestAnimationFrame(fpsLoop);
-    })();
-
-    </script>
+/* ==================================================================
+   IDLE AUTOPLAY
+   ================================================================== */
+let idleT=null,autoI=null;
+function resetIdle(){
+    clearTimeout(idleT);clearInterval(autoI);autoI=null;
+    idleT=setTimeout(()=>{autoI=setInterval(()=>{if(!viewerOn&&!helpOn)go(cur+1)},4500)},25000);
+}
+['mousemove','click','keydown','wheel','touchstart'].forEach(ev=>document.addEventListener(ev,resetIdle));
+</script>
 </body>
 </html>
