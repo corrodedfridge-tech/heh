@@ -1,3 +1,6 @@
+
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -330,14 +333,16 @@
 
         .nav-links {
             display: flex;
-            gap: 30px;
+            gap: 26px;
             pointer-events: all;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
         .nav-link {
             font-family: var(--font-body);
-            font-size: 0.5rem;
-            letter-spacing: 4px;
+            font-size: 0.48rem;
+            letter-spacing: 3px;
             text-transform: uppercase;
             color: var(--color-soft);
             text-decoration: none;
@@ -1434,8 +1439,8 @@
             .fixed-nav { padding: 0 18px; height: 55px; }
             .nav-meta { display: none; }
             .nav-brand { font-size: 0.55rem; letter-spacing: 4px; }
-            .nav-links { gap: 18px; }
-            .nav-link { font-size: 0.42rem; letter-spacing: 3px; }
+            .nav-links { gap: 14px; }
+            .nav-link { font-size: 0.40rem; letter-spacing: 2px; }
             .image-gallery { padding: 0 18px; gap: 35px; }
             .gallery-item.layout-left,
             .gallery-item.layout-right { margin: 0 auto; max-width: 100%; }
@@ -1451,6 +1456,7 @@
         @media (max-width: 480px) {
             .fixed-nav .nav-brand { display: none; }
             .hero-scroll-hint { display: none; }
+            .nav-links { gap: 10px; }
         }
     </style>
 </head>
@@ -1464,7 +1470,7 @@
     <!-- Loader -->
     <div class="loader-screen" id="loaderScreen">
         <div class="loader-logo">Gallery</div>
-        <div class="loader-tagline">a curated collection in three acts</div>
+        <div class="loader-tagline">a curated collection in four acts</div>
         <div class="loader-progress-track">
             <div class="loader-progress-fill" id="loaderFill"></div>
         </div>
@@ -1482,6 +1488,7 @@
             <a href="#section-bullying" class="nav-link" data-section="bullying">Bullying</a>
             <a href="#section-anthony" class="nav-link" data-section="anthony">Anthony</a>
             <a href="#section-confessions" class="nav-link" data-section="confessions">Confessions</a>
+            <a href="#section-chopped" class="nav-link" data-section="chopped">Chopped</a>
         </div>
         <div class="nav-meta">? for help</div>
     </nav>
@@ -1497,8 +1504,8 @@
          ============================================ -->
     <section class="hero-section" id="hero">
         <h1 class="hero-title" id="heroTitle">The Gallery</h1>
-        <p class="hero-subtitle" id="heroSubtitle">Presented in three acts</p>
-        <div class="hero-image-count" id="heroCount">9 photographs</div>
+        <p class="hero-subtitle" id="heroSubtitle">Presented in four acts</p>
+        <div class="hero-image-count" id="heroCount">10 photographs</div>
         <div class="hero-line" id="heroLine"></div>
         <div class="hero-scroll-hint" id="heroScroll">
             <div class="mouse-icon"></div>
@@ -1748,11 +1755,54 @@
         </div>
     </section>
 
+    <!-- Divider -->
+    <div class="section-divider" data-reveal>
+        <div class="divider-inner">
+            <div class="divider-line"></div>
+            <div class="divider-diamond"></div>
+            <div class="divider-line"></div>
+        </div>
+    </div>
+
+    <!-- ============================================
+         ACT IV — CHOPPED PICS
+         ============================================ -->
+    <section class="gallery-section" id="section-chopped">
+        <div class="section-header" data-reveal>
+            <div class="section-number">Act IV</div>
+            <h2 class="section-title">Chopped Pics</h2>
+            <p class="section-description">— the cut —</p>
+            <div class="section-line"></div>
+            <div class="section-image-count">1 photograph</div>
+        </div>
+
+        <div class="image-gallery">
+            <div class="gallery-item layout-hero" data-reveal>
+                <div class="image-card" data-viewable data-index="9">
+                    <div class="card-bracket tl"></div>
+                    <div class="card-bracket tr"></div>
+                    <div class="card-bracket bl"></div>
+                    <div class="card-bracket br"></div>
+                    <div class="image-card-inner">
+                        <img src="https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/matthewchopped.png" alt="Matthew Chopped" draggable="false" loading="lazy">
+                        <div class="card-shine"></div>
+                        <div class="card-specular"></div>
+                        <div class="card-gradient"></div>
+                    </div>
+                    <div class="card-label">Matthew — Chopped</div>
+                    <div class="card-number">10</div>
+                    <div class="card-floor-shadow"></div>
+                    <div class="card-view-hint">View</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Footer -->
     <div class="gallery-footer" data-reveal>
         <div class="footer-text">— fin —</div>
         <div class="footer-line"></div>
-        <div class="footer-count">9 photographs across 3 acts</div>
+        <div class="footer-count">10 photographs across 4 acts</div>
     </div>
 
     <!-- Back to top -->
@@ -1810,79 +1860,87 @@
 
     <script>
     /* ==================================================================
-       IMAGE DATA (ordered by section)
+       IMAGE DATA — organized by section, ordered by name
        ================================================================== */
-    const ALL_IMAGES = [
+    var ALL_IMAGES = [
+        /* ACT I — Bullying People Type */
         { src: 'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/bullyingpeopletype.png', title: 'Bullying People Type', category: 'Bullying People Type', section: 'bullying' },
+
+        /* ACT II — Anthony (1, 2, 3 in order) */
         { src: 'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/anthony1.jpg', title: 'Anthony I', category: 'Anthony', section: 'anthony' },
         { src: 'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/anthony2.jpg', title: 'Anthony II', category: 'Anthony', section: 'anthony' },
         { src: 'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/anthony3.jpg', title: 'Anthony III', category: 'Anthony', section: 'anthony' },
+
+        /* ACT III — Saint Laurence Confessions (1–5 in order) */
         { src: 'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/saintlaurenceconfessions.jpg', title: 'Confessions I', category: 'Saint Laurence Confessions', section: 'confessions' },
         { src: 'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/saintlaurenceconfessions2.jpg', title: 'Confessions II', category: 'Saint Laurence Confessions', section: 'confessions' },
         { src: 'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/saintlaurenceconfessions3.jpg', title: 'Confessions III', category: 'Saint Laurence Confessions', section: 'confessions' },
         { src: 'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/saintlaurenceconfessions4.jpg', title: 'Confessions IV', category: 'Saint Laurence Confessions', section: 'confessions' },
         { src: 'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/saintlaurenceconfessions5.jpg', title: 'Confessions V', category: 'Saint Laurence Confessions', section: 'confessions' },
+
+        /* ACT IV — Chopped Pics */
+        { src: 'https://raw.githubusercontent.com/corrodedfridge-tech/heh/main/matthewchopped.png', title: 'Matthew Chopped', category: 'Chopped Pics', section: 'chopped' },
     ];
 
-    const TOTAL_IMAGES = ALL_IMAGES.length;
+    var TOTAL_IMAGES = ALL_IMAGES.length;
 
     /* ==================================================================
-       STATE
+       STATE VARIABLES
        ================================================================== */
-    let viewerOpen = false;
-    let viewerCurrentIndex = 0;
-    let viewerZoom = 1;
-    let viewerPanX = 0;
-    let viewerPanY = 0;
-    let viewerDragging = false;
-    let viewerDragStartX = 0;
-    let viewerDragStartY = 0;
-    let viewerPanStartX = 0;
-    let viewerPanStartY = 0;
-    let helpVisible = false;
-    let mouseX = 0;
-    let mouseY = 0;
-    let cursorRingX = 0;
-    let cursorRingY = 0;
-    let appInitialized = false;
+    var viewerOpen = false;
+    var viewerCurrentIndex = 0;
+    var viewerZoom = 1;
+    var viewerPanX = 0;
+    var viewerPanY = 0;
+    var viewerDragging = false;
+    var viewerDragStartX = 0;
+    var viewerDragStartY = 0;
+    var viewerPanStartX = 0;
+    var viewerPanStartY = 0;
+    var helpVisible = false;
+    var mouseX = 0;
+    var mouseY = 0;
+    var cursorRingX = 0;
+    var cursorRingY = 0;
+    var appInitialized = false;
 
-    const VIEWER_ZOOM_MIN = 0.5;
-    const VIEWER_ZOOM_MAX = 12;
+    var VIEWER_ZOOM_MIN = 0.5;
+    var VIEWER_ZOOM_MAX = 12;
 
     /* ==================================================================
        DOM REFERENCES
        ================================================================== */
-    const cursorRing = document.getElementById('cursorRing');
-    const cursorDot = document.getElementById('cursorDot');
-    const cursorLabel = document.getElementById('cursorLabel');
-    const loaderScreen = document.getElementById('loaderScreen');
-    const loaderFill = document.getElementById('loaderFill');
-    const loaderPct = document.getElementById('loaderPct');
-    const loaderCount = document.getElementById('loaderCount');
-    const scrollProgress = document.getElementById('scrollProgress');
-    const fixedNav = document.getElementById('fixedNav');
-    const heroTitle = document.getElementById('heroTitle');
-    const heroSubtitle = document.getElementById('heroSubtitle');
-    const heroCount = document.getElementById('heroCount');
-    const heroLine = document.getElementById('heroLine');
-    const heroScroll = document.getElementById('heroScroll');
-    const viewerOverlay = document.getElementById('viewerOverlay');
-    const viewerCloseBtn = document.getElementById('viewerClose');
-    const viewerViewport = document.getElementById('viewerViewport');
-    const viewerPanContainer = document.getElementById('viewerPanContainer');
-    const viewerImg = document.getElementById('viewerImg');
-    const viewerInfoTitle = document.getElementById('viewerInfoTitle');
-    const viewerInfoCat = document.getElementById('viewerInfoCat');
-    const viewerInfoNum = document.getElementById('viewerInfoNum');
-    const viewerPrevBtn = document.getElementById('viewerPrev');
-    const viewerNextBtn = document.getElementById('viewerNext');
-    const vzPctDisplay = document.getElementById('vzPctDisplay');
-    const viewerMinimap = document.getElementById('viewerMinimap');
-    const minimapImg = document.getElementById('minimapImg');
-    const minimapVpRect = document.getElementById('minimapVpRect');
-    const helpOverlay = document.getElementById('helpOverlay');
-    const helpCloseBtn = document.getElementById('helpCloseBtn');
-    const backToTopBtn = document.getElementById('backToTop');
+    var cursorRing = document.getElementById('cursorRing');
+    var cursorDot = document.getElementById('cursorDot');
+    var cursorLabel = document.getElementById('cursorLabel');
+    var loaderScreen = document.getElementById('loaderScreen');
+    var loaderFill = document.getElementById('loaderFill');
+    var loaderPct = document.getElementById('loaderPct');
+    var loaderCount = document.getElementById('loaderCount');
+    var scrollProgress = document.getElementById('scrollProgress');
+    var fixedNav = document.getElementById('fixedNav');
+    var heroTitle = document.getElementById('heroTitle');
+    var heroSubtitle = document.getElementById('heroSubtitle');
+    var heroCount = document.getElementById('heroCount');
+    var heroLine = document.getElementById('heroLine');
+    var heroScroll = document.getElementById('heroScroll');
+    var viewerOverlay = document.getElementById('viewerOverlay');
+    var viewerCloseBtn = document.getElementById('viewerClose');
+    var viewerViewport = document.getElementById('viewerViewport');
+    var viewerPanContainer = document.getElementById('viewerPanContainer');
+    var viewerImg = document.getElementById('viewerImg');
+    var viewerInfoTitle = document.getElementById('viewerInfoTitle');
+    var viewerInfoCat = document.getElementById('viewerInfoCat');
+    var viewerInfoNum = document.getElementById('viewerInfoNum');
+    var viewerPrevBtn = document.getElementById('viewerPrev');
+    var viewerNextBtn = document.getElementById('viewerNext');
+    var vzPctDisplay = document.getElementById('vzPctDisplay');
+    var viewerMinimap = document.getElementById('viewerMinimap');
+    var minimapImg = document.getElementById('minimapImg');
+    var minimapVpRect = document.getElementById('minimapVpRect');
+    var helpOverlay = document.getElementById('helpOverlay');
+    var helpCloseBtn = document.getElementById('helpCloseBtn');
+    var backToTopBtn = document.getElementById('backToTop');
 
     /* ==================================================================
        CURSOR SYSTEM
@@ -1997,24 +2055,16 @@
     function initializeApp() {
         appInitialized = true;
 
-        // Show hero
         heroTitle.classList.add('visible');
         heroSubtitle.classList.add('visible');
         heroCount.classList.add('visible');
         heroLine.classList.add('visible');
         heroScroll.classList.add('visible');
-
-        // Show nav
         fixedNav.classList.add('visible');
 
-        // Setup observers
         initScrollObserver();
-
-        // Ambient particles
         spawnAmbientParticles();
         spawnAmbientShimmers();
-
-        // Bind all events
         bindScrollEvents();
         bindImageCardTilt();
         bindImageCardClick();
@@ -2055,7 +2105,6 @@
             var progress = totalHeight > 0 ? (scrolled / totalHeight * 100) : 0;
             scrollProgress.style.width = progress + '%';
 
-            // Active nav link
             var sections = document.querySelectorAll('.gallery-section');
             var activeId = '';
             sections.forEach(function(section) {
@@ -2070,7 +2119,6 @@
                 link.classList.toggle('active', 'section-' + sectionName === activeId);
             });
 
-            // Back to top visibility
             backToTopBtn.classList.toggle('visible', scrolled > 400);
         });
     }
@@ -2107,8 +2155,8 @@
                 var centerX = rect.width / 2;
                 var centerY = rect.height / 2;
 
-                var normalizedX = (x - centerX) / centerX; // -1 to 1
-                var normalizedY = (y - centerY) / centerY; // -1 to 1
+                var normalizedX = (x - centerX) / centerX;
+                var normalizedY = (y - centerY) / centerY;
 
                 var rotateX = normalizedY * -14;
                 var rotateY = normalizedX * 14;
@@ -2116,7 +2164,6 @@
                 inner.style.transform = 'perspective(900px) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg) scale(1.02)';
                 inner.style.transition = 'transform 0.08s ease-out';
 
-                // Specular highlight
                 if (specular) {
                     var specX = ((x / rect.width) * 100);
                     var specY = ((y / rect.height) * 100);
@@ -2147,7 +2194,7 @@
     }
 
     /* ==================================================================
-       VIEWER OPEN / CLOSE
+       VIEWER OPEN / CLOSE / NAVIGATE
        ================================================================== */
     function openViewer(index) {
         viewerCurrentIndex = index;
@@ -2275,18 +2322,15 @@
        VIEWER EVENTS
        ================================================================== */
     function bindViewerEvents() {
-        // Close button
         viewerCloseBtn.addEventListener('click', closeViewer);
         bindHoverEffect(viewerCloseBtn, 'close');
 
-        // Click background to close
         viewerOverlay.addEventListener('click', function(e) {
             if (e.target === viewerOverlay) {
                 closeViewer();
             }
         });
 
-        // Prev / Next buttons
         viewerPrevBtn.addEventListener('click', function() {
             navigateViewer(-1);
         });
@@ -2296,7 +2340,6 @@
         bindHoverEffect(viewerPrevBtn, 'prev');
         bindHoverEffect(viewerNextBtn, 'next');
 
-        // Zoom HUD buttons
         document.getElementById('vzInBtn').addEventListener('click', function() {
             viewerZoom = Math.min(VIEWER_ZOOM_MAX, viewerZoom * 1.5);
             clampViewerPan();
@@ -2317,7 +2360,6 @@
             bindHoverEffect(btn);
         });
 
-        // Wheel zoom in viewer
         viewerViewport.addEventListener('wheel', function(e) {
             e.preventDefault();
             e.stopPropagation();
@@ -2338,7 +2380,6 @@
             applyViewerZoom(false);
         }, { passive: false });
 
-        // Drag to pan in viewer
         viewerViewport.addEventListener('mousedown', function(e) {
             if (e.button !== 0) return;
             if (viewerZoom <= 1.08) return;
@@ -2369,7 +2410,6 @@
             }
         });
 
-        // Double click to toggle zoom
         viewerViewport.addEventListener('dblclick', function(e) {
             if (viewerZoom > 1.08) {
                 viewerZoom = 1;
@@ -2387,16 +2427,16 @@
             applyViewerZoom(true);
         });
 
-        // Touch support for viewer
+        /* Touch support for viewer */
         var touchLastDist = 0;
         var touchLastCenter = { x: 0, y: 0 };
         var touchStartTime = 0;
-        var touchStartX = 0;
+        var touchStartXPos = 0;
 
         viewerViewport.addEventListener('touchstart', function(e) {
             if (e.touches.length === 1) {
                 touchStartTime = Date.now();
-                touchStartX = e.touches[0].clientX;
+                touchStartXPos = e.touches[0].clientX;
 
                 if (viewerZoom > 1.08) {
                     viewerDragging = true;
@@ -2454,10 +2494,9 @@
         viewerViewport.addEventListener('touchend', function(e) {
             if (e.touches.length < 2) touchLastDist = 0;
 
-            // Swipe to navigate when not zoomed
             if (viewerDragging && viewerZoom <= 1.08) {
                 var elapsed = Date.now() - touchStartTime;
-                var deltaX = e.changedTouches[0].clientX - touchStartX;
+                var deltaX = e.changedTouches[0].clientX - touchStartXPos;
                 if (elapsed < 350 && Math.abs(deltaX) > 50) {
                     if (deltaX > 0) navigateViewer(-1);
                     else navigateViewer(1);
@@ -2477,7 +2516,6 @@
         document.addEventListener('keydown', function(e) {
             if (!appInitialized) return;
 
-            // Help toggle
             if (e.key === '?' || (e.key === '/' && e.shiftKey)) {
                 toggleHelp();
                 return;
@@ -2488,7 +2526,6 @@
                 return;
             }
 
-            // Viewer keyboard controls
             if (viewerOpen) {
                 switch (e.code) {
                     case 'Escape':
@@ -2558,7 +2595,6 @@
                 return;
             }
 
-            // Page-level shortcuts (not in viewer)
             switch (e.code) {
                 case 'KeyF':
                     e.preventDefault();
@@ -2603,7 +2639,7 @@
     }
 
     /* ==================================================================
-       AMBIENT PARTICLES
+       AMBIENT PARTICLES & SHIMMERS
        ================================================================== */
     function spawnAmbientParticles() {
         for (var i = 0; i < 28; i++) {
@@ -2634,7 +2670,7 @@
     }
 
     /* ==================================================================
-       PARALLAX ON MOUSE MOVE (ambient particles)
+       PARALLAX ON MOUSE MOVE
        ================================================================== */
     document.addEventListener('mousemove', function(e) {
         if (!appInitialized) return;
@@ -2649,7 +2685,7 @@
     });
 
     /* ==================================================================
-       CLOCK
+       CLOCK (subtle corner element)
        ================================================================== */
     var clockElement = document.createElement('div');
     clockElement.style.cssText =
@@ -2668,14 +2704,13 @@
     }, 1000);
 
     /* ==================================================================
-       IDLE AUTOPLAY (scrolls to next section after 30s idle)
+       IDLE ANIMATION
        ================================================================== */
     var idleTimeout = null;
 
     function resetIdleTimer() {
         clearTimeout(idleTimeout);
         idleTimeout = setTimeout(function() {
-            // Subtle idle animation — pulse hero title if at top
             if (window.scrollY < 100 && !viewerOpen) {
                 heroTitle.style.transition = 'transform 0.8s var(--ease-spring)';
                 heroTitle.style.transform = 'translateY(0) scale(1.02)';
@@ -2693,3 +2728,4 @@
     </script>
 </body>
 </html>
+```
